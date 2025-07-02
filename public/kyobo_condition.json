@@ -1,0 +1,3277 @@
+[
+  {
+    "type": "대상지정",
+    "path": "코스피",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "코스피(ETF/ETN제외)",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "코스닥",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "코스피+코스닥",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "코스피+코스닥(ETF/ETN제외)",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "지수종목",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "주권구분",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "결산월",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "거래정지종목",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "투자위험종목",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "관리종목",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "벤처기업",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "불성실공시기업",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "액면가",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "정리매매종목",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "주가(현재가) 순위",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "주가(액면가) 범위",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "상장일",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "증거금률",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "신용잔고율",
+    "detail": ""
+  },
+  {
+    "type": "대상지정",
+    "path": "회원사",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>주가범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>주가돌파",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>주가 비교",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>주가비교 2",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>주가비교(3개)",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>주가비교(4개)",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>주가비교(다른주기)",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>주가이격비율",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>5단호가내 가격존재",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>가격범위 n% 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>가격폭 최대종목",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>n봉 최고가/최저가 m봉전 발생",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>등락율 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>등락율 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>등락율 n% 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>등락율 비교",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>등락연속봉수 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>등락연속봉수반전",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>등락연속봉수 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>기간내 등락봉수",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>기준봉 대비 등락율 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>기준봉 대비 등락율 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>액면가대비 주가비율",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>액면가대비 현재가 배율 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>우선주괴리율 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>가격>우선주괴리율 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>최고/최저>기간 최고가/최저가 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>최고/최저>연중 최고가/최저가 변동율 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>최고/최저>연중 최고가/최저가 변동율 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>최고/최저>52주 최고가/최저가 변동율 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>최고/최저>52주 최고가/최저가 변동율 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>최고/최저>연중/52주 최고가/최저가 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>최고/최저>신고가/신저가 갱신",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>최고/최저>기간 신고가/신저가 대비 등락율 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>최고/최저>연중/52주 신고가/신저가 돌파",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>최고/최저>현재봉 신고가/신저가 발생",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>상/하한>상한가/하한가 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>상/하한>상한가/하한가 이탈",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>상/하한>상한가/하한가 발생횟수",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>상/하한>상한가/하한가 대비 괴리율",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>상/하한>상한가/하한가 비교",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>상/하한>5단 호가내 상한가/하한가 존재",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>상/하한>상한가/하한가 진입횟수",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>상/하한>상한가/하한가 진입시간",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>상/하한>상한가/하한가 진입경과시간",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>변동>주가대비 종가 변동율 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>변동>주가대비 종가 변동율 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>변동>주가 변동률(다른주기)",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>변동>주가 변동폭 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>변동>주가 변동폭 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>변동>고가/저가 갱신 연속봉수",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>변동>고가/저가 변동 연속봉수",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>변동>기간내 주가 변동폭 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>변동>기간내 주가 변동폭 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>변동>5일간 주가변동폭 비율 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>변동>당일 가격폭 최대/최소",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>변동>갭 상승/하락 종목 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>변동>갭 상승/하락 종목 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>변동>갭 상승/하락 연속봉수",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>변동>시가갭 발생",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>변동>호가갭 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>호가잔량>호가잔량 비율",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>호가잔량>최우선 호가잔량",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>호가잔량>총잔량 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>호가잔량>총잔량 비교",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>호가잔량>총잔량 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>호가잔량>매수/매도 우선호가 비율",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>호가잔량>총잔량대비 우선호가잔량 비율",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>예상체결>예상체결가",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>예상체결>예상체결가 등락률",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>예상체결>예상체결가 가격범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>예상체결>예상체결 거래량",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>예상체결>예상체결 거래량비율",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>예상체결>예상체결가 등락여부",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>예상체결>예상체결가-이동평균비교",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>예상체결>예상체결량 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>기타지표>상장자본금 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>기타지표>상장자본금 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>기타지표>시가총액 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>기타지표>시가총액 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>기타지표>상장주식수 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>기타지표>상장주식수 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>기타지표>프로그램 순매수 비율",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>기타지표>기간내 프로그램 순매수",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>기타지표>기간내 프로그램 순매수 비율",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>기타지표>프로그램 순매수 연속일수",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>기타지표>프로그램 매매일수",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>기타지표>프로그램 순매수 금액",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>기타지표>프로그램 순매수 금액 비율",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>기타지표>기간내 프로그램 순매수 금액",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "주가분석>기타지표>기간내 프로그램 순매수 금액 비율",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>거래원>거래원별 거래량",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>거래원>거래원별 거래량 비율",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>거래원>거래원 순간변동량",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>거래원>거래원별 매도대비 매수비율",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>거래원>거래원중 특정증권사 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>거래원>매도매수 거래원이 같은 종목",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>거래원>특정거래원이 매도매수 양쪽에 있을때",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>거래원>특정거래원이 매도매수 한쪽에 있을때",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>거래원>외국계 거래원 거래량 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>거래원>외국계 거래원 거래량 비율",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>거래원>외국계 거래원 순매매량 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>거래원>외국계 거래원 순매매 비율",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>거래원>외국계 거래원수",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>외국인 보유율 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>외국인 보유율 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>외국인 소진율 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>외국인 소진율 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>특정일 대비 외국인보유율 증감 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>특정일 대비 외국인보유율 증감 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>외국인 순매수 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>외국인 순매수 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>외국인 순매수/매도 연속일수",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>외국인 평균 순매수량 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>외국인 평균 순매수량 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>외국인 N일간 순매수량 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>외국인 N일간 순매수 금액 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>외국인 최고/최저 보유비중 갱신",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>외국인 휴면 일수 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>외국인/기관/개인 일간 매매변동률",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>외국인(전일 기준)>외국인 첫 순매매조건",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>기관(전일 기준)>기관 순매수량 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>기관(전일 기준)>기관 순매수량 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>기관(전일 기준)>기관 순매수 금액 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>기관(전일 기준)>기관 순매수 금액 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>기관(전일 기준)>기관 순매수/매도 연속일수",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>기관(전일 기준)>기관 평균 순매수량 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>기관(전일 기준)>기관 N일간 순매수량 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>기관(전일 기준)>기관 평균 순매수금액 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>기관(전일 기준)>기관 N일간 순매수금액 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>기관(전일 기준)>기관 휴면 일수 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>기관(전일 기준)>기관 첫 순매매 조건",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>기관(전일 기준)>개인 첫 순매매 조건",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>개인(전일 기준)>개인 순매수/매도 연속일수",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "투자자>개인(전일 기준)>개인 N일간 순매수 금액 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>거래량 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>거래량 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>거래량 n% 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>거래량 증감연속봉수",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>기간 최고/최저 거래량 갱신",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>거래량 변동율 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>거래량 변동율 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>거래량 회전율 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>거래량 회전율 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>전일 거래량 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>전일 동시간 대비 현재거래량 비율 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>거래량급증",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>최고거래량돌파",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>순간체결량 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>체결강도",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>체결강도 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래량>전일 동시간대 대비 거래량 증감률 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래대금>거래대금 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래대금>거래대금 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래대금>거래대금 n% 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래대금>거래대금 증감연속봉수",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래대금>거래대금 변동율 순위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래대금>평균거래대금 범위",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래대금>평균-평균 거래대금 비교",
+    "detail": ""
+  },
+  {
+    "type": "가격지표",
+    "path": "거래량분석>거래대금>순간체결대금 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "가격이동평균>이동평균간 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "가격이동평균>이동평균간 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "가격이동평균>이동평균대비 가격등락률",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "가격이동평균>가격/이동평균간 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "가격이동평균>가격/이동평균 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "가격이동평균>이동평균 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "가격이동평균>이동평균 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "가격이동평균>이동평균 변동률",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "가격이동평균>이동평균범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "가격이동평균>이동평균 배열(3)",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "가격이동평균>이동평균 배열(4)",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "가격이동평균>이동평균간 수렴도범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "가격이동평균>이동평균대비 현재가 대비율",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "가격이동평균>가격/이동평균간 지지",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "가격이동평균>이동평균/이동평균간 지지",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래량이동평균>거래량 이동평균간 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래량이동평균>거래량이 이동평균 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래량이동평균>거래량 이동평균 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래량이동평균>거래량 이동평균 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래량이동평균>거래량 이동평균 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래량이동평균>거래량 이동평균 배열",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래량이동평균>거래량 이동평균 수렴",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래량이동평균>거래량 이동평균간 수렴",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래량이동평균>거래량 이동평균 변동율 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래량이동평균>거래량 이동평균 변동율 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래대금이동평균>거래대금 이동평균 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래대금이동평균>거래대금 이동평균간 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래대금이동평균>거래대금 이동평균 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래대금이동평균>거래대금 이동평균 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래대금이동평균>거래대금 이동평균 구간",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래대금이동평균>n분평균 틱수대비증감",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래대금이동평균>n분평균대비 거래증감",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래대금이동평균>거래대금 이동평균 변동율 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "거래대금이동평균>거래대금 이동평균 변동율 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>MACD>MACD 기준값 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>MACD>MACD Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>MACD>MACD 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>MACD>MACD 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>MACD>MACD Signal 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>MACD>MACD 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>MACD>MACD 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>MACD>MACD 디버전스",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>MACD Osc>MACD Osc 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>MACD Osc>MACD Osc 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>MACD Osc>MACD Osc 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>MACD Osc>MACD Osc 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>MACD Osc>MACD Osc 디버전스",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>Parabolic Sar>Parabolic Sar 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>Parabolic Sar>Parabolic Sar 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>Parabolic Sar>Parabolic Sar 구간",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>LRS>LRS 기준값 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>LRS>LRS Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>LRS>LRS 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>LRS>LRS 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>LRS>LRS 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>LRS>LRS Signal선 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>LRS>LRS 대 Signal 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>LRS>LRS 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>TSF>TSF Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>TSF>TSF 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>Volume Osc>Volume Osc 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>Volume Osc>Volume Osc 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>Volume Osc>Volume Osc 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>Volume Osc>Volume Osc 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>Volume Osc>Volume Osc Signal 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>Volume Osc>Volume Osc 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>Price Osc>Price Osc 기준선 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>Price Osc>Price Osc 기준선 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>Price Osc>Price Osc 기준값 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>Price Osc>Price Osc 기준값 이상이하",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>Price Osc>Price Osc 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>Price Osc>Price Osc 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "추세>Price Osc>Price Osc 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "변동성>Band %B>Band %B 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "변동성>Band %B>Band %B 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "변동성>Band %B>Band %B 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "변동성>Band %B>Band %B 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "변동성>Band %B>Band %B 기준값 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "변동성>Band Width>Band Width 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "변동성>Band Width>Band Width 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "변동성>Band Width>Band Width 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "변동성>Band Width>Band Width 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "변동성>BWI>BWI 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "변동성>Chaikin's Vol>Chaikin's Vol 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "변동성>Chaikin's Vol>Chaikin's Vol Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Fast>Stochastic Fast 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Fast>Stochastic Fast 기준선 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Fast>Stochastic Fast 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Fast>Stochastic Fast 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Fast>Stochastic Fast 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Fast>Stochastic Fast %K,%D 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Fast>Stochastic Fast 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Fast>Stochastic Fast 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Fast>Stochastic Fast 디버전스",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Slow>Stochastic Slow 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Slow>Stochastic Slow 기준선 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Slow>Stochastic Slow 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Slow>Stochastic Slow 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Slow>Stochastic Slow 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Slow>Stochastic Slow %K,%D 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Slow>Stochastic Slow 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Slow>Stochastic Slow 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Stochastic Slow>Stochastic Slow 디버전스",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ADX>ADX 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ADX>ADX 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ADX>ADX 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ADX>ADX 디버전스",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ADXR>ADXR 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ADXR>ADXR 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ADXR>ADXR 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ADXR>ADXR 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>DMI>DMI 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>DMI>DMI 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>DMI>DMI 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>DMI>DMI 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>DMI>DMI 기준선 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>AB Ratio>AB Ratio 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>AB Ratio>AB Ratio 기준선 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>AB Ratio>AB Ratio 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>AD Line>AD Line 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>AD Line>AD Line 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>AD Line>AD Line Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>MAO>MAO 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>MAO>MAO Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>MAO>MAO 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>MAO>MAO 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>MAO>MAO 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>MAO>MAO Signal 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>MAO>MAO 디버전스",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Mass Index>Mass Index 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Mass Index>Mass Index 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Mass Index>Mass Index 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Momentum>Momentum 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Momentum>Momentum Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Momentum>Momentum 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Momentum>Momentum 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Momentum>Momentum 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Momentum>Momentum Signal 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Momentum>Momentum 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Momentum>Momentum 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Momentum>Momentum 디버전스",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>RMI>RMI Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>RMI>RMI 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>RMI>RMI 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>RMI>RMI 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>RMI>RMI Signal 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>RMI>RMI 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ROC>ROC 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ROC>ROC Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ROC>ROC 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ROC>ROC 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ROC>ROC 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ROC>ROC Signal 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ROC>ROC 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ROC>ROC 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ROC>ROC 디버전스",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Sonar>Sonar 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Sonar>Sonar Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Sonar>Sonar 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Sonar>Sonar 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Sonar>Sonar 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Sonar>Sonar Signal 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Sonar>Sonar 디버전스",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>TRIX>TRIX Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>TRIX>TRIX 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>TRIX>TRIX 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>TRIX>TRIX 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>TRIX>TRIX Signal 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>TRIX>TRIX 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>TRIX>TRIX 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>TRIX>TRIX 디버전스",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>William's R>William's R Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>William's R>William's R 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>William's R>William's R 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>William's R>William's R 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>William's R>William's R Signal 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>William's R>William's R 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>William's R>William's R 디버전스",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>삼선전환도>삼선전환도 연속발생",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>삼선전환도>삼선전환도 전환",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ADX DMI>ADX DMI 기준선 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ADX DMI>ADX DMI 기준선 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ADX DMI>ADX DMI 기준값 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ADX DMI>ADX DMI 기준값 이상이하",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>ADX DMI>ADX DMI 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>DMI DX>DMI DX 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>DMI DX>DMI DX 전환",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Standard Deviation>Standard Deviation 기준값 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Standard Deviation>Standard Deviation 기준값 이상이하",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Standard Deviation>Standard Deviation 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Standard Deviation>Standard Deviation 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>Standard Deviation>Standard Deviation 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>VROC>VROC 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>VROC>VROC 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>VROC>VROC 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>VROC>VROC 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "모멘텀>VROC>VROC 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>이격도>이격도 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>이격도>이격도 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>이격도>이격도 n% 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>이격도>이평간 이격도 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>이격도>이평간 이격도 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>이격도>이평간 이격도 n% 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>이격도>이격도 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>이격도>이격도 기준값 이상이하",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>이격도>이격도 배열",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>이격도>이격도 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>OBV>OBV 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>OBV>OBV 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>OBV>OBV 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>OBV>OBV 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>OBV>OBV 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>OBV>OBV 크로스",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>OBV>OBV U마크/D마크 발생",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>RSI>RSI Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>RSI>RSI 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>RSI>RSI 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>RSI>RSI 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>RSI>RSI Signal 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>RSI>RSI 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>RSI>RSI 디버전스",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Volume Ratio>Volume Ratio 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Volume Ratio>Volume Ratio 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Volume Ratio>Volume Ratio 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Volume Ratio>Volume Ratio 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Volume Ratio>Volume Ratio 기준선 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>심리도>심리도 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>심리도>심리도 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>심리도>심리도 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>심리도>심리도 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>심리도>심리도 기준값 이상이하",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>심리도>심리도 크로스",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>심리도>심리도 디버전스",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>심리도>심리도 배열",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Binary Wave>Binary Wave 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Binary Wave>Binary Wave 기준값 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Binary Wave>Binary Wave 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Binary Wave>Binary Wave 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Binary Wave>Binary Wave 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Binary Wave>Binary Wave 구간",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>CCI>CCI 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>CCI>CCI Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>CCI>CCI 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>CCI>CCI 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>CCI>CCI 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>CCI>CCI Signal선 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>CCI>CCI 대 Signal 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>CCI>CCI 순위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>CCI>CCI 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>CCI>CCI 디버전스",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Chaikin's Osc>Chaikin's Osc 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Chaikin's Osc>Chaikin's Osc Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Chaikin's Osc>Chaikin's Osc 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Chaikin's Osc>Chaikin's Osc 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Chaikin's Osc>Chaikin's Osc 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Chaikin's Osc>Chaikin's Osc Signal 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Chaikin's Osc>Chaikin's Osc 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>EOM>EOM 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>EOM>EOM Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>EOM>EOM 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>EOM>EOM 기준값 이상이하",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>EOM>EOM 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>EOM>EOM 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Force Index>Force Index 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Force Index>Force Index 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>MFI>MFI Signal 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>MFI>MFI 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>MFI>MFI 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>MFI>MFI 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>MFI>MFI Signal 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>NVI>NVI 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>NVI>NVI 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>NVI>NVI Signal 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>PVI>PVI 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>PVI>PVI 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>PVI>PVI Signal 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Sigma>Sigma 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Sigma>Sigma 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Sigma>Sigma 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "시장특성>Sigma>Sigma 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Bollinger Bands>Bollinger Bands 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Bollinger Bands>Bollinger Bands 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Bollinger Bands>Bollinger Bands 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Bollinger Bands>Bollinger Bands 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Bollinger Bands>Bollinger Bands 근접",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Bollinger Bands>Bollinger Bands 최대/최소",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Envelope>Envelope 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Envelope>Envelope 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Envelope>Envelope 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Envelope>Envelope 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Envelope>Envelope 근접",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>일목균형표>일목균형표 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>일목균형표>일목균형표 후행스팬 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>일목균형표>일목균형표 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>일목균형표>일목균형표 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>일목균형표>일목균형표 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Pivot>Pivot 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Pivot>Pivot 봉전 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>MAC>MAC 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Demark>Demark 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Demark>Demark 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Demark>Demark 봉전 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Demark>Demark 추세",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>Demark>Demark 반전",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>그물망차트>그물망차트 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>그물망차트>그물망차트 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>그물망차트>그물망차트 범위",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>매물대>매물대 돌파",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>매물대>매물대 비교",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>매물대>매물대 비중",
+    "detail": ""
+  },
+  {
+    "type": "기술적지표",
+    "path": "채널>매물대>매물대 등락율",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "주가 분석>PER 범위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "주가 분석>PER 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "주가 분석>PBR 범위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "주가 분석>PBR 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "주가 분석>EPS 범위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "주가 분석>EPS 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "주가 분석>EV/EBITDA 범위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "주가 분석>EV/EBITDA 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "주가 분석>PSR",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "주가 분석>BPS",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "주가 분석>SPS",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "주가 분석>시가총액",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "주가 분석>자본금",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "주가 분석>주가괴리율(우선주/보통주)",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "주가 분석>EBITDA",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "수익성 분석>ROA",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "수익성 분석>유보율",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "수익성 분석>경상이익률 범위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "수익성 분석>경상이익률 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "수익성 분석>ROE",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "수익성 분석>총자산회전율 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "수익성 분석>영업이익률 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "성장성 분석>매출액 증가율 범위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "성장성 분석>매출액 증가율 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "성장성 분석>영업이익 증가율 범위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "성장성 분석>영업이익 증가율 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "성장성 분석>순이익 증가율 범위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "성장성 분석>순이익 증가율 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "성장성 분석>EPS 증가율 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "성장성 분석>경상이익증가율 범위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "성장성 분석>경상이익증가율 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "안정성 분석>부채비율 범위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "안정성 분석>부채비율 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "안정성 분석>유동비율 범위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "안정성 분석>유동비율 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "기타 재무분석>매출액 범위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "기타 재무분석>매출액 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "기타 재무분석>영업이익 범위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "기타 재무분석>영업이익 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "기타 재무분석>순이익 범위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "기타 재무분석>순이익 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "P/L재무항목>경상이익",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "P/L재무항목>매출총이익",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "P/L재무항목>배당수익률 순위",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "B/S재무항목>자산총계",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "B/S재무항목>자본총계",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "B/S재무항목>부채총계",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "B/S재무항목>유동자산",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "B/S재무항목>고정자산",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "B/S재무항목>유동부채",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "B/S재무항목>고정부채",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "현금흐름재무항목>영업현금흐름",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "현금흐름재무항목>주당현금흐름",
+    "detail": ""
+  },
+  {
+    "type": "재무분석-연결재무제표",
+    "path": "현금흐름재무항목>현금의 증가/감소",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>관통형(피어싱라인)",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>남 삼성형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>동일저점형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>막대 샌드위치형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>사다리 바닥형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>상승 기아형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>상승 박차형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>상승 반격형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>상승 샅바형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>상승 세십자별형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>상승 잉태형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>상승 잉태확인형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>상승 장악형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>상승 장악확인형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>상승 탈출형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>십자샛별형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>샛별형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>애기제비 감추기형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>역망치형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>전서구형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>망치형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>희귀삼천바닥형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>묘비석도지",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승반전>상승용오름도지",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승지속>강세 삼선 반격형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승지속>매트형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승지속>블록형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승지속>상승 갈림길형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승지속>상승 갭 삼법형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승지속>상승 나란히형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승지속>상승 삼법형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승지속>상승 타스키갭형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승지속>장대양봉",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승지속>적삼병",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "상승지속>지연형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>교수형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>까마귀형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>동일흑삼병형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>석별형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>십자석별형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>약세 까마귀형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>유성형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>하락 기아형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>하락 박차형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>하락 반격형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>하락 샅바형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>하락 세십자별형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>하락 잉태형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>하락 잉태확인형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>하락 장악형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>하락 장악확인형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>하락 탈출형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락반전>먹구름형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락지속>걸침형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락지속>약세 삼선 반격형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락지속>장대음봉",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락지속>진입형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락지속>하락 갈림길형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락지속>하락 갭 삼법형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락지속>하락 나란히형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락지속>하락 삼법형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락지속>하락 타스키갭형",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락지속>흑삼병",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "하락지속>트러스팅 라인",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "캔들연속>캔들 양/음봉 연속발생",
+    "detail": ""
+  },
+  {
+    "type": "캔들패턴",
+    "path": "캔들연속>캔들 양/음봉 길이증가 연속발생",
+    "detail": ""
+  },
+  {
+    "type": "베타-상관계수",
+    "path": "베타계수>종목 베타계수 범위",
+    "detail": ""
+  },
+  {
+    "type": "베타-상관계수",
+    "path": "베타계수>종목 베타계수 순위",
+    "detail": ""
+  },
+  {
+    "type": "베타-상관계수",
+    "path": "베타계수>지수 베타계수 범위",
+    "detail": ""
+  },
+  {
+    "type": "베타-상관계수",
+    "path": "베타계수>지수 베타계수 순위",
+    "detail": ""
+  },
+  {
+    "type": "베타-상관계수",
+    "path": "상관계수>종목 상관계수 범위",
+    "detail": ""
+  },
+  {
+    "type": "베타-상관계수",
+    "path": "상관계수>종목 상관계수 순위",
+    "detail": ""
+  },
+  {
+    "type": "베타-상관계수",
+    "path": "상관계수>지수 상관계수 범위",
+    "detail": ""
+  },
+  {
+    "type": "베타-상관계수",
+    "path": "상관계수>지수 상관계수 순위",
+    "detail": ""
+  },
+  {
+    "type": "예상종목검색",
+    "path": "종가/이평 간 돌파",
+    "detail": ""
+  },
+  {
+    "type": "예상종목검색",
+    "path": "이평/이평 간 돌파",
+    "detail": ""
+  },
+  {
+    "type": "예상종목검색",
+    "path": "매물대 돌파",
+    "detail": ""
+  },
+  {
+    "type": "예상종목검색",
+    "path": "기간 고가/저가 돌파",
+    "detail": ""
+  },
+  {
+    "type": "예상종목검색",
+    "path": "기준일 가격선 돌파",
+    "detail": ""
+  },
+  {
+    "type": "당일내발생",
+    "path": "종가/이평 간 돌파",
+    "detail": ""
+  },
+  {
+    "type": "당일내발생",
+    "path": "이평/이평 간 돌파",
+    "detail": ""
+  },
+  {
+    "type": "당일내발생",
+    "path": "매물대 돌파",
+    "detail": ""
+  },
+  {
+    "type": "당일내발생",
+    "path": "전봉대비 가격급변",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "ADX Grapper>ADX Grapper 매수",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "ADX Grapper>ADX Grapper 매도",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "Boomers>Boomers 매수",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "Boomers>Boomers 매도",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "Expansion Pivot>Expansion Pivot 매수",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "Expansion Pivot>Expansion Pivot 매도",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "Gilligan's Island>Gilligan's Island 매수",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "Gilligan's Island>Gilligan's Island 매도",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "Inside day>Inside day 매수",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "Inside day>Inside day 매도",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "Lizards>Lizards 매수",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "Lizards>Lizards 매도",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "Outside day>Outside day 매수",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "Outside day>Outside day 매도",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "Pivot Point>Pivot Point 매수",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "Pivot Point>Pivot Point 매도",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "SlingShots>SlingShots 매수",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "SlingShots>SlingShots 매도",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "1-2-3-4's>1-2-3-4's 매수",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "1-2-3-4's>1-2-3-4's 매도",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "180's>180's 매수",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "180's>180's 매도",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "7% Plan>7% Plan 매수",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "7% Plan>7% Plan 매도",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "30 MBO>30 MBO 매수",
+    "detail": ""
+  },
+  {
+    "type": "전략분석",
+    "path": "30 MBO>30 MBO 매도",
+    "detail": ""
+  }
+]
