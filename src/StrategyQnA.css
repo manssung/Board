@@ -53,7 +53,7 @@
 
 /* 조건 목록 */
 .condition-list {
-  max-height: 220px;
+  max-height: 150px;
   overflow-y: auto;
   border: 1px solid #ccc;
   border-radius: 6px;
@@ -81,7 +81,7 @@
   padding: 14px;
   border-radius: 10px;
   background-color: #fbfbfb;
-  max-height: 200px;
+  max-height: 100px;
   overflow-y: auto;
 }
 
