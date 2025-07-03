@@ -166,7 +166,7 @@
 }
 .selected-item .delete-button {
   position: absolute;
-  top: 12px;
+  top: 28px;
   right: 12px;
   padding: 4px 10px;
   font-size: 12px;

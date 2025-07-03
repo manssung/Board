@@ -4,7 +4,6 @@ import React from 'react';
 export default function SelectedConditions({ selectedConditions, onRemove, onCommentChange  }) {
   return (
     <div>
-      <h3>선택된 조건</h3>
       <ul className="selected-list">
         {selectedConditions.map((cond, idx) => (
           <li key={idx} className="selected-item">

@@ -49,7 +49,6 @@ export default function ConditionTreeView({ broker, selectedConditions, onCondit
         ))}
       </ul>
 
-      <h3>선택된 조건</h3>
       <ul className="selected-list">
         {selectedConditions.map((cond, idx) => (
           <li key={idx} className="selected-item">

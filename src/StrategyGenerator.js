@@ -155,15 +155,15 @@ export default function StrategyQnA() {
           </div>
         </div>
         <div style={{ marginTop: "1rem" }}>
-          <button onClick={() => insertMent('불가')}>작성 불가</button>
-          <button onClick={() => insertMent('외문의')}>고객센터</button>
+          <button onClick={() => insertMent('작성불가')}>작성 불가</button>
+          <button onClick={() => insertMent('고객센터')}>고객센터</button>
         </div>
         <ConditionList
           conditions={filteredConditions}
           onConditionClick={handleConditionClick}
           warning={warning}
         />
-
+        <h3>선택된 조건</h3>
         <div className="selected-conditions-box">
         <SelectedConditions
             selectedConditions={selectedConditions}
