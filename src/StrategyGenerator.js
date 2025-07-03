@@ -77,11 +77,20 @@ export default function StrategyQnA() {
     return match ? match[1].trim() : '';
   };
 
-  const handleConditionClick = (condition) => {
-    setSelectedConditions(prev => [...prev, condition]);
-    setWarning("");
+  const handleCommentChange = (index, newComment) => {
+  setSelectedConditions(prev =>
+    prev.map((cond, i) =>
+      i === index ? { ...cond, comment: newComment } : cond
+    )
+      );
+    };
 
+  const handleConditionClick = (condition) => {
+    const newCondition = { ...condition, comment: ""}
+    setSelectedConditions(prev => [...prev, condition]);
+    
     // 고정 멘트 관련 상태 초기화
+    setWarning("");
     setFixedType("");
     setAutoMent("");
     setCustomMent("");
@@ -102,7 +111,7 @@ export default function StrategyQnA() {
     if (selectedConditions.length > 0) {
       let ment = header;
       selectedConditions.forEach((c, i) => {
-        ment += `${String.fromCharCode(65 + i)} : ${c.type}>${c.path} : \n`;
+        ment += `${String.fromCharCode(65 + i)} : ${c.type}>${c.path} : ${c.comment || ''} \n`;
       });
       ment += `\n조건식 ${selectedConditions.map((_, i) => String.fromCharCode(65 + i)).join(" and ")} 입니다.\n`;
       return ment + footer;
@@ -113,7 +122,7 @@ export default function StrategyQnA() {
       return header + fixedMent + footer;
     }
 
-    return "※ 조건을 하나 이상 선택해주세요.";
+    return header + footer
   };
 
   const filteredConditions = allConditions?.filter(
@@ -146,9 +155,8 @@ export default function StrategyQnA() {
           </div>
         </div>
         <div style={{ marginTop: "1rem" }}>
-          <label>빠른 멘트 삽입: </label>
-          <button onClick={() => insertMent('불가')}>조건 작성 불가</button>
-          <button onClick={() => insertMent('외문의')}>조건 외 문의</button>
+          <button onClick={() => insertMent('불가')}>작성 불가</button>
+          <button onClick={() => insertMent('외문의')}>고객센터</button>
         </div>
         <ConditionList
           conditions={filteredConditions}
@@ -157,10 +165,11 @@ export default function StrategyQnA() {
         />
 
         <div className="selected-conditions-box">
-          <SelectedConditions
+        <SelectedConditions
             selectedConditions={selectedConditions}
             onRemove={handleRemoveCondition}
-          />
+            onCommentChange={handleCommentChange}
+        />
         </div>
 
         <GeneratedMent

@@ -81,8 +81,11 @@
   padding: 14px;
   border-radius: 10px;
   background-color: #fbfbfb;
-  max-height: 100px;
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .selected-list {
@@ -94,12 +97,13 @@
 .selected-item {
   margin-bottom: 10px;
   display: flex;
-  justify-content: space-between;
+
   align-items: center;
   background: #f3f3f3;
   padding: 10px 14px;
   border-radius: 6px;
   font-size: 15px;
+  position: relative;
 }
 
 .delete-button {
@@ -148,3 +152,23 @@
 .condition-item:hover {
   background-color: #e0e7ff;
 }
+.comment-input {
+ width: 50%;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.4;
+  padding: 8px;
+  font-family: inherit;
+  margin-left: 10px;
+}
+.selected-item .delete-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
