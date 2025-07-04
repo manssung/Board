@@ -9,7 +9,7 @@ export default function SelectedConditions({ selectedConditions, onRemove, onCom
           <li key={idx} className="selected-item">
             <span style={{width:'320px'}}>
               {cond.type ? `${cond.type} > ` : ''}
-              {cond.path} : {cond.detail}
+              {cond.path} : 
             </span>
             <textarea
                 className="comment-input"

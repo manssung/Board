@@ -27,6 +27,14 @@ export default function StrategyQnA() {
     setAutoMent("");
   };
   
+  const handleReset = () => {
+  setSelectedConditions([]);
+  setCustomMent('');
+  setAutoMent('');
+  setFixedType('');
+  };
+
+
   useEffect(() => {
       const brokerMap = {      
         "신한증권": "shinhan_condition.json",
@@ -155,15 +163,20 @@ export default function StrategyQnA() {
           </div>
         </div>
         <div style={{ marginTop: "1rem" }}>
-          <button onClick={() => insertMent('작성불가')}>작성 불가</button>
-          <button onClick={() => insertMent('고객센터')}>고객센터</button>
+          <button className="notice-button" onClick={() => insertMent('작성불가')}>작성 불가</button>
+          <button className="notice-button" onClick={() => insertMent('고객센터')}>고객센터</button>
         </div>
         <ConditionList
           conditions={filteredConditions}
           onConditionClick={handleConditionClick}
           warning={warning}
         />
+        <div className="selected-conditions-header">
         <h3>선택된 조건</h3>
+        <button className="reset-button" onClick={handleReset}>
+        초기화
+        </button>
+        </div>
         <div className="selected-conditions-box">
         <SelectedConditions
             selectedConditions={selectedConditions}
