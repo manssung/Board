@@ -13,7 +13,7 @@ export default function ConditionList({ conditions, onConditionClick, warning })
             className="condition-item"
             onClick={() => onConditionClick(cond)}
           >
-            {cond.type || "기타"}{">"}{cond.path || "(경로 없음)"} : {cond.detail || ""}
+            {cond.type || "기타"}{">"}{cond.path || "(경로 없음)"} : 
           </div>
         ))}
       </div>
