@@ -13,7 +13,7 @@ export default function SelectedConditions({ selectedConditions, onRemove, onCom
             </span>
             <textarea
                 className="comment-input"
-                value={cond.comment || ""}
+                 value={cond.comment !== undefined && cond.comment !== '' ? cond.comment : cond.detail || ""}
                 onChange={(e) => onCommentChange(idx, e.target.value)}
                 placeholder="조건에 대한 설명을 입력하세요"
                 rows={2}

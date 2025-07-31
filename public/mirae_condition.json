@@ -4398,5 +4398,71 @@
     "type": "투자자동향",
     "path": "장중추정>장중추정 순매수 순위",
     "detail": ""
+  },
+  {
+    "type": "추세지표",
+    "path": "MACD>MACD 돌파",
+    "detail": ""
+  },
+    {
+    "type": "추세지표",
+    "path": "MACD>MACD 크로스",
+    "detail": ""
+  },
+    {
+    "type": "추세지표",
+    "path": "MACD>MACD 추세",
+    "detail": ""
+  },
+    {
+    "type": "추세지표",
+    "path": "MACD>MACD 반전",
+    "detail": ""
+  },
+    {
+    "type": "추세지표",
+    "path": "MACD>MACD 디버전스",
+    "detail": ""
+  },
+    {
+    "type": "추세지표",
+    "path": "MACD>MACD 구간",
+    "detail": ""
+  },
+    {
+    "type": "추세지표",
+    "path": "MACD>MACD 배열",
+    "detail": ""
+  },
+      {
+    "type": "추세지표",
+    "path": "MACD>MACD 순위",
+    "detail": ""
+  },
+  {
+    "type": "추세지표",
+    "path": "MACD>MACD 기준값 범위",
+    "detail": ""
+  },
+  {
+    "type": "추세지표",
+    "path": "MACD>MACD 0선 상향돌파",
+    "detail": ""
+  },
+  {
+    "type": "추세지표",
+    "path": "MACD>MACD 0선 하향돌파",
+    "detail": ""
+  },
+  {
+    "type": "추세지표",
+    "path": "MACD>MACD-Signal과 골든크로스",
+    "detail": ""
+  },
+  {
+    "type": "추세지표",
+    "path": "MACD>MACD-Signal과 데드크로스",
+    "detail": ""
   }
+  
 ]

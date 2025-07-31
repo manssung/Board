@@ -1,15 +1,36 @@
 {
   "name": "strategy-generator",
   "version": "1.0.0",
+  "main": "electron.js",
   "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "electron": "electron .",
+    "package": "electron-builder"
+  },
   "dependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-scripts": "5.0.1"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build"
+  "devDependencies": {
+    "electron": "^37.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.example.strategy",
+    "productName": "StrategyGenerator",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "build/**/*",
+      "electron.js"
+    ],
+    "win": {
+      "target": "nsis"
+    }
   },
   "browserslist": {
     "production": [
@@ -22,9 +43,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "electron": "^37.2.0",
-    "electron-builder": "^26.0.12"
   }
 }

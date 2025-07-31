@@ -37,8 +37,8 @@ export default function StrategyQnA() {
 
   useEffect(() => {
       const brokerMap = {      
-        "신한증권": "shinhan_condition.json",
-        "KB증권": "/kb_condition.json",
+        "신한증권": "/shinhan_condition.json",
+        "KB증권": "/kb_condition_fully.json",
         "NH증권": "/nh_condition.json",
         "교보증권": "/kyobo_condition.json",
         "LS증권": "/ls_condition.json",
@@ -51,7 +51,7 @@ export default function StrategyQnA() {
     setFixedType("");
 
     if (brokerMap[selectedBroker]) {
-      fetch(brokerMap[selectedBroker])
+      fetch(`${process.env.PUBLIC_URL}${brokerMap[selectedBroker]}`)
         .then(res => {
           if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
           return res.text();
@@ -116,19 +116,20 @@ export default function StrategyQnA() {
 
     const footer = "\n감사합니다.";
 
-    if (selectedConditions.length > 0) {
-      let ment = header;
-      selectedConditions.forEach((c, i) => {
-        ment += `${String.fromCharCode(65 + i)} : ${c.type}>${c.path} : ${c.comment || ''} \n`;
-      });
-      ment += `\n조건식 ${selectedConditions.map((_, i) => String.fromCharCode(65 + i)).join(" and ")} 입니다.\n`;
-      return ment + footer;
-    }
+  if (selectedConditions.length > 0) {
+    let ment = header;
+    selectedConditions.forEach((c, i) => {
+      const description = c.comment && c.comment.trim() !== '' ? c.comment : c.detail || '';
+      ment += `${String.fromCharCode(65 + i)} : ${c.type}>${c.path} : ${description} \n`;
+    });
+    ment += `\n조건식 ${selectedConditions.map((_, i) => String.fromCharCode(65 + i)).join(" and ")} 입니다.\n`;
+    return ment + footer;
+  }
 
-    const fixedMent = fixedMentMap[selectedBroker]?.[typeOverride || fixedType];
-    if (fixedMent) {
-      return header + fixedMent + footer;
-    }
+  const fixedMent = fixedMentMap[selectedBroker]?.[typeOverride || fixedType];
+  if (fixedMent) {
+    return header + fixedMent + footer;
+  }
 
     return header + footer
   };
