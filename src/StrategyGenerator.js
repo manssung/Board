@@ -1,76 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import './StrategyQnA.css';
+import './css/StrategyGenerator.css';
 import BrokerSelector from '../src/components/BrokerSelector';
 import ConditionSearch from '../src/components/Condition Search';
 import ConditionList from '../src/components/Condition List';
 import SelectedConditions from '../src/components/Selected Conditions';
 import GeneratedMent from '../src/components/Generated Ment';
 import fixedMentMap from './data/fixedMentMap.js';
-//import { generateMent } from './util/generateMent.js';
+import brokerMap from './data/brokerMap.js';
+import { useBrokerData } from './hooks/useBrokerData';
+import { generateMent } from './util/mentGenerator';
 
-const brokers = ["LS증권", "미래에셋증권", "NH증권", "신한증권", "교보증권", "KB증권"];
+export default function StrategyGenerator() {
+  const brokers = Object.keys(brokerMap);
 
-export default function StrategyQnA() {
   const [selectedBroker, setSelectedBroker] = useState("");
   const [search, setSearch] = useState("");
   const [selectedConditions, setSelectedConditions] = useState([]);
-  const [allConditions, setAllConditions] = useState([]);
+  //const [allConditions, setAllConditions] = useState([]);
   const [customMent, setCustomMent] = useState("");
   const [warning, setWarning] = useState("");
   const [autoMent, setAutoMent] = useState("");
   const [fixedType, setFixedType] = useState("");
+  const { allConditions, isLoading, error } = useBrokerData(selectedBroker);
 
-  const insertMent = (type) => {
+  const insertMent = (type) => { //멘트 삽입 함수
     setFixedType(type);
     setSelectedConditions([]);
     setCustomMent("");
     setAutoMent("");
   };
   
-  const handleReset = () => {
+  const handleReset = () => { //초기화 버튼
   setSelectedConditions([]);
   setCustomMent('');
   setAutoMent('');
   setFixedType('');
   };
 
-
-  useEffect(() => {
-      const brokerMap = {      
-        "신한증권": "/shinhan_condition.json",
-        "KB증권": "/kb_condition_fully.json",
-        "NH증권": "/nh_condition.json",
-        "교보증권": "/kyobo_condition.json",
-        "LS증권": "/ls_condition.json",
-        "미래에셋증권": "/mirae_condition.json"
-      };
-    
-    setSelectedConditions([]);
-    setAutoMent("");
-    setCustomMent("");
-    setFixedType("");
-
-    if (brokerMap[selectedBroker]) {
-      fetch(`${process.env.PUBLIC_URL}${brokerMap[selectedBroker]}`)
-        .then(res => {
-          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-          return res.text();
-        })
-        .then(text => {
-          const json = JSON.parse(text);
-          const enriched = json.map(item => ({
-            ...item,
-            broker: selectedBroker,
-            name: item.name || item.path,
-            type: item.type || extractTypeFromPath(item.path) || ''
-          }));
-          setAllConditions(enriched);
-        })
-        .catch(err => console.error('조건 데이터 로딩 오류:', err));
-    } else {
-      setAllConditions([]);
-    }
-  }, [selectedBroker]);
+  useEffect(() => { //증권사 데이터 불러오기
+  setSelectedConditions([]);
+  setAutoMent("");
+  setCustomMent("");
+  setFixedType("");
+}, [selectedBroker]);
+ 
 
   useEffect(() => { //멘트 바로 수정
   if (fixedType && selectedConditions.length === 0) {
@@ -79,11 +52,6 @@ export default function StrategyQnA() {
     setCustomMent(ment);
   }
   }, [selectedConditions, fixedType]);
-
-  const extractTypeFromPath = (path = '') => {
-    const match = path.match(/^([^>]+)>/);
-    return match ? match[1].trim() : '';
-  };
 
   const handleCommentChange = (index, newComment) => {
   setSelectedConditions(prev =>
@@ -108,31 +76,16 @@ export default function StrategyQnA() {
     setSelectedConditions(prev => prev.filter((_, i) => i !== index));
   };
   
-  const generateMent = (typeOverride = null) => {
-    const header =
-      "안녕하십니까 전략Q&A담당자입니다.\n" +
-      "먼저 전략Q&A게시판을 이용해주시는 고객님께 감사인사드립니다.\n\n" +
-      "문의하신 내용에 대해 답변드립니다.\n\n";
 
-    const footer = "\n감사합니다.";
+  useEffect(() => { //멘트 바로 수정
+    if (fixedType && selectedConditions.length === 0) {
+      //  필요한 모든 재료를 객체 형태로 전달해줍니다.
+      const ment = generateMent({ typeOverride: fixedType, fixedMentMap, selectedBroker });
+      setAutoMent(ment);
+      setCustomMent(ment);
+    }
+  }, [selectedConditions, fixedType, selectedBroker]); 
 
-  if (selectedConditions.length > 0) {
-    let ment = header;
-    selectedConditions.forEach((c, i) => {
-      const description = c.comment && c.comment.trim() !== '' ? c.comment : c.detail || '';
-      ment += `${String.fromCharCode(65 + i)} : ${c.type}>${c.path} : ${description} \n`;
-    });
-    ment += `\n조건식 ${selectedConditions.map((_, i) => String.fromCharCode(65 + i)).join(" and ")} 입니다.\n`;
-    return ment + footer;
-  }
-
-  const fixedMent = fixedMentMap[selectedBroker]?.[typeOverride || fixedType];
-  if (fixedMent) {
-    return header + fixedMent + footer;
-  }
-
-    return header + footer
-  };
 
   const filteredConditions = allConditions?.filter(
     c => (
@@ -142,7 +95,12 @@ export default function StrategyQnA() {
     )
   ) || [];
 
-  const effectiveMent = customMent || autoMent || generateMent();
+  const effectiveMent = customMent || autoMent || generateMent({
+    selectedConditions,
+    fixedMentMap,
+    selectedBroker,
+    fixedType
+    });
 
   return (
     <div className="container">
