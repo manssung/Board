@@ -9,6 +9,7 @@ import fixedMentMap from './data/fixedMentMap.js';
 import brokerMap from './data/brokerMap.js';
 import { useBrokerData } from './hooks/useBrokerData';
 import { generateMent } from './util/mentGenerator';
+import { useAiStrategyGenerator } from './hooks/useAiStrategyGenerator';
 
 export default function StrategyGenerator() {
   const brokers = Object.keys(brokerMap);
@@ -21,6 +22,9 @@ export default function StrategyGenerator() {
   const [warning, setWarning] = useState("");
   const [autoMent, setAutoMent] = useState("");
   const [fixedType, setFixedType] = useState("");
+  const [customerQuery, setCustomerQuery] = useState(""); 
+  const { isAiLoading, generateStrategy } = useAiStrategyGenerator();
+
   const { allConditions, isLoading, error } = useBrokerData(selectedBroker);
 
   const insertMent = (type) => { //멘트 삽입 함수
@@ -102,6 +106,22 @@ export default function StrategyGenerator() {
     fixedType
     });
 
+ const handleAiGenerate = async () => {
+    if (!selectedBroker || !customerQuery.trim()) {
+      alert("증권사와 고객 문의 내용을 모두 입력해주세요.");
+      return;
+    }
+      const newConditions = await generateStrategy({
+      customerQuery,
+      selectedBroker,
+      allConditions,
+    });
+
+    if (newConditions) {
+      setSelectedConditions(newConditions);
+    }
+  };
+
   return (
     <div className="container">
       <div className="card">
@@ -124,6 +144,22 @@ export default function StrategyGenerator() {
         <div style={{ marginTop: "1rem" }}>
           <button className="notice-button" onClick={() => insertMent('작성불가')}>작성 불가</button>
           <button className="notice-button" onClick={() => insertMent('고객센터')}>고객센터</button>
+        </div>
+        <div className="ai-section">
+            <h3>고객 문의 내용</h3>
+            <textarea
+              className="ment-box"
+              rows={5}
+              placeholder="고객의 전략 문의 내용을 여기에 붙여넣으세요."
+              value={customerQuery}
+              onChange={(e) => setCustomerQuery(e.target.value)}
+            />
+            <button className="generate-button"
+            onClick={handleAiGenerate}
+            disabled={isAiLoading}
+            >
+              {isAiLoading ? 'AI 분석 중...' : 'AI로 전략 생성'}
+            </button>
         </div>
         <ConditionList
           conditions={filteredConditions}
