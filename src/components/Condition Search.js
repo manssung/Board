@@ -3,8 +3,7 @@ import React from 'react';
 
 export default function ConditionSearch({ search, onSearch }) {
   return (
-    <div className="column">
-      <label>조건 검색</label>
+    <div className="column" style={{ marginLeft: '10px' }}>
       <input
         type="text"
         placeholder="조건명을 입력하세요"

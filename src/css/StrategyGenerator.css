@@ -70,9 +70,20 @@
   transition: background 0.2s;
   font-size: 15px;
 }
-
+.list-header {
+  display: flex;
+  justify-content: space-between; /* 양쪽 끝으로 정렬 */
+  align-items: center; /* 세로 중앙 정렬 */
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
 .condition-item:hover {
   background-color: #eef5ff;
+}
+.list-header { /*조건명 입력*/
+  display: flex;
+  justify-content: left;
+  align-items: center;
 }
 
 /* 선택된 조건 */
@@ -87,6 +98,12 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+.list-header input[type="text"] {  
+  padding: 10px 14px;       /* 내부 여백을 줘서 높이를 키웁니다 */
+  font-size: 14px;     /* 폰트 크기를 키웁니다 */
+  border-radius: 8px; /* 테두리를 살짝 둥글게 */
+  border: 1px solid #bbb;
 }
 
 .selected-list {

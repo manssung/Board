@@ -134,12 +134,6 @@ export default function StrategyGenerator() {
               onChange={setSelectedBroker}
             />
           </div>
-          <div className="small-column">
-            <ConditionSearch
-              search={search}
-              onSearch={setSearch}
-            />
-          </div>
         </div>
         <div style={{ marginTop: "1rem" }}>
           <button className="notice-button" onClick={() => insertMent('작성불가')}>작성 불가</button>
@@ -164,6 +158,12 @@ export default function StrategyGenerator() {
         <ConditionList
           conditions={filteredConditions}
           onConditionClick={handleConditionClick}
+          searchComponent={
+        <ConditionSearch
+          search={search}
+          onSearch={setSearch}
+          />
+        }
           warning={warning}
         />
         <div className="selected-conditions-header">
