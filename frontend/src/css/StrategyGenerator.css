@@ -51,6 +51,30 @@
   background-color: #fff;
   margin-left: 5px
 }
+/* StrategyQnA.css */
+
+.tabs-container {
+  display: flex;
+  border-bottom: 2px solid #eee;
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  font-size: 1em;
+  color: #888;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px; /* 아래 테두리와 겹치도록 */
+}
+
+.tab-button.active {
+  color: #333;
+  font-weight: bold;
+  border-bottom: 2px solid #007bff;
+}
 
 /* 조건 목록 */
 .condition-list {

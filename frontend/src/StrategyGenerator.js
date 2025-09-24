@@ -24,6 +24,8 @@ export default function StrategyGenerator() {
   const [fixedType, setFixedType] = useState("");
   const [customerQuery, setCustomerQuery] = useState(""); 
   const { isAiLoading, generateStrategy } = useAiStrategyGenerator();
+  const [activeTab, setActiveTab] = useState('manual'); 
+
 
   const { allConditions, isLoading, error } = useBrokerData(selectedBroker);
 
@@ -139,8 +141,8 @@ export default function StrategyGenerator() {
           <button className="notice-button" onClick={() => insertMent('작성불가')}>작성 불가</button>
           <button className="notice-button" onClick={() => insertMent('고객센터')}>고객센터</button>
         </div>
-        <div className="ai-section">
-            <div className="selected-conditions-header"> {/* 기존 초기화 버튼과 같은 스타일 적용 */}
+        {/* <div className="ai-section">
+            <div className="selected-conditions-header"> 
               <h3>고객 문의 내용</h3>
               <button
                 className="reset-button"
@@ -162,7 +164,7 @@ export default function StrategyGenerator() {
             >
               {isAiLoading ? 'AI 분석 중...' : 'AI로 전략 생성'}
             </button>
-        </div>
+        </div>  */}
         <ConditionList
           conditions={filteredConditions}
           onConditionClick={handleConditionClick}
