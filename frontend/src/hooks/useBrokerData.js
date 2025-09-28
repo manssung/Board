@@ -147,7 +147,6 @@ export function useBrokerData(selectedBroker) {
                 });
             });
             setAllConditions(conditions);
-
         } else if (Array.isArray(fileInfo) && fileInfo.length > 0) {
           const firstFilePath = fileInfo[0];
           const folderPath = firstFilePath.substring(0, firstFilePath.lastIndexOf('/'));

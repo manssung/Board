@@ -39,38 +39,38 @@ export function useAiStrategyGenerator() {
           { "type": "시세분언급석", "path": "거래량>거래량 범위", "detail": "거래량이 100,000주 이상" }
       `;
     
-    // ✨ --- Ollama 연동을 위한 수정 --- ✨
-    const API_URL = 'http://localhost:11434/api/generate'; // Ollama 기본 주소
-
-     try {
+    // ✨ --- 제미나이 연동을 위한 수정 --- ✨
+  const API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${API_KEY}`;
+  
+   try {
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: "llama3",
-          prompt: prompt,
-          stream: false,
-          format: "json", // AI가 JSON 객체를 반환하도록 지시
+          contents: [{ parts: [{ text: prompt }] }],
+          // ✨ JSON 출력을 더 안정적으로 만들기 위한 설정
+          generationConfig: {
+            responseMimeType: "application/json",
+          },
         }),
       });
-
       if (!response.ok) {
-        throw new Error(`Ollama API 호출 실패: ${response.status}`);
+        throw new Error(`Gemini API 호출 실패: ${response.status}`);
       }
 
       const data = await response.json();
       
-      // Ollama는 응답이 data.response에 문자열로 들어있습니다.
-      const aiModifiedDetail = data.response;
-      console.log("Ollama로부터 받은 원본 응답 (JSON 문자열):", aiModifiedDetail);
+      // 제미나이 API는 응답이 candidates 배열 안에 들어있습니다.
+      const aiResponseJsonString = data.candidates[0].content.parts[0].text;
+      console.log("Gemini로부터 받은 원본 응답 (JSON 문자열):", aiResponseJsonString);
       
-       const newConditionObject = JSON.parse(aiModifiedDetail);
-      // AI가 수정한 detail 문자열을 반환합니다.
-      return newConditionObject 
+      const newConditionObject = JSON.parse(aiResponseJsonString);
+      return newConditionObject;
 
     } catch (error) {
-      console.error("Ollama 상세 설명 수정 중 오류 발생:", error);
-      alert("Ollama 상세 설명 수정에 실패했습니다. Ollama가 실행 중인지 확인해주세요.");
+      console.error("Gemini 전략 생성 중 오류 발생:", error);
+      alert("Gemini 전략 생성에 실패했습니다. API 키와 네트워크 연결을 확인해주세요.");
       return null;
     } finally {
       setIsAiLoading(false);

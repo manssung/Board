@@ -125,71 +125,88 @@ export default function StrategyGenerator() {
   };
 
   return (
-    <div className="container">
+      <div className="container">
       <div className="card">
         <h2 className="title">전략 Q&A 조건 생성기</h2>
-        <div className="row align-center">
-          <div className="small-column">
-            <BrokerSelector
-              brokers={brokers}
-              selectedBroker={selectedBroker}
-              onChange={setSelectedBroker}
-            />
-          </div>
+
+        {/* --- 탭 버튼 UI --- */}
+        <div className="tabs-container">
+          <button 
+            className={`tab-button ${activeTab === 'manual' ? 'active' : ''}`}
+            onClick={() => setActiveTab('manual')}
+          >
+            조건 생성
+          </button>
+          <button 
+            className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`}
+            // onClick={() => setActiveTab('ai')}
+             onClick={() => alert('개발중입니다.')}
+          >
+            AI 자동 생성
+          </button>
         </div>
-        <div style={{ marginTop: "1rem" }}>
-          <button className="notice-button" onClick={() => insertMent('작성불가')}>작성 불가</button>
-          <button className="notice-button" onClick={() => insertMent('고객센터')}>고객센터</button>
-        </div>
-        {/* <div className="ai-section">
-            <div className="selected-conditions-header"> 
-              <h3>고객 문의 내용</h3>
-              <button
-                className="reset-button"
-                onClick={() => setCustomerQuery("")}
-              >
-                초기화
-              </button>
-            </div>
-            <textarea
-              className="ment-box"
-              rows={5}
-              placeholder="고객의 전략 문의 내용을 여기에 붙여넣으세요."
-              value={customerQuery}
-              onChange={(e) => setCustomerQuery(e.target.value)}
-            />
-            <button className="generate-button"
-            onClick={handleAiGenerate}
-            disabled={isAiLoading}
-            >
-              {isAiLoading ? 'AI 분석 중...' : 'AI로 전략 생성'}
-            </button>
-        </div>  */}
-        <ConditionList
-          conditions={filteredConditions}
-          onConditionClick={handleConditionClick}
-          searchComponent={
-        <ConditionSearch
-          search={search}
-          onSearch={setSearch}
-          />
-        }
+
+        {/* --- 탭 내용 (조건부 렌더링) --- */}
+        <div className="tab-content">
+          {activeTab === 'manual' && (
+            <div id="manual-tab">
+              {/* ✨ row와 column 구조로 다시 감싸줍니다. */}
+              <div className="row align-center">
+                <div className="small-column">
+                  <BrokerSelector brokers={brokers} selectedBroker={selectedBroker} onChange={setSelectedBroker} />
+                </div>
+              </div>
+              <ConditionList
+                conditions={filteredConditions}
+                onConditionClick={handleConditionClick}
+                searchComponent={
+              <ConditionSearch
+                search={search}
+                onSearch={setSearch}
+                />
+              }
           warning={warning}
-        />
+           />
+            </div>
+          )}
+
+          {activeTab === 'ai' && (
+            <div id="ai-tab">
+              {/* ✨ row와 column 구조로 다시 감싸줍니다. */}
+              <div className="row align-center">
+                  <div className="small-column">
+                    <BrokerSelector brokers={brokers} selectedBroker={selectedBroker} onChange={setSelectedBroker} />
+                  </div>
+              </div>
+              <div className="ai-section">
+                <h3>고객 문의 내용</h3>
+                <textarea
+                  className="ment-box"
+                  value={customerQuery}
+                  onChange={(e) => setCustomerQuery(e.target.value)}
+                  placeholder="고객의 전략 문의 내용을 여기에 붙여넣으세요. (예: 거래량 10만주 이상)"
+                />
+                <button className="generate-button" onClick={handleAiGenerate} disabled={isAiLoading || isLoading}>
+                  {isAiLoading || isLoading ? '분석 중...' : 'AI로 조건 생성'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* --- 공통 UI --- */}
         <div className="selected-conditions-header">
-        <h3>선택된 조건</h3>
-        <button className="reset-button" onClick={handleReset}>
-        초기화
-        </button>
+          <h3>선택된 조건</h3>
+          <button className="reset-button" onClick={handleReset}>초기화</button>
         </div>
         <div className="selected-conditions-box">
-        <SelectedConditions
+          <SelectedConditions
             selectedConditions={selectedConditions}
             onRemove={handleRemoveCondition}
             onCommentChange={handleCommentChange}
-        />
+          />
         </div>
-
+        
         <GeneratedMent
           ment={effectiveMent}
           onChange={setCustomMent}
