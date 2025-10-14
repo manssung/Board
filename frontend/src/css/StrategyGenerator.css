@@ -205,7 +205,12 @@ body {
 /* --- 반응형 웹을 위한 미디어 쿼리 --- */
 /* 화면 너비가 1024px 이하일 때만 아래 스타일이 적용됩니다. */
 @media screen and (max-width: 1024px) {
-
+    .main-content {
+    gap: 10px !important;
+  }
+  .top-panel {
+    gap: 10px !important;
+  }
   /* --- 기존 세로 쌓기 코드 --- */
   .container {
     padding: 10px;
@@ -221,9 +226,6 @@ body {
   .bottom-panel {
     flex: none;
   }
-  .panel, .bottom-panel {
-    min-height: 300px; /* 최소 높이를 살짝 줄여 공간 확보 */
-  }
     .list-header {
     flex-wrap: wrap; /* 공간이 부족하면 아래로 자동 줄바꿈 */
     gap: 10px; /* 제목과 검색창 사이의 간격 */
@@ -232,6 +234,7 @@ body {
   .list-header .condition-search-container {
     width: 100%; /* 좁은 화면에서는 너비를 100%로 설정 */
   }
+
 
   /* --- 여기까지 기존 코드 --- */
 
@@ -251,6 +254,7 @@ body {
     flex-shrink: 0; /* 높이가 줄어들지 않도록 설정 */
   }
 
+  
     #right-panel .panel-content {
     max-height: 250px; /* 목록의 최대 높이를 250px로 제한 */
     overflow-y: auto;  /* 내용이 최대 높이를 넘으면 스크롤바 생성 */
