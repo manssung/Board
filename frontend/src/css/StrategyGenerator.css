@@ -224,6 +224,15 @@ body {
   .panel, .bottom-panel {
     min-height: 300px; /* 최소 높이를 살짝 줄여 공간 확보 */
   }
+    .list-header {
+    flex-wrap: wrap; /* 공간이 부족하면 아래로 자동 줄바꿈 */
+    gap: 10px; /* 제목과 검색창 사이의 간격 */
+  }
+
+  .list-header .condition-search-container {
+    width: 100%; /* 좁은 화면에서는 너비를 100%로 설정 */
+  }
+
   /* --- 여기까지 기존 코드 --- */
 
 
@@ -242,9 +251,14 @@ body {
     flex-shrink: 0; /* 높이가 줄어들지 않도록 설정 */
   }
 
-   #left-panel .broker-selector-container {
+    #right-panel .panel-content {
+    max-height: 250px; /* 목록의 최대 높이를 250px로 제한 */
+    overflow-y: auto;  /* 내용이 최대 높이를 넘으면 스크롤바 생성 */
+  }
+  
+   #left-panel .broker-selector-container select{
     width: auto; /* 너비를 자동으로 설정하여 부모 패널에 맞춤 */
-    min-width: 200px; /* 너무 작아지지 않도록 최소 너비 설정 */
+    max-width: 150px; /* 너무 작아지지 않도록 최소 너비 설정 */
   }
 
   /* 오른쪽 '선택된 조건' 패널 최적화 */
