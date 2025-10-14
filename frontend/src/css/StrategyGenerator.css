@@ -228,7 +228,25 @@ body {
 
 
   /* --- ✨ 태블릿 화면 최적화 코드 추가 --- */
-  
+
+    #left-panel .panel-content {
+    /* 이 부분은 ConditionList가 스크롤되기 위해 필요합니다. */
+    display: flex;
+    flex-direction: column;
+    overflow-y: hidden; /* 자식 요소에서 스크롤을 제어하도록 변경 */
+  }
+
+  #left-panel .condition-list {
+    max-height: 300px; /* 목록의 최대 높이를 300px로 제한 */
+    overflow-y: auto;  /* 내용이 최대 높이를 넘으면 스크롤바 생성 */
+    flex-shrink: 0; /* 높이가 줄어들지 않도록 설정 */
+  }
+
+   #left-panel .broker-selector-container {
+    width: auto; /* 너비를 자동으로 설정하여 부모 패널에 맞춤 */
+    min-width: 200px; /* 너무 작아지지 않도록 최소 너비 설정 */
+  }
+
   /* 오른쪽 '선택된 조건' 패널 최적화 */
   #right-panel .condition-pill {
     font-size: 12px; /* 태그 글자 크기 축소 */
