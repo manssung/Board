@@ -177,8 +177,6 @@ body {
   background-color: white; /* 스크롤 시 뒷 내용이 비치지 않도록 배경색 지정 */
   z-index: 10; /* 다른 요소들 위에 표시되도록 설정 */
   padding-top: 10px; /* 패널 상단과의 여백 확보 */
-  padding-bottom: 10px; /* 아래 목록과의 시각적인 간격을 줌 */
-
 }
 
 .list-header h3 {

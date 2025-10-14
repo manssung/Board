@@ -37,6 +37,7 @@
   padding: 8px;
   background-color: white;
   box-sizing: border-box;
+  resize: none; /* 사용자가 크기를 조절할 수 없도록 설정 */
 }
 
 .delete-button {

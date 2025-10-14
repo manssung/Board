@@ -118,7 +118,6 @@ export default function StrategyGenerator() {
     });
 
   const handleMentChange = (newMent) => {
-    console.log("멘트 수동 변경 감지:", newMent);
     setCustomMent(newMent);
     setIsMentManuallyEdited(true); // ✨ 사용자가 직접 수정했음을 기록
 

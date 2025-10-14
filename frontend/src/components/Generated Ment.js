@@ -20,6 +20,7 @@ const GeneratedMent = ({ ment, onChange }) => {
 
   return (
     <div className="ment-box-container">
+      <h3>답변 멘트</h3>
       <textarea
         className="ment-textarea"
         value={ment}
