@@ -1,0 +1,47 @@
+/* src/components/ConditionList.css */
+
+.condition-list {
+  flex-grow: 1; /* 남은 공간을 모두 차지하며 늘어남 */
+  overflow-y: auto; /* 내용이 넘치면 자체 스크롤 */
+  border: 1px solid var(--medium-gray);
+  border-radius: var(--border-radius);
+  padding: 8px;
+}
+
+.condition-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--medium-gray);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 14px;
+}
+
+.condition-item:hover {
+  background-color: #e9f4ff; /* 더 부드러운 파란색 계열 */
+}
+
+/* --- '+ 추가' 아이콘 --- */
+.add-icon {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--primary-color);
+  opacity: 0; /* 평소에는 숨김 */
+  transition: opacity 0.2s ease;
+}
+
+.condition-item:hover .add-icon {
+  opacity: 1; /* 마우스를 올렸을 때만 표시 */
+}
+
+/* --- 목록이 비어있을 때 메시지 --- */
+.empty-list-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: var(--dark-gray);
+  font-size: 14px;
+}

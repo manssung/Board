@@ -90,9 +90,9 @@ export function useBrokerData(selectedBroker) {
 
       try {
          if (selectedBroker === '미래에셋증권') {
-            const treeUrls = fileInfo.tree.map(file => `${process.env.PUBLIC_URL}${file}`);
-            const mapUrls = fileInfo.maps.map(file => `${process.env.PUBLIC_URL}${file}`);
-            const urls = [...treeUrls, ...mapUrls];
+          const treeUrls = fileInfo.tree.map(file => `${process.env.PUBLIC_URL}${file}`);
+          const mapUrls = (fileInfo.maps || []).map(file => `${process.env.PUBLIC_URL}${file}`);
+          const urls = [...treeUrls, ...mapUrls];
 
             const responses = await Promise.all(urls.map(url => fetch(url)));
             const xmlStrings = await Promise.all(responses.map(async (res) => {
@@ -103,8 +103,7 @@ export function useBrokerData(selectedBroker) {
             }));
 
             const detailMap = new Map();
-            const mapXmlStrings = xmlStrings.slice(treeUrls.length);
-        
+            const mapXmlStrings = xmlStrings.slice(treeUrls.length); 
             for (const xmlString of mapXmlStrings) {
                 const mapXml = parseXml(xmlString);
                 if (!mapXml) continue;
@@ -116,25 +115,23 @@ export function useBrokerData(selectedBroker) {
                 });
             }
 
-            const conditions = [];
-            xmlStrings.forEach((xmlString, index) => {
+            console.log("미래에셋 mapXmlStrings 개수:", detailMap);
+
+          const conditions = [];
+            const treeXmlStrings = xmlStrings.slice(0, treeUrls.length);
+            for (const xmlString of treeXmlStrings) {
                 const treecommonXml = parseXml(xmlString);
-                if (!treecommonXml) {
-                    console.log(`파일 분석 실패: ${fileInfo.tree[index]}`);
-                    return;
-                }
+                if (!treecommonXml) continue;
 
                 const topCategories = Array.from(treecommonXml.documentElement.children);
                 topCategories.forEach(categoryNode => {
                    //const type = categoryNode.tagName;
                     if (!treecommonXml.documentElement.hasAttribute('TYPE')) return;
                     const type = treecommonXml.documentElement.tagName.replace(/-/g, '/');
-                    categoryNode.querySelectorAll('*[NAME]').forEach(conditionNode => {
-                        if (conditionNode.querySelector('*[NAME]')) {
-                            return;
-                        }
-                        
-                        const path = generateMiraePath(conditionNode);
+                    categoryNode.querySelectorAll('*[NAME]:not(:has(*[NAME]))').forEach(conditionNode => {
+
+                   const path = generateMiraePath(conditionNode);
+                        if (path){
                         const conditionName = conditionNode.getAttribute('NAME');
                         const detail = detailMap.get(conditionName) || '';
                             conditions.push({ 
@@ -143,9 +140,10 @@ export function useBrokerData(selectedBroker) {
                                 detail: detail,
                                 broker: selectedBroker 
                             });
+                          }
                     });
                 });
-            });
+            };
             setAllConditions(conditions);
         } else if (Array.isArray(fileInfo) && fileInfo.length > 0) {
           const firstFilePath = fileInfo[0];

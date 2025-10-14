@@ -1,0 +1,64 @@
+/* src/components/GeneratedMent.css */
+
+/* 텍스트 영역과 버튼을 감싸는 컨테이너 */
+.ment-box-container {
+  position: relative; /* 버튼을 오른쪽 위에 위치시키기 위한 기준점 */
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* 부모(bottom-panel)의 남은 공간을 모두 차지 */
+}
+
+.ment-textarea {
+  width: 100%;
+  flex-grow: 1; /* 컨테이너의 남은 공간을 모두 차지 */
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 12px;
+  padding-top: 40px; /* 버튼이 들어갈 공간 확보 */
+  border: none; /* 부모인 bottom-panel에 테두리가 있으므로 제거 */
+  resize: none;
+  font-family: inherit;
+  background-color: white;
+}
+
+.ment-textarea:focus {
+  outline: none;
+}
+
+/* 새로운 복사 버튼 스타일 */
+.copy-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  
+  display: flex;
+  align-items: center;
+  gap: 6px; /* 아이콘과 텍스트 사이 간격 */
+
+  background-color: var(--light-gray);
+  color: var(--dark-gray);
+  border: 1px solid var(--medium-gray);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copy-button:hover {
+  background-color: var(--medium-gray);
+  color: var(--text-color);
+}
+
+/* 복사 완료 시 스타일 */
+.copy-button.copied {
+  background-color: #d1e7dd; /* 연한 초록색 */
+  color: #0f5132; /* 진한 초록색 */
+  border-color: #badbcc;
+}
+
+.copy-icon {
+  width: 14px;
+  height: 14px;
+}

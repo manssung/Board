@@ -1,0 +1,23 @@
+/* src/components/ConditionSearch.css */
+
+.condition-search-container {
+  width: 220px; /* 검색창의 너비를 지정 */
+  margin-left:10px;
+}
+
+.condition-search-container input {
+  width: 100%;
+  padding: 8px 12px; /* 셀렉트 박스와 높이를 맞춤 */
+  font-size: 14px;
+  border: 1px solid var(--medium-gray);
+  border-radius: var(--border-radius);
+  background-color: white;
+  box-sizing: border-box; /* 패딩과 테두리를 너비에 포함 */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.condition-search-container input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}

@@ -1,11 +1,20 @@
 // components/ConditionList.js
 import React from 'react';
+import '../css/ConditionList.css';
 
 export default function ConditionList({ conditions, onConditionClick, searchComponent, warning }) {
+ if (!conditions || conditions.length === 0) {
+    return (
+      <div className="condition-list">
+        <div className="empty-list-message">
+          <p>표시할 조건이 없습니다.</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div>
       <div className="list-header">
-      <h3>조건 선택</h3>
       {warning && <div style={{ color: 'red', marginBottom: '10px' }}>{warning}</div>}
       {searchComponent}
       </div>
@@ -16,7 +25,8 @@ export default function ConditionList({ conditions, onConditionClick, searchComp
             className="condition-item"
             onClick={() => onConditionClick(cond)}
           >
-            {cond.type || "기타"}{">"}{cond.path || "(경로 없음)"} : 
+           <span>{cond.type || "기타"}{">"}{cond.path || "(경로 없음)"} : </span> 
+            <span className="add-icon">+</span> 
           </div>
         ))}
       </div>
