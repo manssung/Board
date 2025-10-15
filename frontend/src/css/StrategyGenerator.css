@@ -21,12 +21,13 @@ body {
   padding: 20px;
   display: flex;
   justify-content: center;
+  align-items: flex-start; 
 }
+
 
 .card {
   width: 95vw;
-  max-width: 1400px;
-  height: 90vh;
+  max-width: 14/0px;
   background-color: white;
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
@@ -46,18 +47,20 @@ body {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  overflow: hidden;
+  /*overflow: hidden;*/
   gap: 15px;
 }
 
 .top-panel {
   flex: 3;
+  height: 55vh;
   display: flex;
   gap: 15px;
-  overflow: hidden;
+ /*overflow: hidden;*/
 }
 
-.bottom-panel, .panel {
+.bottom-panel {
+  /* ✨ 핵심 4: flex 비율 없이 내용에 따라 높이가 유동적으로 변함 */
   background-color: white;
   border: 1px solid var(--medium-gray);
   border-radius: var(--border-radius);
@@ -66,8 +69,20 @@ body {
   flex-direction: column;
 }
 
-.bottom-panel { flex: 2; }
-.panel { flex: 1; min-width: 0; }
+.panel {
+  flex: 1;
+  height: 100%; /* 부모(.top-panel)의 고정된 높이를 꽉 채움 */
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--medium-gray);
+  border-radius: var(--border-radius);
+  padding: 15px;
+  background-color: white;
+  min-width: 0;
+}
+
+/*.bottom-panel { flex: 2; }
+.panel { flex: 1; min-width: 0; }*/
 
 .panel-header {
   display: flex;
@@ -78,14 +93,17 @@ body {
   border-bottom: 1px solid var(--medium-gray);
   flex-shrink: 0;
 }
+   #left-panel .broker-selector-container select{
+    width: auto; /* 너비를 자동으로 설정하여 부모 패널에 맞춤 */
+    max-width: 150px; /* 너무 작아지지 않도록 최소 너비 설정 */
+  }
 
 /* 이 부분을 찾아서 수정하세요 */
 .panel-content {
-  flex-grow: 1;
+ flex-grow: 1;
   overflow-y: auto;
-  display: flex; /* ✨ 추가 */
-  flex-direction: column; /* ✨ 추가 */
 }
+
 
 .panel-header h3 { margin: 0; }
 
@@ -187,10 +205,12 @@ body {
 
 #left-panel {
   flex: 2; /* 2의 비율을 가집니다 */
+  height:55vh;
 }
 
 #right-panel {
   flex: 3; /* 3의 비율을 가져 더 넓어집니다 */
+  height:55vh;
 }
 
 /* 스크롤바 스타일링 */
@@ -221,11 +241,20 @@ body {
   }
   .top-panel {
     flex-direction: column;
-    flex: none;
+    /* flex: none; */
+    height: auto;
+    flex-grow: 1
   }
   .bottom-panel {
-    flex: none;
+  flex-shrink: 0; /* 공간이 부족해도 높이가 줄어들지 않음 */
+  background-color: white;
+  border: 1px solid var(--medium-gray);
+  border-radius: var(--border-radius);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
   }
+
     .list-header {
     flex-wrap: wrap; /* 공간이 부족하면 아래로 자동 줄바꿈 */
     gap: 10px; /* 제목과 검색창 사이의 간격 */

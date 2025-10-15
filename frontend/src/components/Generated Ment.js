@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import '../css/GeneratedMent.css';
+import useAutoSizeTextArea from '../hooks/useAutoSizeTextArea';
 
 const GeneratedMent = ({ ment, onChange }) => {
   const [isCopied, setIsCopied] = useState(false);
+  const textAreaRef = useRef(null);
+
+  useAutoSizeTextArea(textAreaRef.current, ment);
 
   const handleCopy = () => {
     // navigator.clipboard API를 사용하여 텍스트를 복사합니다.
@@ -22,6 +26,7 @@ const GeneratedMent = ({ ment, onChange }) => {
     <div className="ment-box-container">
       <h3>답변 멘트</h3>
       <textarea
+        ref={textAreaRef}
         className="ment-textarea"
         value={ment}
         onChange={(e) => onChange(e.target.value)}
