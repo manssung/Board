@@ -38,7 +38,8 @@ const SelectedItem = ({ cond, index, onRemove, onCommentChange }) => {
         <textarea
           ref={textAreaRef} // ref를 textarea에 연결합니다.
           className="comment-input"
-          value={cond.comment !== undefined && cond.comment !== '' ? cond.comment : cond.detail || ""}
+          // value={cond.comment !== undefined && cond.comment !== '' ? cond.comment : cond.detail || ""}
+          value={cond.comment !== undefined ? cond.comment : cond.detail || ""}
           onChange={(e) => onCommentChange(index, e.target.value)}
           placeholder="코멘트 입력..."
           rows={1} // 기본 높이를 1줄로 시작합니다.

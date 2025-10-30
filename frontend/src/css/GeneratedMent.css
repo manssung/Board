@@ -28,13 +28,11 @@
 /* 새로운 복사 버튼 스타일 */
 .copy-button {
   position: absolute;
-  top: 10px;
+  top: -2px;
   right: 10px;
-  
   display: flex;
   align-items: center;
   gap: 6px; /* 아이콘과 텍스트 사이 간격 */
-
   background-color: var(--light-gray);
   color: var(--dark-gray);
   border: 1px solid var(--medium-gray);
@@ -63,3 +61,60 @@
   height: 14px;
 }
 
+/* src/components/GeneratedMent.css */
+
+.edit-button {
+  background-color: transparent;
+  color: var(--dark-gray);
+  border: 1px solid var(--medium-gray);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.edit-button:hover {
+  background-color: var(--medium-gray);
+}
+
+.ment-display pre {
+  margin: 0;
+  font-family: inherit;
+  /* --- ✨ 이 두 줄을 추가해주세요 --- */
+  white-space: pre-wrap; /* 공백/줄바꿈을 유지하면서 자동 줄바꿈 허용 */
+  word-wrap: break-word;   /* 아주 긴 단어(경로 등)도 강제로 줄바꿈 */
+}
+
+/* 편집 모드용 textarea */
+.ment-textarea-edit {
+  width: 100%;
+  flex-grow: 1;
+  border: none;
+  resize: none;
+  overflow-y: hidden;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.ment-textarea-edit:focus {
+  outline: none;
+}
+
+.ment-header {
+  display: flex;
+  justify-content: space-between; /* 양쪽 끝으로 정렬 */
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--medium-gray);
+}
+.ment-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* 제목과 수정 버튼 사이 간격 */
+}
+
+.ment-title-group h3 {
+  margin: 0; /* h3 태그의 기본 여백 제거 */
+}

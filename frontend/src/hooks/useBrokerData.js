@@ -115,8 +115,6 @@ export function useBrokerData(selectedBroker) {
                 });
             }
 
-            console.log("미래에셋 mapXmlStrings 개수:", detailMap);
-
           const conditions = [];
             const treeXmlStrings = xmlStrings.slice(0, treeUrls.length);
             for (const xmlString of treeXmlStrings) {

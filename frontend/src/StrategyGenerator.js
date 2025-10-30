@@ -8,8 +8,9 @@ import GeneratedMent from '../src/components/Generated Ment';
 import fixedMentMap from './data/fixedMentMap.js';
 import brokerMap from './data/brokerMap.js';
 import { useBrokerData } from './hooks/useBrokerData';
-import { generateMent } from './util/mentGenerator';
+import { generateMent } from './util/generateMent.js';
 import { useAiStrategyGenerator } from './hooks/useAiStrategyGenerator';
+
 
 export default function StrategyGenerator() {
   const brokers = Object.keys(brokerMap);
@@ -71,11 +72,12 @@ export default function StrategyGenerator() {
       );
       setIsMentManuallyEdited(false);
       setCustomMent("");
+      setFixedType("");
     };
 
   const handleConditionClick = (condition) => {
     const newCondition = { ...condition, comment: ""}
-    setSelectedConditions(prev => [...prev, condition]);
+    setSelectedConditions(prev => [...prev, {...condition, comment: undefined, operator : 'and'},]);
     
     // 고정 멘트 관련 상태 초기화
     setWarning("");
@@ -85,10 +87,25 @@ export default function StrategyGenerator() {
     setIsMentManuallyEdited(false);
   };
 
+  //and / or
+ const handleToggleOperator = (index) => {
+    // index에 해당하는 조건의 operator를 'and' -> 'or', 'or' -> 'and'로 변경
+    const newConditions = selectedConditions.map((item, i) => {
+      if (i === index) {
+        return { ...item, operator: item.operator === 'and' ? 'or' : 'and' };
+      }
+      return item;
+    });
+    setSelectedConditions(newConditions);
+    setIsMentManuallyEdited(false); // 멘트가 자동으로 다시 생성되도록 설정
+  };
+
+
   const handleRemoveCondition = (index) => {
     setSelectedConditions(prev => prev.filter((_, i) => i !== index));
     setIsMentManuallyEdited(false);
     setCustomMent("");
+    setFixedType("");
   };
   
 
@@ -110,21 +127,29 @@ export default function StrategyGenerator() {
     )
   ) || [];
 
-  const effectiveMent = customMent || autoMent || generateMent({
-    selectedConditions,
-    fixedMentMap,
-    selectedBroker,
-    fixedType
-    });
+   const effectiveMent = customMent || autoMent || generateMent({
+     selectedConditions,
+     fixedMentMap,
+     selectedBroker,
+     fixedType
+     });
 
-  const handleMentChange = (newMent) => {
-    setCustomMent(newMent);
-    setIsMentManuallyEdited(true); // ✨ 사용자가 직접 수정했음을 기록
+  /*
+   const effectiveMent = customMent || autoMent || generateMent({
+     selectedConditions,
+     fixedMentMap,
+     selectedBroker,
+     fixedType
+     });
 
-    const updated = parseMentAndUpdateConditions(newMent, selectedConditions);
-    setSelectedConditions(updated);
-  };
+   const handleMentChange = (newMent) => {
+     setCustomMent(newMent);
+     setIsMentManuallyEdited(true); // ✨ 사용자가 직접 수정했음을 기록
 
+     const updated = parseMentAndUpdateConditions(newMent, selectedConditions);
+     setSelectedConditions(updated);
+   };
+*/
 const handleAiGenerate = async () => {
     if (!selectedBroker || !customerQuery.trim()) {
       alert("증권사와 요청할 내용을 모두 입력해주세요.");
@@ -160,74 +185,72 @@ const handleAiGenerate = async () => {
     // 2. 완성된 prompt를 훅에 전달하여 AI를 호출합니다.
     const newCondition = await generateStrategy(prompt);
     if (newCondition) {
-      setSelectedConditions(prev => [...prev, { ...newCondition, comment: "" }]);
+      setSelectedConditions(prev => [...prev, { ...newCondition, comment: undefined }]);
+      setIsMentManuallyEdited(false);
     }
   };
 
   //새로운 멘트
-  const parseMentAndUpdateConditions = (text, originalConditions) => {
+const parseMentForComments = (text, originalConditions) => {
   const lines = text.split('\n');
-  const updatedConditions = [...originalConditions];
+  const updatedConditions = originalConditions.map(cond => ({ ...cond }));
   
   lines.forEach(line => {
-    // "A : ", "B : " 와 같은 패턴을 찾습니다.
     const match = line.match(/^([A-Z])\s*:\s*(.*)/);
     if (match) {
-      const charCode = match[1].charCodeAt(0);
-      const index = charCode - 'A'.charCodeAt(0); // 'A'는 0, 'B'는 1
-      
+      const index = match[1].charCodeAt(0) - 'A'.charCodeAt(0);
       if (index >= 0 && index < updatedConditions.length) {
         const content = match[2];
         const parts = content.split(' : ');
-        const newComment = parts.length > 1 ? parts[parts.length - 1] : ''; // 마지막 ' : ' 뒤의 내용을 코멘트로 간주
-        
-        updatedConditions[index] = {
-          ...updatedConditions[index],
-          comment: newComment.trim(),
-        };
+        const newComment = parts.length > 1 ? parts.slice(1).join(' : ') : '';
+        if (updatedConditions[index]) {
+          updatedConditions[index].comment = newComment.trim();
+        }
       }
     }
   });
-  
   return updatedConditions;
 };
 
-
+// ✨ '편집 완료' 핸들러 다시 추가
+  const handleMentUpdate = (newMent) => {
+    const updatedConditions = parseMentForComments(newMent, selectedConditions);
+    setSelectedConditions(updatedConditions);
+  };
   return (
- <div className="container">
+<div className="container">
       <div className="card">
         <h2 className="title">전략 Q&A 조건 생성기</h2>
-        
         <div className="main-content">
-          {/* --- 🔼 상단 영역 --- */}
           <div className="top-panel">
-            
-            {/* --- 왼쪽 패널 (탐색) --- */}
             <div id="left-panel" className="panel">
               <div className="tabs-container">
-                <button className={`tab-button ${activeTab === 'manual' ? 'active' : ''}`} onClick={() => setActiveTab('manual')}>
-                  조건 생성
-                </button>
-                {/* <button className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`} onClick={() => setActiveTab('ai')}> */}
-                <button className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`} onClick={() => alert('현재 개발중입니다.')}>
-                  AI 자동 생성
-                </button>
+                <button className={`tab-button ${activeTab === 'manual' ? 'active' : ''}`} onClick={() => setActiveTab('manual')}>조건 생성</button>
+                <button className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`} onClick={() => alert('현재 개발중입니다.')}>AI 자동 생성</button>
               </div>
-              <div>
-              <BrokerSelector brokers={brokers} selectedBroker={selectedBroker} onChange={setSelectedBroker} />
-              </div>
+              
+              <div className="broker-actions-container">
+               <BrokerSelector brokers={brokers} selectedBroker={selectedBroker} onChange={setSelectedBroker} />
+               <div className="fixed-ment-buttons">
+                  <button className="notice-button" onClick={() => insertMent('조건선물')}>조건선물</button>
+                  <button className="notice-button" onClick={() => insertMent('작성불가')}>작성불가</button>
+                  <button className="notice-button" onClick={() => insertMent('고객센터')}>고객센터</button>
+                  {/* 필요에 따라 버튼 추가 */}
+                </div>
+                </div>
+                <div className="list-header">
+                      <h3>조건 선택</h3>
+                      <ConditionSearch search={search} onSearch={setSearch} />
+                </div>
               <div className="panel-content">
                 {activeTab === 'manual' && (
                   <>
-                    <div className="list-header" >
-                     <h3>조건 선택</h3>
-                    <ConditionSearch search={search} onSearch={setSearch} />
-                  </div>
-                  <ConditionList conditions={filteredConditions} onConditionClick={handleConditionClick} />
+                    <ConditionList conditions={filteredConditions} onConditionClick={handleConditionClick} />
                   </>
                 )}
                 {activeTab === 'ai' && (
                   <div id="ai-tab">
+                    <BrokerSelector brokers={brokers} selectedBroker={selectedBroker} onChange={setSelectedBroker} />
                     <div className="ai-section">
                       <h3>고객 문의 내용</h3>
                       <textarea
@@ -246,7 +269,6 @@ const handleAiGenerate = async () => {
               </div>
             </div>
             
-            {/* --- 오른쪽 패널 (선택 목록) --- */}
             <div id="right-panel" className="panel">
               <div className="panel-header">
                 <h3>선택된 조건</h3>
@@ -258,9 +280,16 @@ const handleAiGenerate = async () => {
             </div>
           </div>
 
-          {/* --- 🔽 하단 영역 --- */}
           <div className="bottom-panel">
-            <GeneratedMent ment={effectiveMent} onChange={handleMentChange} />
+            <GeneratedMent 
+              selectedConditions={selectedConditions} 
+              onToggleOperator={handleToggleOperator} 
+              fixedMentMap={fixedMentMap}
+              selectedBroker={selectedBroker}
+              fixedType={fixedType}
+              ment={effectiveMent}
+              // onMentUpdate={handleMentUpdate}
+            />
           </div>
         </div>
       </div>

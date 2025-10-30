@@ -104,6 +104,42 @@ body {
   overflow-y: auto;
 }
 
+/*증권사 문의사항*/
+.broker-actions-container {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* 선택창과 버튼 그룹 사이 간격 */
+  margin-bottom: 15px; /* 아래 요소와의 간격 */
+  flex-wrap: wrap; /* 화면 좁아지면 줄바꿈 */
+}
+
+.broker-actions-container > .broker-selector-container {
+  flex-grow: 1; /* 남은 공간 차지 */
+  min-width: 150px; /* 최소 너비 */
+}
+
+.fixed-ment-buttons {
+  display: flex;
+  gap: 8px; /* 버튼 사이 간격 */
+  flex-shrink: 0; /* 버튼 그룹이 찌그러지지 않도록 */
+  margin-bottom:12px;
+}
+
+.notice-button {
+  background-color: #6c757d; /* 회색 계열 */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.notice-button:hover {
+  background-color: #5a6268;
+}
+
 
 .panel-header h3 { margin: 0; }
 
@@ -220,7 +256,6 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: #aaa; }
 
 /* src/css/StrategyGenerator.css */
-/* src/css/StrategyGenerator.css */
 
 /* --- 반응형 웹을 위한 미디어 쿼리 --- */
 /* 화면 너비가 1024px 이하일 때만 아래 스타일이 적용됩니다. */
@@ -240,11 +275,18 @@ body {
     min-height: 90vh;
   }
   .top-panel {
+    height:auto;
     flex-direction: column;
     /* flex: none; */
     height: auto;
     flex-grow: 1
   }
+/* ✨ 1. 메인 컨텐츠와 상단 패널을 세로로 쌓음 */
+  .main-content, .top-panel {
+    flex-direction: column;
+    gap: 10px;
+  }
+
   .bottom-panel {
   flex-shrink: 0; /* 공간이 부족해도 높이가 줄어들지 않음 */
   background-color: white;

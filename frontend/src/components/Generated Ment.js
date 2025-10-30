@@ -1,51 +1,142 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../css/GeneratedMent.css';
 import useAutoSizeTextArea from '../hooks/useAutoSizeTextArea';
 
-const GeneratedMent = ({ ment, onChange }) => {
-  const [isCopied, setIsCopied] = useState(false);
-  const textAreaRef = useRef(null);
+// 멘트 생성 로직 (헬퍼 함수)
+const getMentParts = ({ selectedConditions, fixedMentMap, selectedBroker, fixedType }) => {
+  const header = `안녕하십니까 전략Q&A담당자입니다.\n먼저 전략Q&A게시판을 이용해주시는 고객님께 감사인사드립니다.\n\n문의하신 내용에 대해 답변드립니다.\n\n`;
+  const footer = `\n감사합니다.`;
 
-  useAutoSizeTextArea(textAreaRef.current, ment);
+  // 1. 고정 멘트 우선 처리 (작성불가, 고객센터 등)
+  const fixedMent = fixedMentMap?.[selectedBroker]?.[fixedType];
+  if (fixedMent) {
+    const fullTextForCopy = header + fixedMent + footer;
+    // ✨ isFixed: true (고정 멘트), isEditable: true (수정 가능)
+    return { header, conditionLines: fixedMent, footer, fullTextForCopy, isFixed: true, isEditable: true };
+  }
+
+  // 2. 선택된 조건 처리
+  if (selectedConditions && selectedConditions.length > 0) {
+    const conditionLines = selectedConditions.map((item, index) => {
+      const letter = String.fromCharCode('A'.charCodeAt(0) + index);
+      const path = `${item.type || ''}>${item.path || ''}`;
+      const description = item.comment !== undefined ? item.comment : item.detail || '';
+      return `${letter} : ${path} : ${description}`;
+    }).join('\n');
+    
+    let closingLineText = '조건식 ';
+    selectedConditions.forEach((item, index) => {
+      closingLineText += String.fromCharCode('A'.charCodeAt(0) + index);
+      if (index < selectedConditions.length - 1) {
+        closingLineText += ` ${item.operator || 'and'} `;
+      }
+    });
+    closingLineText += ' 입니다.\n';
+
+    const fullTextForCopy = `${header}${conditionLines}\n\n${closingLineText}${footer}`;
+    // ✨ isFixed: false (조건 멘트), isEditable: false (수정 불가)
+    return { header, conditionLines, footer, fullTextForCopy, isFixed: false, isEditable: false };
+  }
+
+  // 3. 아무것도 없을 때 (빈 멘트)
+  const emptyText = header + '\n' + footer;
+  // ✨ isFixed: true (고정 멘트), isEditable: true (수정 가능)
+  return { header, conditionLines: '', footer, fullTextForCopy: emptyText, isFixed: true, isEditable: true };
+};
+
+
+const GeneratedMent = ({ selectedConditions, onToggleOperator, fixedMentMap, selectedBroker, fixedType }) => {
+  const [isCopied, setIsCopied] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState('');
+
+  // ✨ isEditable 플래그를 받아옵니다.
+  const { header, conditionLines, footer, fullTextForCopy, isFixed, isEditable } = getMentParts({ selectedConditions, fixedMentMap, selectedBroker, fixedType });
+
+  const textAreaRef = useRef(null);
+  // useAutoSizeTextArea(textAreaRef.current, editText);
+  useAutoSizeTextArea(textAreaRef.current, editText);
+
+  // 멘트가 바뀔 때마다 editText를 동기화하고, '조건 멘트'일 경우 '보기 모드'로 강제 전환
+  useEffect(() => {
+    setEditText(fullTextForCopy);
+    if (!isFixed) {
+      setIsEditing(false);
+    }
+  }, [fullTextForCopy, isFixed]);
 
   const handleCopy = () => {
-    // navigator.clipboard API를 사용하여 텍스트를 복사합니다.
-    navigator.clipboard.writeText(ment).then(() => {
-      setIsCopied(true); // 복사 성공 시 상태 변경
-      // 2초 후에 다시 원래 상태로 되돌립니다.
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2000);
-    }).catch(err => {
-      console.error('복사 실패:', err);
-      alert('텍스트 복사에 실패했습니다.');
-    });
+    // ✨ 편집 중이면 수정한 텍스트를, 아니면 원본 텍스트를 복사
+    const textToCopy = isEditing ? editText : fullTextForCopy;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    }).catch(err => console.error('복사 실패:', err));
+  };
+
+  const handleStartEditing = () => {
+    setEditText(fullTextForCopy); // 현재 멘트 내용으로 편집 시작
+    setIsEditing(true);
+  };
+  
+  const handleDoneEditing = () => {
+    setIsEditing(false);
+    // ✨ 수정한 내용은 부모(StrategyGenerator)로 보내지 않고,
+    // 이 컴포넌트의 editText 상태에만 임시로 저장됩니다.
   };
 
   return (
     <div className="ment-box-container">
-      <h3>답변 멘트</h3>
-      <textarea
-        ref={textAreaRef}
-        className="ment-textarea"
-        value={ment}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      <button 
-        className={`copy-button ${isCopied ? 'copied' : ''}`}
-        onClick={handleCopy}
-      >
-        {isCopied ? (
-          '✅ 복사 완료!'
-        ) : (
-          <>
-            <svg className="copy-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375V9.375a2.25 2.25 0 00-2.25-2.25H9.375" />
-            </svg>
-            복사
-          </>
-        )}
-      </button>
+      <div className="ment-header">
+        <div className="ment-title-group">
+        <h3>답변 멘트</h3>
+        {isEditable && (
+            // <button className="edit-button" onClick={() => isEditing ? handleDoneEditing() : handleStartEditing()}>
+             <button className="edit-button" onClick={() => alert('현재 개발중입니다.')}>
+              {isEditing ? '✔ 완료' : '✏️ 수정'}
+            </button>
+          )}
+        </div>
+        <div className="ment-buttons">
+          {/* ✨ isEditable이 true일 때만 '수정' 버튼이 보입니다. */}
+          <button className={`copy-button ${isCopied ? 'copied' : ''}`} onClick={handleCopy}>
+            {isCopied ? '✅ 복사 완료!' : '복사'}
+          </button>
+        </div>
+      </div>
+
+      {isEditing ? (
+        <textarea
+          ref={textAreaRef.current}
+          className="ment-textarea-edit"
+          value={editText}
+          onChange={(e) => setEditText(e.target.value)}
+        />
+      ) : (
+        <div className="ment-display">
+          <pre>{header}</pre>
+          <pre>{conditionLines}</pre>
+          {/* ✨ isFixed가 false일 때만 (조건 멘트일 때만) 'and/or' 토글 라인이 보입니다. */}
+          {!isFixed && selectedConditions.length > 0 && (
+            <p className="closing-line">
+              {'조건식 '}
+              {selectedConditions.map((item, index) => (
+                <React.Fragment key={index}>
+                  <span>{String.fromCharCode('A'.charCodeAt(0) + index)}</span>
+                  {index < selectedConditions.length - 1 && (
+                    <span className="operator" onDoubleClick={() => onToggleOperator(index)}>
+                    {/* <span className="operator"> */}
+                      {` ${item.operator || 'and'} `}
+                    </span>
+                  )}
+                </React.Fragment>
+              ))}
+              {' 입니다.'}
+            </p>
+          )}
+          <pre>{footer}</pre>
+        </div>
+      )}
     </div>
   );
 };
