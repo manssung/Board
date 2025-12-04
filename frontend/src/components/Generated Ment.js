@@ -5,13 +5,12 @@ import useAutoSizeTextArea from '../hooks/useAutoSizeTextArea';
 // 멘트 생성 로직 (헬퍼 함수)
 const getMentParts = ({ selectedConditions, fixedMentMap, selectedBroker, fixedType }) => {
   const header = `안녕하십니까 전략Q&A담당자입니다.\n먼저 전략Q&A게시판을 이용해주시는 고객님께 감사인사드립니다.\n\n문의하신 내용에 대해 답변드립니다.\n\n`;
-  const footer = `\n감사합니다.`;
+  const footer = `감사합니다.`;
 
   // 1. 고정 멘트 우선 처리 (작성불가, 고객센터 등)
   const fixedMent = fixedMentMap?.[selectedBroker]?.[fixedType];
   if (fixedMent) {
     const fullTextForCopy = header + fixedMent + footer;
-    // ✨ isFixed: true (고정 멘트), isEditable: true (수정 가능)
     return { header, conditionLines: fixedMent, footer, fullTextForCopy, isFixed: true, isEditable: true };
   }
 
@@ -25,15 +24,34 @@ const getMentParts = ({ selectedConditions, fixedMentMap, selectedBroker, fixedT
     }).join('\n');
     
     let closingLineText = '조건식 ';
+    // const processedGroups = new Set();
     selectedConditions.forEach((item, index) => {
-      closingLineText += String.fromCharCode('A'.charCodeAt(0) + index);
+      const letter = String.fromCharCode('A'.charCodeAt(0) + index);
+      const prevItem = selectedConditions[index - 1];
+      const nextItem = selectedConditions[index + 1];
+
+      const currentGroupIds = item.groupIds || [];
+      const prevGroupIds = prevItem ? (prevItem.groupIds || []) : [];
+      const nextGroupIds = nextItem ? (nextItem.groupIds || []) : [];
+
+// 1. 열어야 할 괄호 수 계산
+      const groupIdsToOpen = currentGroupIds.filter(id => !prevGroupIds.includes(id));
+      closingLineText += '('.repeat(groupIdsToOpen.length);
+
+      closingLineText += letter;
+
+      // 2. 닫아야 할 괄호 수 계산
+      const groupIdsToClose = currentGroupIds.filter(id => !nextGroupIds.includes(id));
+      closingLineText += ')'.repeat(groupIdsToClose.length);
+      
+      // 3. 연산자 처리
       if (index < selectedConditions.length - 1) {
         closingLineText += ` ${item.operator || 'and'} `;
       }
     });
-    closingLineText += ' 입니다.\n';
+    closingLineText += ' 입니다.';
 
-    const fullTextForCopy = `${header}${conditionLines}\n\n${closingLineText}${footer}`;
+    const fullTextForCopy = `${header}${conditionLines}\n\n${closingLineText}\n\n${footer}`;
     // ✨ isFixed: false (조건 멘트), isEditable: false (수정 불가)
     return { header, conditionLines, footer, fullTextForCopy, isFixed: false, isEditable: false };
   }
@@ -45,7 +63,21 @@ const getMentParts = ({ selectedConditions, fixedMentMap, selectedBroker, fixedT
 };
 
 
-const GeneratedMent = ({ selectedConditions, onToggleOperator, fixedMentMap, selectedBroker, fixedType }) => {
+const GeneratedMent = ({ 
+  selectedConditions, 
+  onToggleOperator, 
+  fixedMentMap, 
+  selectedBroker, 
+  fixedType,
+  isGrouping, 
+  setIsGrouping, 
+  checkedLetters, 
+  onLetterCheck, 
+  onClearAllGroups,
+  handleToggleGroupMode,
+  onToggleGroupMode,
+  onGroup, 
+  onUngroup }) => {
   const [isCopied, setIsCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState('');
@@ -85,19 +117,25 @@ const GeneratedMent = ({ selectedConditions, onToggleOperator, fixedMentMap, sel
     // 이 컴포넌트의 editText 상태에만 임시로 저장됩니다.
   };
 
+  const hasAnyGroup = selectedConditions && selectedConditions.some(item => item.groupIds && item.groupIds.length > 0);
+
   return (
     <div className="ment-box-container">
       <div className="ment-header">
         <div className="ment-title-group">
         <h3>답변 멘트</h3>
-        {isEditable && (
-            // <button className="edit-button" onClick={() => isEditing ? handleDoneEditing() : handleStartEditing()}>
-             <button className="edit-button" onClick={() => alert('현재 개발중입니다.')}>
-              {isEditing ? '✔ 완료' : '✏️ 수정'}
-            </button>
-          )}
+        
         </div>
         <div className="ment-buttons">
+              {!isFixed && selectedConditions.length > 0 && (
+            <button 
+              className={`group-toggle-button ${isGrouping ? 'active' : ''}`}
+              // onClick={() => setIsGrouping(!isGrouping)}
+              onClick={onToggleGroupMode}
+            >
+              {isGrouping ? '✔ 그룹 모드 끄기' : '그룹 설정'}
+            </button>
+            )}
           {/* ✨ isEditable이 true일 때만 '수정' 버튼이 보입니다. */}
           <button className={`copy-button ${isCopied ? 'copied' : ''}`} onClick={handleCopy}>
             {isCopied ? '✅ 복사 완료!' : '복사'}
@@ -105,38 +143,79 @@ const GeneratedMent = ({ selectedConditions, onToggleOperator, fixedMentMap, sel
         </div>
       </div>
 
-      {isEditing ? (
-        <textarea
-          ref={textAreaRef.current}
-          className="ment-textarea-edit"
-          value={editText}
-          onChange={(e) => setEditText(e.target.value)}
-        />
-      ) : (
-        <div className="ment-display">
-          <pre>{header}</pre>
-          <pre>{conditionLines}</pre>
-          {/* ✨ isFixed가 false일 때만 (조건 멘트일 때만) 'and/or' 토글 라인이 보입니다. */}
-          {!isFixed && selectedConditions.length > 0 && (
+<div className="ment-display">
+        <pre>{header}</pre>
+        <pre>{conditionLines}</pre>
+        {!isFixed && selectedConditions.length > 0 && (
+          <div className="closing-line-container">
             <p className="closing-line">
               {'조건식 '}
-              {selectedConditions.map((item, index) => (
-                <React.Fragment key={index}>
-                  <span>{String.fromCharCode('A'.charCodeAt(0) + index)}</span>
-                  {index < selectedConditions.length - 1 && (
-                    <span className="operator" onDoubleClick={() => onToggleOperator(index)}>
-                    {/* <span className="operator"> */}
-                      {` ${item.operator || 'and'} `}
+              {selectedConditions.map((item, index) => {
+                const letter = String.fromCharCode('A'.charCodeAt(0) + index);
+                const isChecked = checkedLetters.has(letter);
+                const prevItem = selectedConditions[index - 1];
+                const nextItem = selectedConditions[index + 1];
+
+                const currentGroupIds = item.groupIds || [];
+                const prevGroupIds = prevItem ? (prevItem.groupIds || []) : [];
+                const nextGroupIds = nextItem ? (nextItem.groupIds || []) : [];
+
+                // 중첩 괄호 계산
+                const groupIdsToOpen = currentGroupIds.filter(id => !prevGroupIds.includes(id));
+                const groupIdsToClose = currentGroupIds.filter(id => !nextGroupIds.includes(id));
+
+                return (
+                  <React.Fragment key={index}>
+                    {groupIdsToOpen.map(id => <span key={`open-${id}`}>( </span>)}
+                    
+                    <span 
+                      className={`condition-letter ${isGrouping ? 'groupable' : ''} ${isChecked ? 'checked' : ''}`}
+                      onClick={() => isGrouping && onLetterCheck(letter)} // 그룹 모드일 때만 클릭 가능
+                      title={isGrouping ? "클릭하여 선택" : ""}
+                    >
+                      {letter}
                     </span>
-                  )}
-                </React.Fragment>
-              ))}
+                    
+                    {/* 닫는 괄호 */}
+                    {groupIdsToClose.map(id => <span key={`close-${id}`}> )</span>)}
+
+                    {/* 연산자 (더블클릭 시 토글) */}
+                    {index < selectedConditions.length - 1 && (
+                      <span 
+                        className="operator" 
+                       onDoubleClick={() => onToggleOperator(index)} // 그룹 모드 아닐 때만 토글 가능
+                      >
+                        {` ${item.operator || 'and'} `}
+                      </span>
+                    )}
+                  </React.Fragment>
+                );
+              })}
               {' 입니다.'}
             </p>
-          )}
-          <pre>{footer}</pre>
-        </div>
-      )}
+          {isGrouping && (
+              <div className="group-action-buttons">
+                {/* 1. 항목을 선택했을 때만 나오는 버튼들 */}
+                {checkedLetters.size > 0 && (
+                  <>
+                    <button className="group-button" onClick={onGroup}>그룹 생성</button>
+                    {/* <button className="group-button ungroup" onClick={onUngroup}>선택 해제</button> */}
+                    {/* <button className="group-button clear" onClick={onClearAllGroups}>괄호 전체 삭제</button> */}
+                  </>
+                )}
+              {(selectedConditions.some(item => item.groupIds && item.groupIds.length > 0)) && (
+                  <>
+                    {checkedLetters.size > 0 && <div className="divider"></div>}
+                    <button className="group-button clear-all" onClick={onClearAllGroups}>괄호 전체 삭제</button>
+                  </>
+                )}
+              </div>
+            )}
+     
+          </div>
+        )}
+        <pre>{footer}</pre>
+      </div>
     </div>
   );
 };

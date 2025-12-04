@@ -27,12 +27,9 @@
 
 /* 새로운 복사 버튼 스타일 */
 .copy-button {
-  position: absolute;
-  top: -2px;
-  right: 10px;
-  display: flex;
+display: flex;
   align-items: center;
-  gap: 6px; /* 아이콘과 텍스트 사이 간격 */
+  gap: 6px; 
   background-color: var(--light-gray);
   color: var(--dark-gray);
   border: 1px solid var(--medium-gray);
@@ -117,4 +114,134 @@
 
 .ment-title-group h3 {
   margin: 0; /* h3 태그의 기본 여백 제거 */
+}
+/* src/components/GeneratedMent.css */
+
+.closing-line-container {
+  /* 조건식 라인과 그룹 버튼을 묶는 컨테이너 */
+}
+
+.condition-letter {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 4px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.condition-letter:hover {
+  background-color: #f0f0f0;
+}
+.condition-letter.checked {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.group-action-buttons {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
+.group-button {
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.group-button.clear {
+  background-color: #dc3545;
+  color: white;
+}
+/* src/components/GeneratedMent.css 파일에 추가 */
+
+.group-button.clear-all {
+  background-color: #dc3545; /* danger red */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.group-button.clear-all:hover {
+  background-color: #c82333;
+}
+.ment-buttons {
+  display: flex; /* ✨ 버튼들을 가로로 나란히 배치 */
+  gap: 8px; /* ✨ 버튼 사이의 간격 */
+}
+
+.group-toggle-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff; /* 흰색 배경 */
+  border: 1px solid var(--medium-gray); /* 회색 테두리 */
+  color: var(--dark-gray); /* 진회색 글자 */
+  border-radius: 6px; /* 둥근 모서리 */
+  padding: 6px 12px; /* 여백 */
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.group-toggle-button:hover {
+  background-color: var(--medium-gray); /* 호버 시 회색 배경 */
+  color: var(--text-color);
+}
+
+/* 활성화되었을 때 (파란색 강조) */
+.group-toggle-button.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+.group-toggle-button.active:hover {
+  background-color: #0056b3; /* 더 진한 파란색 */
+}
+
+.condition-letter.groupable {
+  cursor: pointer;
+  border: 1px dashed #ccc;
+  padding: 0 2px;
+}
+.condition-letter.checked {
+  background-color: var(--primary-color);
+  color: white;
+  border: 1px solid var(--primary-color);
+}
+
+.group-action-buttons {
+  margin-top: 10px;
+  display: flex;
+  gap: 5px;
+}
+
+.group-action-buttons {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center; /* 세로 중앙 정렬 */
+}
+
+/* 구분선 스타일 */
+.group-action-buttons .divider {
+  width: 1px;
+  height: 20px;
+  background-color: #ccc;
+  margin: 0 4px;
+}
+
+/* 괄호 전체 삭제 버튼 (붉은색) */
+.group-button.clear-all {
+  background-color: #dc3545;
+  color: white;
+}
+.group-button.clear-all:hover {
+  background-color: #c82333;
 }
