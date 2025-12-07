@@ -146,6 +146,7 @@ const GeneratedMent = ({
 <div className="ment-display">
         <pre>{header}</pre>
         <pre>{conditionLines}</pre>
+        {!isFixed && selectedConditions.length > 0 && <br />}
         {!isFixed && selectedConditions.length > 0 && (
           <div className="closing-line-container">
             <p className="closing-line">

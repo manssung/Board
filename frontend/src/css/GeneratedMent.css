@@ -119,6 +119,7 @@ display: flex;
 
 .closing-line-container {
   /* 조건식 라인과 그룹 버튼을 묶는 컨테이너 */
+  /* margin-top : 5px */
 }
 
 .condition-letter {
@@ -126,7 +127,7 @@ display: flex;
   border-radius: 4px;
   padding: 2px 4px;
   transition: all 0.2s ease;
-  user-select: none;
+  user-select: text;
 }
 .condition-letter:hover {
   background-color: #f0f0f0;
