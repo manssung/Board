@@ -54,7 +54,7 @@ const SelectedItem = ({ cond, index, onRemove, onCommentChange, onToggleParen, i
           // value={cond.comment !== undefined && cond.comment !== '' ? cond.comment : cond.detail || ""}
           value={cond.comment !== undefined ? cond.comment : cond.detail || ""}
           onChange={(e) => onCommentChange(index, e.target.value)}
-          placeholder="코멘트 입력..."
+          placeholder={cond.detail === '' ? "(기본값 없음) 세부 수치를 입력해주세요" : ""}
           rows={1} // 기본 높이를 1줄로 시작합니다.
         />
       </div>

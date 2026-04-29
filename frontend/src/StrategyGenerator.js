@@ -301,42 +301,39 @@ const newGroupId = Date.now();
    };
 */
 const handleAiGenerate = async () => {
-    if (!selectedBroker || !customerQuery.trim()) {
-      alert("증권사와 요청할 내용을 모두 입력해주세요.");
+    // 1. 유효성 검사
+    if (!selectedBroker) {
+      alert("먼저 증권사를 선택해주세요.");
+      return;
+    }
+    if (!customerQuery.trim()) {
+      alert("고객 문의 내용을 입력해주세요.");
+      return;
+    }
+    if (!allConditions || allConditions.length === 0) {
+      alert("선택하신 증권사의 조건 데이터가 없습니다.");
       return;
     }
 
-    // 1. 여기서 AI에게 보낼 프롬프트를 완성합니다.
-    const prompt = `
-          # 역할:
-          당신은 증권사 조건검색 전략 생성 전문가입니다.
-          # 임무:
-          1. 사용자의 자연어 요청을 분석합니다.
-          2. 주어진 '${selectedBroker}'의 '전체 조건 목록'에서 사용자의 요청과 가장 관련이 높은 조건 객체 "하나"를 선택합니다.
-          3. 선택한 조건 객체의 'detail' 필드에 있는 숫자 값을 사용자의 요청에 맞게 수정합니다.
-          4. 최종적으로, 'detail' 필드가 수정된 "완전한 조건 객체"를 JSON 형식으로 반환합니다.
-          # 사용자의 요청:
-          "${customerQuery}"
-          # 전체 조건 목록 (JSON):
-          ${JSON.stringify(allConditions, null, 2)}
-          # 지시사항:
-          - '전체 조건 목록'에서 가장 적합한 조건 객체를 단 하나만 찾아야 합니다.
-          - 찾은 객체의 'detail'에 있는 수치만 사용자의 요청에 맞게 수정하고, 나머지 문구는 그대로 유지해야 합니다.
-          - 다른 설명이나 대화 없이, 오직 수정된 **JSON 객체 하나만** 반환해야 합니다.
-          - 응답 앞뒤에 \`\`\`json ... \`\`\` 같은 마크다운을 절대 포함하지 마세요.
-          # 예시:
-          - 사용자의 요청: "거래량 10만주 이상인 종목 찾아줘"
-          - '전체 조건 목록'에서 찾은 객체: 
-            { "type": "시세분석", "path": "거래량>거래량 범위", "detail": "거래량이 20,000주 이상" }
-          - 올바른 반환값 (JSON 형식):
-            { "type": "시세분석", "path": "거래량>거래량 범위", "detail": "거래량이 100,000주 이상" }
-          `;
+    // ✨ 중요: 함수 호출 시 3번째 인자로 'selectedBroker'를 전달합니다!
+    const resultCondition = await generateStrategy(customerQuery, allConditions, selectedBroker);
 
-    // 2. 완성된 prompt를 훅에 전달하여 AI를 호출합니다.
-    const newCondition = await generateStrategy(prompt);
-    if (newCondition) {
-      setSelectedConditions(prev => [...prev, { ...newCondition, comment: undefined }]);
-      setIsMentManuallyEdited(false);
+    // 2. 결과 처리
+    if (resultCondition) {
+      const newConditionItem = {
+        ...resultCondition,
+        id: Date.now(),
+        operator: 'and',
+        groupIds: [],
+        comment: resultCondition.detail
+      };
+
+      setSelectedConditions(prev => [...prev, newConditionItem]);
+      setFixedType(""); 
+      alert(`AI가 조건을 찾아냈습니다!\n(${newConditionItem.path})`);
+      
+    } else {
+      alert("AI가 적절한 조건을 찾지 못했습니다.\n질문을 더 구체적으로 적어주세요.");
     }
   };
 
@@ -377,6 +374,7 @@ const parseMentForComments = (text, originalConditions) => {
               <div className="tabs-container">
                 <button className={`tab-button ${activeTab === 'manual' ? 'active' : ''}`} onClick={() => setActiveTab('manual')}>조건 생성</button>
                 <button className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`} onClick={() => alert('현재 개발중입니다.')}>AI 자동 생성</button>
+                {/* <button className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`} onClick={() => setActiveTab('ai')}>AI 자동 생성</button> */}
               </div>
               
               <div className="broker-actions-container">
@@ -388,19 +386,19 @@ const parseMentForComments = (text, originalConditions) => {
                   {/* 필요에 따라 버튼 추가 */}
                 </div>
                 </div>
-                <div className="list-header">
-                      <h3>조건 선택</h3>
-                      <ConditionSearch search={search} onSearch={setSearch} />
-                </div>
+
               <div className="panel-content">
                 {activeTab === 'manual' && (
                   <>
+                  <div className="list-header">
+                        <h3>조건 선택</h3>
+                        <ConditionSearch search={search} onSearch={setSearch} />
+                  </div>
                     <ConditionList conditions={filteredConditions} onConditionClick={handleConditionClick} />
                   </>
                 )}
                 {activeTab === 'ai' && (
                   <div id="ai-tab">
-                    <BrokerSelector brokers={brokers} selectedBroker={selectedBroker} onChange={setSelectedBroker} />
                     <div className="ai-section">
                       <h3>고객 문의 내용</h3>
                       <textarea

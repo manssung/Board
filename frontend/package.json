@@ -10,11 +10,13 @@
     "package": "electron-builder"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-scripts": "5.0.1"
   },
   "devDependencies": {
+    "@types/react": "^19.2.7",
     "electron": "^37.2.0",
     "electron-builder": "^26.0.12"
   },
