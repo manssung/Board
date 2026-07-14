@@ -392,8 +392,8 @@ const parseMentForComments = (text, originalConditions) => {
             <div id="left-panel" className="panel">
               <div className="tabs-container">
                 <button className={`tab-button ${activeTab === 'manual' ? 'active' : ''}`} onClick={() => setActiveTab('manual')}>조건 생성</button>
-                <button className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`} onClick={() => alert('현재 개발중입니다.')}>AI 자동 생성</button>
-                {/* <button className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`} onClick={() => setActiveTab('ai')}>AI 자동 생성</button> */}
+                {/* <button className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`} onClick={() => alert('현재 개발중입니다.')}>AI 자동 생성</button> */}
+                <button className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`} onClick={() => setActiveTab('ai')}>AI 자동 생성</button>
               </div>
               
               <div className="broker-actions-container">
