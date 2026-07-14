@@ -46,6 +46,15 @@ const brokerMap = {
         "/ls_xml/mapf-k.xml",
         "/ls_xml/mapl-q.xml",
       ],
+      "미래에셋증권(해외)" :[
+        "/kairoso_xml/mapa-b.xml",
+        "/kairoso_xml/mapc1.xml",
+        "/kairoso_xml/mapc2_1-19.xml",
+        "/kairoso_xml/mapc2_20-39.xml",
+        "/kairoso_xml/mapc2_40-59.xml",
+        "/kairoso_xml/mapc2_60-79.xml",
+        "/kairoso_xml/mapd.xml",
+      ],
       "미래에셋증권": {
         tree: [
           "/kairos_xml/treecommon_target.xml",
