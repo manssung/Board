@@ -40,6 +40,39 @@
   resize: none; /* 사용자가 크기를 조절할 수 없도록 설정 */
 }
 
+.move-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 8px 0 4px; /* 오른쪽 여백 늘려서 삭제 버튼과 간격 확보 */
+}
+
+.move-button {
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  width: 24px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: background 0.15s;
+}
+
+.move-button:hover:not(:disabled) {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.move-button:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
 .delete-button {
   width: 24px;
   height: 24px;

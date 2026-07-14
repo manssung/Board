@@ -1,9 +1,8 @@
-// src/components/SelectedConditions.js
 import React, { useRef } from 'react'; // useRef를 import 합니다.
 import '../css/SelectedConditions.css';
 import useAutoSizeTextArea from '../hooks/useAutoSizeTextArea'; // 1단계에서 만든 훅을 import 합니다.
 
-const SelectedConditions = ({ selectedConditions, onRemove, onCommentChange, onToggleParen }) => {
+const SelectedConditions = ({ selectedConditions, onRemove, onCommentChange, onToggleParen, onMove }) => {
   return (
     <>
       {selectedConditions.map((cond, index) => (
@@ -12,9 +11,12 @@ const SelectedConditions = ({ selectedConditions, onRemove, onCommentChange, onT
           key={index}
           cond={cond}
           index={index}
+          isFirst={index === 0}
+          isLast={index === selectedConditions.length - 1}
           onRemove={onRemove}
           onCommentChange={onCommentChange}
           onToggleParen={onToggleParen}
+          onMove={onMove}
         />
       ))}
     </>
@@ -22,7 +24,7 @@ const SelectedConditions = ({ selectedConditions, onRemove, onCommentChange, onT
 };
 
 // --- ✨ 각 아이템을 렌더링하는 별도의 컴포넌트 ---
-const SelectedItem = ({ cond, index, onRemove, onCommentChange, onToggleParen, isChecked }) => {
+const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange, onToggleParen, onMove, isChecked }) => {
   // textarea DOM 요소에 접근하기 위해 useRef를 사용합니다.
   const textAreaRef = useRef(null);
 
@@ -57,6 +59,24 @@ const SelectedItem = ({ cond, index, onRemove, onCommentChange, onToggleParen, i
           placeholder={cond.detail === '' ? "(기본값 없음) 세부 수치를 입력해주세요" : ""}
           rows={1} // 기본 높이를 1줄로 시작합니다.
         />
+      </div>
+      <div className="move-buttons">
+        <button
+          className="move-button"
+          onClick={() => onMove(index, 'up')}
+          disabled={isFirst}
+          title="위로 이동"
+        >
+          ▲
+        </button>
+        <button
+          className="move-button"
+          onClick={() => onMove(index, 'down')}
+          disabled={isLast}
+          title="아래로 이동"
+        >
+          ▼
+        </button>
       </div>
       <button
         className="delete-button"

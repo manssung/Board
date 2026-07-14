@@ -14,7 +14,7 @@ export function useAiStrategyGenerator() {
     try {
       // 1. 데이터 경량화
       const simplifiedList = conditionList.map((item, index) => 
-        `ID:${index} | ${item.type} > ${item.path}`
+        `ID:${index} | ${item.type} > ${item.path} : ${item.detail ?? ''} `
       ).join('\n');
 
       console.log(`📦 [4] 조건 리스트 요약 완료 (총 ${conditionList.length}개)`);
@@ -26,9 +26,9 @@ export function useAiStrategyGenerator() {
 
         # 임무
         1. 사용자의 [요청 사항]을 분석합니다.
-        2. 아래 제공된 [${selectedBroker} 제공 조건 목록]을 꼼꼼히 읽어봅니다.
-        3. 목록 중에서 사용자의 요청을 구현하기에 가장 적합한 조건 **단 하나**를 찾습니다.
-        4. 찾은 조건의 ID(originalIndex)와, 사용자 요청에 맞춰 수정한 상세 설정값(detail)을 JSON으로 반환합니다.
+        2. 아래 제공된 [${selectedBroker} 제공 조건 목록]을 꼼꼼히 읽어봅니다. 각 항목의 '상세조건'까지 반드시 비교해서 판단하세요.
+        3. 목록 중에서 사용자의 요청을 구현하기에 적합한 조건을 **모두** 찾습니다. (하나일 수도, 여러 개일 수도 있습니다. 확실하지 않은 후보는 넣지 마세요)
+        4. 찾은 각 조건의 ID(originalIndex)와, 사용자 요청에 맞춰 수정한 상세 설정값(detail)을 JSON 배열로 반환합니다
 
         # 사용자 요청 사항
         "${customerQuery}"
@@ -38,37 +38,43 @@ export function useAiStrategyGenerator() {
         ${simplifiedList}
         ---
 
-      # 전체 조건 목록 (JSON):
-          ${JSON.stringify(simplifiedList, null, 2)}
-          # 지시사항:
-          - '전체 조건 목록'에서 가장 적합한 조건 객체를 단 하나만 찾아야 합니다.
-          - 찾은 객체의 'detail'에 있는 수치만 사용자의 요청에 맞게 수정하고, 나머지 문구는 그대로 유지해야 합니다.
-          - 다른 설명이나 대화 없이, 오직 수정된 **JSON 객체 하나만** 반환해야 합니다.
-          - 응답 앞뒤에 \`\`\`json ... \`\`\` 같은 마크다운을 절대 포함하지 마세요.
-          # 예시:
-          - 사용자의 요청: "거래량 10만주 이상인 종목 찾아줘"
-          - '전체 조건 목록'에서 찾은 객체: 
-            { "type": "시세분석", "path": "거래량>거래량 범위", "detail": "거래량이 20,000주 이상" }
-          - 올바른 반환값 (JSON 형식):
-            { "type": "시세분석", "path": "거래량>거래량 범위", "detail": "거래량이 100,000주 이상" }
-          `;
+# 지시사항
+      - 목록에 있는 조건 중 적합한 것을 모두 선택하되, 같은 조건을 중복해서 넣지 마세요. (목록에 없는 조건을 만들어내지 마세요)
+      - 각 선택 객체의 'detail' 수치만 사용자의 요청에 맞게 수정하세요. 원래 상세조건의 형식(단위, 표현 방식)은 최대한 유지하세요.
+      - 응답은 반드시 아래 예시와 같이 'originalIndex'와 'detail' 두 개의 키만 가진 객체들의 **JSON 배열**이어야 합니다. 적합한 조건이 하나면 배열 원소도 1개, 없으면 빈 배열 []을 반환하세요.
 
-
-      console.log("📡 [5] fetch 요청 전송 시작...");
+      # 예시:
+      - 사용자의 요청: "거래량 10만주 이상이고 시가총액 1000억 이상인 종목 찾아줘"
+      - 올바른 반환값 (JSON 형식):
+      [
+        { "originalIndex": 42, "detail": "거래량이 100,000주 이상" },
+        { "originalIndex": 17, "detail": "시가총액이 1000억원 이상" }
+      ]
+`;
 
       // 3. API 요청
-      const response = await fetch(API_URL, {
+    const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: finalPrompt }] }],
           generationConfig: {
+            temperature: 0, // 조건 매칭은 창의성보다 일관성이 중요
             responseMimeType: "application/json",
+            responseSchema: {
+              type: "ARRAY",
+              items: {
+                type: "OBJECT",
+                properties: {
+                  originalIndex: { type: "INTEGER" },
+                  detail: { type: "STRING" },
+                },
+                required: ["originalIndex", "detail"],
+              },
+            },
           },
         }),
       });
-
-      console.log(`📩 [6] 응답 도착! 상태코드: ${response.status} (${response.statusText})`);
 
       if (!response.ok) {
         throw new Error(`Gemini API 호출 실패: ${response.status}`);
@@ -77,18 +83,30 @@ export function useAiStrategyGenerator() {
       const data = await response.json();
       const aiResponseJsonString = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
       
-      // 4. 파싱 및 결과 병합
-      const result = JSON.parse(aiResponseJsonString.trim());
+      // 4. 파싱 및 결과 병합 (배열)
+      const resultArray = JSON.parse(aiResponseJsonString.trim());
+      const rawList = Array.isArray(resultArray) ? resultArray : [resultArray]; // 혹시 모델이 객체 하나만 줘도 방어
 
-      if (result.originalIndex !== undefined && result.originalIndex !== -1 && conditionList[result.originalIndex]) {
-        const originalItem = conditionList[result.originalIndex];
-        return {
-          ...originalItem,
-          detail: result.detail 
-        };
-      } else {
-        return null;
-      }
+      const seenIndex = new Set();
+      const matchedItems = [];
+
+      rawList.forEach((result) => {
+        const matchedIndex = Number(result?.originalIndex);
+        if (
+          !Number.isNaN(matchedIndex) &&
+          matchedIndex !== -1 &&
+          conditionList[matchedIndex] &&
+          !seenIndex.has(matchedIndex) // 중복 방지
+        ) {
+          seenIndex.add(matchedIndex);
+          matchedItems.push({
+            ...conditionList[matchedIndex],
+            detail: result.detail,
+          });
+        }
+      });
+
+      return matchedItems; // 매칭 없으면 빈 배열
 
     } catch (error) {
       console.error("Gemini 전략 생성 중 오류 발생:", error);

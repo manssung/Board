@@ -245,6 +245,23 @@ const newGroupId = Date.now();
   };
 
 
+  const handleMoveCondition = (index, direction) => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= selectedConditions.length) return;
+ 
+    setSelectedConditions(prev => {
+      const updated = [...prev];
+      [updated[index], updated[targetIndex]] = [updated[targetIndex], updated[index]];
+      // ✨ 순서가 바뀌면 기존 괄호(그룹) 구조가 인덱스 기준이라 깨지므로 전체 초기화합니다.
+      return updated.map(item => ({ ...item, groupIds: [] }));
+    });
+    setCheckedLetters(new Set());
+    setIsGrouping(false);
+    setIsMentManuallyEdited(false);
+    setCustomMent("");
+    setFixedType("");
+  };
+ 
   const handleRemoveCondition = (index) => {
     setSelectedConditions(prev => 
       prev
@@ -315,23 +332,25 @@ const handleAiGenerate = async () => {
       return;
     }
 
-    // ✨ 중요: 함수 호출 시 3번째 인자로 'selectedBroker'를 전달합니다!
-    const resultCondition = await generateStrategy(customerQuery, allConditions, selectedBroker);
+    setSelectedConditions([]);
 
-    // 2. 결과 처리
-    if (resultCondition) {
-      const newConditionItem = {
-        ...resultCondition,
-        id: Date.now(),
+    // ✨ 중요: 함수 호출 시 3번째 인자로 'selectedBroker'를 전달합니다!
+    const matchedConditions = await generateStrategy(customerQuery, allConditions, selectedBroker);
+
+    // 2. 결과 처리 (여러 개의 매칭 결과를 모두 반영)
+    if (matchedConditions && matchedConditions.length > 0) {
+      const newConditionItems = matchedConditions.map((cond, i) => ({
+        ...cond,
+        id: Date.now() + i, // ✨ 여러 개를 한 번에 추가해도 id가 겹치지 않도록
         operator: 'and',
         groupIds: [],
-        comment: resultCondition.detail
-      };
+        comment: cond.detail,
+      }));
 
-      setSelectedConditions(prev => [...prev, newConditionItem]);
-      setFixedType(""); 
-      alert(`AI가 조건을 찾아냈습니다!\n(${newConditionItem.path})`);
-      
+      setSelectedConditions(prev => [...prev, ...newConditionItems]);
+      setFixedType("");
+      alert(`AI가 조건 ${newConditionItems.length}개를 찾아냈습니다!\n${newConditionItems.map(c => `- ${c.path}`).join('\n')}`);
+
     } else {
       alert("AI가 적절한 조건을 찾지 못했습니다.\n질문을 더 구체적으로 적어주세요.");
     }
@@ -423,7 +442,7 @@ const parseMentForComments = (text, originalConditions) => {
                 <button className="reset-button" onClick={handleReset}>초기화</button>
               </div>
               <div className="panel-content">
-                <SelectedConditions selectedConditions={selectedConditions} onRemove={handleRemoveCondition} onCommentChange={handleCommentChange} />
+                <SelectedConditions selectedConditions={selectedConditions} onRemove={handleRemoveCondition} onCommentChange={handleCommentChange} onMove={handleMoveCondition} />
               </div>
             </div>
           </div>
