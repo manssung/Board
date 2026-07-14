@@ -229,7 +229,6 @@ export function useBrokerData(selectedBroker) {
                     const type = categoryNode.tagName;
                     const conditionNodes = categoryNode.querySelectorAll('*[NAME]:not(:has(*[NAME]))');
 
-                    console.log(type, " asdasd");
                     conditionNodes.forEach(conditionNode => {
                         if (conditionNode.tagName.toUpperCase() === 'P') return;
 
@@ -246,9 +245,13 @@ export function useBrokerData(selectedBroker) {
                                 detail = ''; 
                             }
                             
-                      
+
+
+                            // let finalPath = path;
+                            // let finalType = '해외조건';
+
                             conditions.push({
-                                // type: type, // 💡 원래 type 대신 finalType
+                                // type: finalType, // 💡 원래 type 대신 finalType
                                 path: path, // 💡 원래 path 대신 잘려나간 finalPath
                                 detail: detail,
                                 broker: selectedBroker,

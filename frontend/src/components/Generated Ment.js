@@ -18,7 +18,14 @@ const getMentParts = ({ selectedConditions, fixedMentMap, selectedBroker, fixedT
   if (selectedConditions && selectedConditions.length > 0) {
     const conditionLines = selectedConditions.map((item, index) => {
       const letter = String.fromCharCode('A'.charCodeAt(0) + index);
-      const path = `${item.type || ''}>${item.path || ''}`;
+      
+      const typeStr = item.type && item.type.trim() !== '' ? `${item.type}>` : '';
+      // 💡 2. path 맨 앞의 찌꺼기 화살표(>)와 공백을 완전히 청소합니다.
+      const cleanPath = item.path ? item.path.replace(/^[\s>]+/, '').trim() : '';
+      
+      // 💡 3. 안전하게 조립된 경로를 사용합니다.
+      const path = `${typeStr}${cleanPath}`;
+      // const path = `${item.type || ''}>${item.path || ''}`;
       const description = item.comment !== undefined ? item.comment : item.detail || '';
       return `${letter} : ${path} : ${description}`;
     }).join('\n');

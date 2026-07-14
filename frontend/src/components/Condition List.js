@@ -25,7 +25,7 @@ export default function ConditionList({ conditions, onConditionClick, searchComp
             className="condition-item"
             onClick={() => onConditionClick(cond)}
           >
-           <span>{cond.type || "기타"}{">"}{cond.path || "(경로 없음)"} : </span> 
+           <span>{cond.type ? `${cond.type} >` : ""}{cond.path || "(경로 없음)"} : </span> 
             <span className="add-icon">+</span> 
           </div>
         ))}
