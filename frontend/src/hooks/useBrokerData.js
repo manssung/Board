@@ -4,7 +4,10 @@ import brokerMap from '../data/brokerMap.js';
 // XML 파싱 함수
 const parseXml = (xmlString) => {
   const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+  // 일부 미래에셋 map XML은 XML 선언 앞에 공백/개행이 포함되어 있습니다.
+  // XML 선언은 문서의 첫 문자여야 하므로, 선언 앞의 문자만 제거한 뒤 파싱합니다.
+  const normalizedXmlString = xmlString.replace(/^\uFEFF?\s*(?=<\?xml\b)/i, '');
+  const xmlDoc = parser.parseFromString(normalizedXmlString, "application/xml");
   const errorNode = xmlDoc.querySelector('parsererror');
   if (errorNode) {
     console.error("XML 파싱 오류:", errorNode.textContent);
@@ -98,6 +101,56 @@ const fillTemplate = (templateNode) => {
         }
     });
     return template.replace(/봉전기준|봉이내|,|회 발생/g, '').replace(/\s+/g, ' ').trim();
+};
+
+// FILE_NAME + tag matching prevents identically named conditions in separate
+// map files from overwriting each other in the text-only fallback map.
+const buildDetailMap = (mapUrls, mapXmls) => {
+    const detailMap = new Map();
+    const ambiguousTags = new Set();
+
+    mapXmls.forEach((mapXml, index) => {
+        if (!mapXml) return;
+
+        const mapUrl = mapUrls[index];
+        const fileName = mapUrl.substring(mapUrl.lastIndexOf('/') + 1).replace(/\.xml$/i, '');
+        const fileKey = fileName.replace(/^map/i, '').toUpperCase();
+
+        mapXml.querySelectorAll('*[MAP_NAME]').forEach(node => {
+            const detail = fillTemplate(node);
+            const tagKey = node.tagName;
+            const mapName = node.getAttribute('MAP_NAME');
+            const completeIndexName = node.getAttribute('COMPLETE_INDEX_NAME');
+
+            detailMap.set(`${fileKey}::${tagKey}`, detail);
+
+            if (!ambiguousTags.has(tagKey)) {
+                if (!detailMap.has(`TAG:${tagKey}`)) {
+                    detailMap.set(`TAG:${tagKey}`, detail);
+                } else if (detailMap.get(`TAG:${tagKey}`) !== detail) {
+                    detailMap.delete(`TAG:${tagKey}`);
+                    ambiguousTags.add(tagKey);
+                }
+            }
+
+            if (mapName) detailMap.set(normalizeKey(mapName), detail);
+            if (completeIndexName) detailMap.set(normalizeKey(completeIndexName), detail);
+        });
+    });
+
+    return detailMap;
+};
+
+const findDetail = (detailMap, conditionNode, conditionName) => {
+    const fileName = findFileNameAttr(conditionNode);
+    let detail = fileName
+        ? detailMap.get(`${fileName.toUpperCase()}::${conditionNode.tagName}`)
+        : undefined;
+
+    if (detail === undefined) detail = detailMap.get(`TAG:${conditionNode.tagName}`);
+    if (detail === undefined) detail = detailMap.get(normalizeKey(conditionName));
+
+    return detail ?? '';
 };
 
 export function useBrokerData(selectedBroker) {
@@ -289,7 +342,8 @@ export function useBrokerData(selectedBroker) {
             }));
 
             const treecommonXml = parseXml(xmlStrings[0]);
-            const mapXmls = xmlStrings.slice(1).map(s => parseXml(s));        
+            const mapXmls = xmlStrings.slice(1).map(s => parseXml(s));
+            const exactDetailMap = buildDetailMap(mapUrls, mapXmls);
             
             // 💡 [핵심 2] Map(사물함) 만들어서 정규화된 이름으로 데이터 쟁여두기!
             const detailMap = new Map();
@@ -327,7 +381,7 @@ export function useBrokerData(selectedBroker) {
                             const conditionName = conditionNode.getAttribute('NAME');
                             
                             // 💡 [핵심 3] 쿼리셀렉터 대신, 정규화된 이름으로 사물함(detailMap)에서 바로 꺼내오기!
-                            let detail = detailMap.get(normalizeKey(conditionName));
+                            let detail = findDetail(exactDetailMap, conditionNode, conditionName);
                             
                             // (보너스) 여기서도 못 찾으면 진짜 데이터가 없는 겁니다.
                             if (!detail) {
@@ -362,7 +416,8 @@ export function useBrokerData(selectedBroker) {
             }));
 
             const treecommonXml = parseXml(xmlStrings[0]);
-            const mapXmls = xmlStrings.slice(1).map(s => parseXml(s));        
+            const mapXmls = xmlStrings.slice(1).map(s => parseXml(s));
+            const exactDetailMap = buildDetailMap(mapUrls, mapXmls);
             
             // 💡 [핵심 2] Map(사물함) 만들어서 정규화된 이름으로 데이터 쟁여두기!
             const detailMap = new Map();
@@ -400,7 +455,7 @@ export function useBrokerData(selectedBroker) {
                             const conditionName = conditionNode.getAttribute('NAME');
                             
                             // 💡 [핵심 3] 쿼리셀렉터 대신, 정규화된 이름으로 사물함(detailMap)에서 바로 꺼내오기!
-                            let detail = detailMap.get(normalizeKey(conditionName));
+                            let detail = findDetail(exactDetailMap, conditionNode, conditionName);
                             
                             // (보너스) 여기서도 못 찾으면 진짜 데이터가 없는 겁니다.
                             if (!detail) {
