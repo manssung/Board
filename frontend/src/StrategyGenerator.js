@@ -383,6 +383,12 @@ const parseMentForComments = (text, originalConditions) => {
     const updatedConditions = parseMentForComments(newMent, selectedConditions);
     setSelectedConditions(updatedConditions);
   };
+
+  const mentButtons = selectedBroker?.includes('신한')
+  ? ['조건선물', '기능불가', '작성불가', '전략외문의', '오류답변']
+  : ['조건선물', '작성불가', '고객센터']; // 기존에 쓰시던 기본 버튼 목록
+
+
   return (
 <div className="container">
       <div className="card">
@@ -398,11 +404,22 @@ const parseMentForComments = (text, originalConditions) => {
               
               <div className="broker-actions-container">
                <BrokerSelector brokers={brokers} selectedBroker={selectedBroker} onChange={setSelectedBroker} />
-               <div className="fixed-ment-buttons">
+               {/*} <div className="fixed-ment-buttons">
                   <button className="notice-button" onClick={() => insertMent('조건선물')}>조건선물</button>
                   <button className="notice-button" onClick={() => insertMent('작성불가')}>작성불가</button>
                   <button className="notice-button" onClick={() => insertMent('고객센터')}>고객센터</button>
-                  {/* 필요에 따라 버튼 추가 */}
+                  {/* 필요에 따라 버튼 추가 
+                </div> */}
+               <div className="fixed-ment-buttons">
+                  {mentButtons.map((ment, idx) => (
+                    <button 
+                      key={idx} 
+                      className="notice-button" 
+                      onClick={() => insertMent(ment)}
+                    >
+                      {ment}
+                    </button>
+                  ))}
                 </div>
                 </div>
 
