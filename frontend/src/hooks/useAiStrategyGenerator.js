@@ -8,7 +8,12 @@ export function useAiStrategyGenerator() {
     setIsAiLoading(true);
     
     // ⚠️ 본인의 API 키를 넣어주세요.
-    const API_KEY = "AIzaSyDcQeGQFp5tRZHldjBNPzWNFXaO6WrKAmw"; 
+    const API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
+    if (!API_KEY) {
+      alert('Gemini API 키가 설정되지 않았습니다. .env 파일을 확인하세요.');
+      setIsAiLoading(false);
+      return null;
+    }
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
     try {

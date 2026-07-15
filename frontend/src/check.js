@@ -2,7 +2,7 @@
 // 내 키로 사용 가능한 모델 이름을 구글 서버에 직접 물어보는 코드입니다.
 
 async function checkModels() {
-  const API_KEY = "AIzaSyDcQeGQFp5tRZHldjBNPzWNFXaO6WrKAmw"; 
+  const API_KEY = process.env.GEMINI_API_KEY;
   const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`;
 
   try {

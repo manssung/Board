@@ -5,7 +5,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 async function main() {
   // ⚠️ 주의: 스크린샷에 노출된 키는 폐기하고 새로 발급받는 것이 안전합니다.
-  const API_KEY = "AIzaSyDcQeGQFp5tRZHldjBNPzWNFXaO6WrKAmw"; 
+  const API_KEY = process.env.GEMINI_API_KEY;
 
   if (!API_KEY) { console.error("❌ 키 입력 필요!"); return; }
 
