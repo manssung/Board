@@ -33,7 +33,7 @@ export function useAiStrategyGenerator() {
         1. 사용자의 [요청 사항]을 분석합니다.
         2. 아래 제공된 [${selectedBroker} 제공 조건 목록]을 꼼꼼히 읽어봅니다. 각 항목의 '상세조건'까지 반드시 비교해서 판단하세요.
         3. 목록 중에서 사용자의 요청을 구현하기에 적합한 조건을 **모두** 찾습니다. (하나일 수도, 여러 개일 수도 있습니다. 확실하지 않은 후보는 넣지 마세요)
-        4. 찾은 각 조건의 ID(originalIndex)와, 사용자 요청에 맞춰 수정한 상세 설정값(detail)을 JSON 배열로 반환합니다
+        4. 찾은 각 조건의 ID(originalIndex), 사용자 요청에 맞춰 수정한 상세 설정값(detail), 선택 근거(reason), 신뢰도(confidence)를 JSON 배열로 반환합니다.
 
         # 사용자 요청 사항
         "${customerQuery}"
@@ -46,14 +46,16 @@ export function useAiStrategyGenerator() {
 # 지시사항
       - 목록에 있는 조건 중 적합한 것을 모두 선택하되, 같은 조건을 중복해서 넣지 마세요. (목록에 없는 조건을 만들어내지 마세요)
       - 각 선택 객체의 'detail' 수치만 사용자의 요청에 맞게 수정하세요. 원래 상세조건의 형식(단위, 표현 방식)은 최대한 유지하세요.
-      - 응답은 반드시 아래 예시와 같이 'originalIndex'와 'detail' 두 개의 키만 가진 객체들의 **JSON 배열**이어야 합니다. 적합한 조건이 하나면 배열 원소도 1개, 없으면 빈 배열 []을 반환하세요.
+      - reason에는 해당 조건이 고객 문의를 충족하는 이유를 한국어 한 문장으로 작성하세요.
+      - confidence에는 high, medium, low 중 하나만 작성하세요. 고객 요청과 조건명이 직접 일치하면 high, 일부 해석이 필요하면 medium, 가능성만 있으면 low입니다.
+      - 응답은 반드시 아래 예시와 같이 originalIndex, detail, reason, confidence 키를 가진 객체들의 JSON 배열이어야 합니다. 적합한 조건이 하나면 배열 원소도 1개, 없으면 빈 배열 []을 반환하세요.
 
       # 예시:
       - 사용자의 요청: "거래량 10만주 이상이고 시가총액 1000억 이상인 종목 찾아줘"
       - 올바른 반환값 (JSON 형식):
       [
-        { "originalIndex": 42, "detail": "거래량이 100,000주 이상" },
-        { "originalIndex": 17, "detail": "시가총액이 1000억원 이상" }
+        { "originalIndex": 42, "detail": "거래량이 100,000주 이상", "reason": "고객이 요청한 최소 거래량 조건과 일치합니다.", "confidence": "high" },
+        { "originalIndex": 17, "detail": "시가총액이 1000억원 이상", "reason": "고객이 요청한 최소 시가총액 조건과 일치합니다.", "confidence": "high" }
       ]
 `;
 
@@ -73,8 +75,10 @@ export function useAiStrategyGenerator() {
                 properties: {
                   originalIndex: { type: "INTEGER" },
                   detail: { type: "STRING" },
+                  reason: { type: "STRING" },
+                  confidence: { type: "STRING" },
                 },
-                required: ["originalIndex", "detail"],
+                required: ["originalIndex", "detail", "reason", "confidence"],
               },
             },
           },
@@ -107,6 +111,10 @@ export function useAiStrategyGenerator() {
           matchedItems.push({
             ...conditionList[matchedIndex],
             detail: result.detail,
+            aiReason: typeof result.reason === 'string' ? result.reason.trim() : '',
+            aiConfidence: ['high', 'medium', 'low'].includes(String(result.confidence).toLowerCase())
+              ? String(result.confidence).toLowerCase()
+              : 'medium',
           });
         }
       });

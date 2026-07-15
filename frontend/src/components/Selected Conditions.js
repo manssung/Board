@@ -59,6 +59,14 @@ const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange,
           placeholder={cond.detail === '' ? "(기본값 없음) 세부 수치를 입력해주세요" : ""}
           rows={1} // 기본 높이를 1줄로 시작합니다.
         />
+        {cond.aiReason && (
+          <div className="ai-match-info">
+            <span className={`ai-confidence ai-confidence-${cond.aiConfidence || 'medium'}`}>
+              AI {cond.aiConfidence || 'medium'}
+            </span>
+            <span className="ai-match-reason">AI 추천 근거: {cond.aiReason}</span>
+          </div>
+        )}
       </div>
       <div className="move-buttons">
         <button

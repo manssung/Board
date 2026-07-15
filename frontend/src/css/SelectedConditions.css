@@ -94,3 +94,28 @@
   background-color: #e63946; /* 빨간색 계열 */
   color: white;
 }
+
+.ai-match-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: #4b5563;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.ai-confidence {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 2px 6px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.ai-confidence-high { background: #16803c; }
+.ai-confidence-medium { background: #a16207; }
+.ai-confidence-low { background: #b42318; }
+
+.ai-match-reason { padding-top: 1px; }
