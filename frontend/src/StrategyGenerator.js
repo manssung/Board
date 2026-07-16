@@ -11,6 +11,35 @@ import { useBrokerData } from './hooks/useBrokerData';
 import { generateMent } from './util/generateMent.js';
 import { useAiStrategyGenerator } from './hooks/useAiStrategyGenerator';
 
+const groupOrConditions = (conditions) => {
+  const groupedConditions = conditions.map(condition => ({ ...condition, groupIds: [] }));
+
+  // 조건이 둘뿐인 "A or B"는 괄호 없이 표현합니다.
+  if (groupedConditions.length < 3) {
+    return groupedConditions;
+  }
+
+  let index = 0;
+
+  while (index < groupedConditions.length - 1) {
+    if (groupedConditions[index].operator !== 'or') {
+      index += 1;
+      continue;
+    }
+
+    const groupStart = index;
+    while (index < groupedConditions.length - 1 && groupedConditions[index].operator === 'or') {
+      index += 1;
+    }
+
+    const groupId = `ai-or-${Date.now()}-${groupStart}`;
+    for (let memberIndex = groupStart; memberIndex <= index; memberIndex += 1) {
+      groupedConditions[memberIndex].groupIds = [groupId];
+    }
+  }
+
+  return groupedConditions;
+};
 
 export default function StrategyGenerator() {
   const brokers = Object.keys(brokerMap);
@@ -339,13 +368,12 @@ const handleAiGenerate = async () => {
 
     // 2. 결과 처리 (여러 개의 매칭 결과를 모두 반영)
     if (matchedConditions && matchedConditions.length > 0) {
-      const newConditionItems = matchedConditions.map((cond, i) => ({
+      const newConditionItems = groupOrConditions(matchedConditions.map((cond, i) => ({
         ...cond,
         id: Date.now() + i, // ✨ 여러 개를 한 번에 추가해도 id가 겹치지 않도록
-        operator: 'and',
-        groupIds: [],
+        operator: cond.nextOperator === 'or' ? 'or' : 'and',
         comment: cond.detail,
-      }));
+      })));
 
       setSelectedConditions(prev => [...prev, ...newConditionItems]);
       setFixedType("");
