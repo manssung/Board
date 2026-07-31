@@ -45,6 +45,10 @@ const brokerMap = {
       "LS증권": [
         "/ls_xml/mapa-b.xml",
         "/ls_xml/mapc1.xml",
+        "/ls_xml/mapc2_1-11.xml",
+        "/ls_xml/mapc2_12-23.xml",
+        "/ls_xml/mapc3_1-12.xml",
+        "/ls_xml/mapc3_13-25.xml",
         "/ls_xml/mapc4.xml",
         "/ls_xml/mapc5.xml",
         "/ls_xml/mapd.xml",
