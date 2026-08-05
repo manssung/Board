@@ -330,22 +330,6 @@ const newGroupId = Date.now();
      fixedType
      });
 
-  /*
-   const effectiveMent = customMent || autoMent || generateMent({
-     selectedConditions,
-     fixedMentMap,
-     selectedBroker,
-     fixedType
-     });
-
-   const handleMentChange = (newMent) => {
-     setCustomMent(newMent);
-     setIsMentManuallyEdited(true); // ✨ 사용자가 직접 수정했음을 기록
-
-     const updated = parseMentAndUpdateConditions(newMent, selectedConditions);
-     setSelectedConditions(updated);
-   };
-*/
 const handleAiGenerate = async () => {
     // 1. 유효성 검사
     if (!selectedBroker) {
