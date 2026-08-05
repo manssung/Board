@@ -8,7 +8,7 @@ export function useAiStrategyGenerator() {
     setIsAiLoading(true);
     
     // ⚠️ 본인의 API 키를 넣어주세요.
-    const API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
+    const API_KEY = (process.env.REACT_APP_GEMINI_API_KEY || '').trim();
     if (!API_KEY) {
       alert('Gemini API 키가 설정되지 않았습니다. .env 파일을 확인하세요.');
       setIsAiLoading(false);
@@ -52,7 +52,7 @@ export function useAiStrategyGenerator() {
 # 지시사항
       - 목록에 있는 조건 중 적합한 것을 모두 선택하되, 같은 조건을 중복해서 넣지 마세요. (목록에 없는 조건을 만들어내지 마세요)
       - 각 선택 객체의 'detail' 수치만 사용자의 요청에 맞게 수정하세요. 원래 상세조건의 형식(단위, 표현 방식)은 최대한 유지하세요.
-      - reason에는 해당 조건이 고객 문의를 충족하는 이유를 한국어 한 문장으로 작성하세요.
+      - reason은 고객이 읽는 안내문처럼 자연스럽고 쉬운 한국어 한 문장으로 작성하세요. "고객님께서 [원하는 결과]를 찾으셔서, [이 조건이 그 결과에 도움이 되는 이유]를 반영했습니다."와 같이 고객 요청과 조건의 연결을 설명하세요. 단순히 조건명을 반복하거나 "AI가 선택했습니다"라고 쓰지 말고, 전문 용어는 풀어서 설명하세요. 60자 이내로 핵심 수치·기간만 담으세요.
       - confidence에는 high, medium, low 중 하나만 작성하세요. 고객 요청과 조건명이 직접 일치하면 high, 일부 해석이 필요하면 medium, 가능성만 있으면 low입니다.
       - 모든 응답 객체에는 nextOperator를 반드시 포함하고 값은 "and" 또는 "or" 중 하나여야 합니다.
       - 응답은 반드시 아래 예시와 같이 originalIndex, detail, reason, confidence 키를 가진 객체들의 JSON 배열이어야 합니다. 적합한 조건이 하나면 배열 원소도 1개, 없으면 빈 배열 []을 반환하세요.
@@ -94,6 +94,8 @@ export function useAiStrategyGenerator() {
       });
 
       if (!response.ok) {
+        const errorBody = await response.json().catch(() => null);
+        console.error('Gemini API error details:', errorBody?.error || errorBody);
         throw new Error(`Gemini API 호출 실패: ${response.status}`);
       }
       
