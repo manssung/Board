@@ -54,7 +54,10 @@ export default function StrategyGenerator() {
   const [fixedType, setFixedType] = useState("");
   const [customerQuery, setCustomerQuery] = useState(""); 
   const { isAiLoading, generateStrategy } = useAiStrategyGenerator();
-  const [activeTab, setActiveTab] = useState('manual'); 
+  const [activeTab, setActiveTab] = useState('ai'); 
+  const [lastAiResult, setLastAiResult] = useState(null);
+  const [aiDraftConditions, setAiDraftConditions] = useState([]);
+  const workflowStage = isAiLoading ? 2 : lastAiResult ? 3 : 1;
 
   const [isMentManuallyEdited, setIsMentManuallyEdited] = useState(false);
 
@@ -70,6 +73,8 @@ export default function StrategyGenerator() {
   setFixedType("");
   setSearch("");
   setCheckedLetters(new Set());
+  setLastAiResult(null);
+  setAiDraftConditions([]);
 }, [selectedBroker]);
 
 
@@ -79,6 +84,7 @@ export default function StrategyGenerator() {
       return;
     }
     setFixedType(type);
+    setLastAiResult(null);
     setSelectedConditions([]);
     setCustomMent("");
     setAutoMent("");
@@ -86,6 +92,8 @@ export default function StrategyGenerator() {
   
   const handleReset = () => { //초기화 버튼
   setSelectedConditions([]);
+  setLastAiResult(null);
+  setAiDraftConditions([]);
   setCustomMent('');
   setAutoMent('');
   setFixedType('');
@@ -345,9 +353,9 @@ const handleAiGenerate = async () => {
       return;
     }
 
-    setSelectedConditions([]);
-
     // ✨ 중요: 함수 호출 시 3번째 인자로 'selectedBroker'를 전달합니다!
+    setLastAiResult(null);
+    setAiDraftConditions([]);
     const matchedConditions = await generateStrategy(customerQuery, allConditions, selectedBroker);
 
     // 2. 결과 처리 (여러 개의 매칭 결과를 모두 반영)
@@ -359,8 +367,9 @@ const handleAiGenerate = async () => {
         comment: cond.detail,
       })));
 
-      setSelectedConditions(prev => [...prev, ...newConditionItems]);
+      setAiDraftConditions(newConditionItems);
       setFixedType("");
+      setLastAiResult({ request: customerQuery, count: newConditionItems.length });
       alert(`AI가 조건 ${newConditionItems.length}개를 찾아냈습니다!\n${newConditionItems.map(c => `- ${c.path}`).join('\n')}`);
 
     } else {
@@ -369,6 +378,35 @@ const handleAiGenerate = async () => {
   };
 
   //새로운 멘트
+  const handleApplyAiDraft = (index) => {
+    const draft = aiDraftConditions[index];
+    if (!draft) return;
+    setSelectedConditions(prev => [...prev, { ...draft, groupIds: [] }]);
+    setAiDraftConditions(prev => prev.filter((_, draftIndex) => draftIndex !== index));
+    setFixedType('');
+    setCustomMent('');
+  };
+
+  const handleApplyAllAiDrafts = () => {
+    if (aiDraftConditions.length === 0) return;
+    setSelectedConditions(prev => [...prev, ...aiDraftConditions]);
+    setAiDraftConditions([]);
+    setFixedType('');
+    setCustomMent('');
+  };
+
+  const handleDiscardAiDraft = (index) => {
+    setAiDraftConditions(prev => prev.filter((_, draftIndex) => draftIndex !== index));
+  };
+
+  const handleAiExample = (query) => {
+    setCustomerQuery(query);
+  };
+
+  const handleReviewInManual = () => {
+    setActiveTab('manual');
+  };
+
 const parseMentForComments = (text, originalConditions) => {
   const lines = text.split('\n');
   const updatedConditions = originalConditions.map(cond => ({ ...cond }));
@@ -404,10 +442,27 @@ const parseMentForComments = (text, originalConditions) => {
   return (
 <div className="container">
       <div className="card">
+        <header className="app-intro">
+          <div>
+            <p className="app-eyebrow">AI 전략 Q&amp;A · 업무용</p>
+            <h1>고객 문의 조건식 작성</h1>
+            <p className="app-description">문의 내용을 입력하면 AI가 조건 후보를 제안합니다. 검토 후 적용해 주세요.</p>
+          </div>
+          <div className="app-status">{selectedBroker ? `${selectedBroker} 조건 데이터 준비됨` : '증권사를 선택해 주세요'}</div>
+        </header>
         <h2 className="title">전략 Q&A 조건 생성기</h2>
         <div className="main-content">
-          <div className="top-panel">
-            <div id="left-panel" className="panel">
+          {activeTab === 'ai' && (
+            <div className="workflow-steps" aria-label="AI 조건 생성 작업 단계">
+              <span className={`workflow-step ${workflowStage === 1 ? 'active' : 'complete'}`}><b>{workflowStage > 1 ? '✓' : '1'}</b> 고객 문의 입력</span>
+              <span className="workflow-arrow">→</span>
+              <span className={`workflow-step ${workflowStage === 2 ? 'active loading' : workflowStage > 2 ? 'complete' : ''}`}><b>{workflowStage > 2 ? '✓' : '2'}</b> {workflowStage === 2 ? 'AI 조건 분석 중' : 'AI 추천 검토'}</span>
+              <span className="workflow-arrow">→</span>
+              <span className={`workflow-step ${workflowStage === 3 ? 'active' : ''}`}><b>3</b> 조건식 확정</span>
+            </div>
+          )}
+          <div className={`top-panel ${activeTab === 'ai' ? 'ai-workflow-layout' : ''}`}>
+            <div id="left-panel" className={`panel ${activeTab === 'ai' ? 'ai-request-panel' : ''}`}>
               <div className="tabs-container">
                 <button className={`tab-button ${activeTab === 'manual' ? 'active' : ''}`} onClick={() => setActiveTab('manual')}>조건 생성</button>
                 {/* <button className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`} onClick={() => alert('현재 개발중입니다.')}>AI 자동 생성</button> */}
@@ -446,6 +501,46 @@ const parseMentForComments = (text, originalConditions) => {
                   </>
                 )}
                 {activeTab === 'ai' && (
+                  <div className="ai-workflow">
+                    <div className="ai-workflow-heading">
+                      <span className="ai-workflow-icon">✦</span>
+                      <div>
+                        <h3>고객 문의 입력</h3>
+                        <p>고객이 원하는 종목 조건을 자연스럽게 작성해 주세요.</p>
+                      </div>
+                    </div>
+                    <button type="button" className="ai-clear-query-button" onClick={() => setCustomerQuery('')} disabled={!customerQuery}>입력 내용 초기화</button>
+                    {lastAiResult && (
+                      <div className="ai-inline-result">최근 AI 추천: {lastAiResult.count}개 조건 초안을 만들었습니다. 검토 후 적용해 주세요.</div>
+                    )}
+                    {selectedConditions.length > 0 && aiDraftConditions.length === 0 && (
+                      <button type="button" className="review-manual-button" onClick={handleReviewInManual}>조건 생성 탭에서 검토·수정하기 →</button>
+                    )}
+                    <textarea
+                      className="ment-box ai-query-input"
+                      rows={7}
+                      value={customerQuery}
+                      onChange={(e) => setCustomerQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.ctrlKey && e.key === 'Enter') handleAiGenerate();
+                      }}
+                      placeholder="예: 거래량이 많고 시가총액이 1,000억 이상인 종목을 찾아줘"
+                    />
+                    <div className="ai-example-area">
+                      <span>빠른 입력</span>
+                      <div className="ai-example-chips">
+                        <button type="button" onClick={() => handleAiExample('거래량이 최근 평균보다 크게 증가한 종목을 찾아줘')}>거래량 급증</button>
+                        <button type="button" onClick={() => handleAiExample('저평가된 대형주를 찾아줘')}>저평가 대형주</button>
+                        <button type="button" onClick={() => handleAiExample('최근 상승 추세가 이어지는 종목을 찾아줘')}>상승 추세</button>
+                      </div>
+                    </div>
+                    <button className="generate-button ai-primary-button" onClick={handleAiGenerate} disabled={isAiLoading || isLoading}>
+                      {isAiLoading || isLoading ? 'AI가 조건을 분석하고 있습니다...' : 'AI 조건 추천 받기'}
+                    </button>
+                    <p className="ai-keyboard-hint">Ctrl + Enter로 바로 분석할 수 있습니다.</p>
+                  </div>
+                )}
+                {activeTab === 'ai' && (
                   <div id="ai-tab">
                     <div className="ai-section">
                       <h3>고객 문의 내용</h3>
@@ -466,12 +561,64 @@ const parseMentForComments = (text, originalConditions) => {
             </div>
             
             <div id="right-panel" className="panel">
-              <div className="panel-header">
+              <div className={`panel-header ${activeTab === 'ai' ? 'ai-results-header' : ''}`}>
+                {activeTab === 'ai' && (
+                  <div className="ai-results-title">
+                    <span className="ai-workflow-icon">✦</span>
+                    <div><h3>AI 추천 결과</h3><p>추천 내용을 검토한 뒤 조건 생성 탭에서 수정할 수 있습니다.</p></div>
+                  </div>
+                )}
                 <h3>선택된 조건</h3>
                 <button className="reset-button" onClick={handleReset}>초기화</button>
               </div>
               <div className="panel-content">
-                <SelectedConditions selectedConditions={selectedConditions} onRemove={handleRemoveCondition} onCommentChange={handleCommentChange} onMove={handleMoveCondition} />
+                {activeTab === 'ai' && (
+                  <div className="ai-result-summary">
+                    <div>
+                      <span>요청 요약</span>
+                      <strong>{lastAiResult?.request || customerQuery || '고객 문의를 입력해 AI 추천을 시작하세요.'}</strong>
+                    </div>
+                    <b>{lastAiResult?.count || selectedConditions.length}개 조건</b>
+                  </div>
+                )}
+                {activeTab === 'ai' && aiDraftConditions.length === 0 && selectedConditions.length === 0 && (
+                  <div className="ai-empty-state">
+                    <span>✦</span>
+                    <strong>AI가 조건 후보를 추천해 드립니다.</strong>
+                    <p>고객 문의를 입력하고 AI 조건 추천 받기를 눌러 시작하세요.</p>
+                  </div>
+                )}
+                {activeTab === 'ai' && aiDraftConditions.length > 0 && (
+                  <div className="ai-draft-list">
+                    <div className="ai-draft-actions">
+                      <span>추천 초안 {aiDraftConditions.length}개</span>
+                      <button type="button" onClick={handleApplyAllAiDrafts}>전체 적용</button>
+                    </div>
+                    {aiDraftConditions.map((condition, index) => (
+                      <article className="ai-draft-card" key={`${condition.path}-${index}`}>
+                        <div className="ai-draft-card-head">
+                          <span>AI 추천</span>
+                          <strong>{condition.type ? `${condition.type} > ` : ''}{condition.path}</strong>
+                        </div>
+                        <p className="ai-draft-detail">{condition.detail}</p>
+                        {condition.aiReason && <p className="ai-draft-reason">{condition.aiReason}</p>}
+                        <div className="ai-draft-card-actions">
+                          <button type="button" className="draft-apply-button" onClick={() => handleApplyAiDraft(index)}>적용</button>
+                          <button type="button" className="draft-discard-button" onClick={() => handleDiscardAiDraft(index)}>제외</button>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+                {activeTab === 'ai' && aiDraftConditions.length === 0 && selectedConditions.length > 0 && (
+                  <div className="ai-applied-state">
+                    <strong>{selectedConditions.length}개 조건이 적용되었습니다.</strong>
+                    <button type="button" onClick={handleReviewInManual}>조건 생성 탭에서 검토·수정하기 →</button>
+                  </div>
+                )}
+                {activeTab === 'manual' && (
+                  <SelectedConditions selectedConditions={selectedConditions} onRemove={handleRemoveCondition} onCommentChange={handleCommentChange} onMove={handleMoveCondition} />
+                )}
               </div>
             </div>
           </div>
