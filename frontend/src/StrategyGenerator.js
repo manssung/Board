@@ -94,6 +94,7 @@ export default function StrategyGenerator() {
   setSelectedConditions([]);
   setLastAiResult(null);
   setAiDraftConditions([]);
+  setCustomerQuery('');
   setCustomMent('');
   setAutoMent('');
   setFixedType('');
@@ -354,8 +355,13 @@ const handleAiGenerate = async () => {
     }
 
     // ✨ 중요: 함수 호출 시 3번째 인자로 'selectedBroker'를 전달합니다!
+    setSelectedConditions([]);
     setLastAiResult(null);
     setAiDraftConditions([]);
+    setCustomMent('');
+    setAutoMent('');
+    setFixedType('');
+    setCheckedLetters(new Set());
     const matchedConditions = await generateStrategy(customerQuery, allConditions, selectedBroker);
 
     // 2. 결과 처리 (여러 개의 매칭 결과를 모두 반영)
