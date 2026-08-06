@@ -1,4 +1,6 @@
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const MAX_IMAGE_BASE64_LENGTH = Math.ceil((2 * 1024 * 1024 * 4) / 3) + 1024;
+const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 function buildPrompt(customerQuery, conditionList, selectedBroker) {
   const conditions = conditionList
@@ -72,7 +74,7 @@ module.exports = async function handler(request, response) {
     return response.status(500).json({ error: 'AI 서비스 설정이 완료되지 않았습니다.' });
   }
 
-  const { customerQuery, conditionList, selectedBroker } = request.body || {};
+  const { customerQuery, conditionList, selectedBroker, imageAttachment } = request.body || {};
   if (typeof customerQuery !== 'string' || !customerQuery.trim()) {
     return response.status(400).json({ error: '고객 문의 내용을 입력해 주세요.' });
   }
@@ -83,14 +85,24 @@ module.exports = async function handler(request, response) {
     return response.status(400).json({ error: '증권사를 선택해 주세요.' });
   }
 
+  let imagePart = null;
+  if (imageAttachment) {
+    const { mimeType, data } = imageAttachment;
+    if (!ALLOWED_IMAGE_TYPES.has(mimeType) || typeof data !== 'string' || !data || data.length > MAX_IMAGE_BASE64_LENGTH) {
+      return response.status(400).json({ error: '첨부 이미지는 JPG, PNG, WEBP 형식의 2MB 이하 파일만 사용할 수 있습니다.' });
+    }
+    imagePart = { inlineData: { mimeType, data } };
+  }
+
   try {
+    const prompt = `${buildPrompt(customerQuery.trim(), conditionList, selectedBroker.trim())}${imagePart ? '\n\n# 첨부 이미지 안내\n첨부 이미지는 고객 문의를 파악하는 보조 자료입니다. 이미지에서 확인할 수 있는 내용만 참고하고, 목록에 없는 조건은 만들지 마세요.' : ''}`;
     const geminiResponse = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL)}:generateContent`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: buildPrompt(customerQuery.trim(), conditionList, selectedBroker.trim()) }] }],
+          contents: [{ parts: [{ text: prompt }, ...(imagePart ? [imagePart] : [])] }],
           generationConfig: { temperature: 0, responseMimeType: 'application/json', responseSchema },
         }),
       },

@@ -1,0 +1,20 @@
+.saved-strategies {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #e7edf5;
+}
+
+.saved-strategies-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.saved-strategies-header h3 { margin: 0; color: #344861; font-size: 14px; }
+.saved-strategies-header p { margin: 4px 0 0; color: #8794a7; font-size: 11px; }
+.saved-strategies-header > span { padding: 4px 7px; border-radius: 999px; color: #5171a2; background: #f2f6fc; font-size: 11px; font-weight: 700; }
+.saved-strategies-empty { margin: 12px 0 0; padding: 13px; border: 1px dashed #d8e2ef; border-radius: 8px; color: #8492a6; background: #fbfcfe; font-size: 12px; }
+.saved-strategies-list { display: grid; gap: 7px; margin-top: 12px; }
+.saved-strategy-item { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 11px; border: 1px solid #e0e8f2; border-radius: 8px; background: #fbfdff; }
+.saved-strategy-item > div:first-child { min-width: 0; }
+.saved-strategy-item strong { display: block; overflow: hidden; color: #43556e; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.saved-strategy-item span { display: block; margin-top: 3px; color: #8b98aa; font-size: 11px; }
+.saved-strategy-actions { display: flex; flex: 0 0 auto; gap: 5px; }
+.saved-strategy-actions button { border: 1px solid #d6e1ef; border-radius: 6px; padding: 5px 7px; color: #5c6e87; background: #fff; cursor: pointer; font-size: 11px; }
+.saved-strategy-actions button:first-child { border-color: #c0d3f0; color: #2e64bd; background: #f6faff; }
+.saved-strategy-actions button:hover { border-color: #9eb8df; }

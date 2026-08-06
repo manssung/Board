@@ -81,6 +81,7 @@ const GeneratedMent = ({
   checkedLetters, 
   onLetterCheck, 
   onClearAllGroups,
+  onSaveDraft,
   handleToggleGroupMode,
   onToggleGroupMode,
   onGroup, 
@@ -134,13 +135,16 @@ const GeneratedMent = ({
         
         </div>
         <div className="ment-buttons">
+          {onSaveDraft && (
+            <button type="button" className="save-draft-button" onClick={onSaveDraft}>임시저장</button>
+          )}
               {!isFixed && selectedConditions.length > 0 && (
             <button 
               className={`group-toggle-button ${isGrouping ? 'active' : ''}`}
               // onClick={() => setIsGrouping(!isGrouping)}
               onClick={onToggleGroupMode}
             >
-              {isGrouping ? '✔ 그룹 모드 끄기' : '그룹 설정'}
+              {isGrouping ? '그룹 편집 완료' : '그룹 편집 시작'}
             </button>
             )}
           {/* ✨ isEditable이 true일 때만 '수정' 버튼이 보입니다. */}
@@ -179,7 +183,7 @@ const GeneratedMent = ({
                     <span 
                       className={`condition-letter ${isGrouping ? 'groupable' : ''} ${isChecked ? 'checked' : ''}`}
                       onClick={() => isGrouping && onLetterCheck(letter)} // 그룹 모드일 때만 클릭 가능
-                      title={isGrouping ? "클릭하여 선택" : ""}
+                      title={isGrouping ? "그룹에 포함할 조건 선택" : ""}
                     >
                       {letter}
                     </span>
@@ -191,7 +195,8 @@ const GeneratedMent = ({
                     {index < selectedConditions.length - 1 && (
                       <span 
                         className="operator" 
-                       onDoubleClick={() => onToggleOperator(index)} // 그룹 모드 아닐 때만 토글 가능
+                       onClick={() => onToggleOperator(index)}
+                       title="클릭하여 AND / OR 전환"
                       >
                         {` ${item.operator || 'and'} `}
                       </span>
@@ -203,6 +208,7 @@ const GeneratedMent = ({
             </p>
           {isGrouping && (
               <div className="group-action-buttons">
+                <p className="group-guide">묶을 조건을 선택한 뒤 <b>그룹 생성</b>을 눌러 주세요.</p>
                 {/* 1. 항목을 선택했을 때만 나오는 버튼들 */}
                 {checkedLetters.size > 0 && (
                   <>
@@ -214,7 +220,7 @@ const GeneratedMent = ({
               {(selectedConditions.some(item => item.groupIds && item.groupIds.length > 0)) && (
                   <>
                     {checkedLetters.size > 0 && <div className="divider"></div>}
-                    <button className="group-button clear-all" onClick={onClearAllGroups}>괄호 전체 삭제</button>
+                    <button className="group-button clear-all" onClick={onClearAllGroups}>모든 그룹 해제</button>
                   </>
                 )}
               </div>

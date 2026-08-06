@@ -10,6 +10,8 @@ import brokerMap from './data/brokerMap.js';
 import { useBrokerData } from './hooks/useBrokerData';
 import { generateMent } from './util/generateMent.js';
 import { useAiStrategyGenerator } from './hooks/useAiStrategyGenerator';
+import { useSavedStrategies } from './hooks/useSavedStrategies';
+import SavedStrategies from './components/SavedStrategies';
 
 const groupOrConditions = (conditions) => {
   const groupedConditions = conditions.map(condition => ({ ...condition, groupIds: [] }));
@@ -41,6 +43,18 @@ const groupOrConditions = (conditions) => {
   return groupedConditions;
 };
 
+const MAX_ATTACHMENT_BYTES = 2 * 1024 * 1024;
+const ALLOWED_ATTACHMENT_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+// 이미지 첨부 기능은 검토 후 다시 공개할 수 있도록 코드만 보관합니다.
+const ENABLE_IMAGE_ATTACHMENT = false;
+
+const readImageAsBase64 = (file) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(String(reader.result || '').split(',')[1] || '');
+  reader.onerror = () => reject(new Error('이미지 파일을 읽지 못했습니다.'));
+  reader.readAsDataURL(file);
+});
+
 export default function StrategyGenerator() {
   const brokers = Object.keys(brokerMap);
 
@@ -57,7 +71,12 @@ export default function StrategyGenerator() {
   const [activeTab, setActiveTab] = useState('ai'); 
   const [lastAiResult, setLastAiResult] = useState(null);
   const [aiDraftConditions, setAiDraftConditions] = useState([]);
-  const workflowStage = isAiLoading ? 2 : lastAiResult ? 3 : 1;
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isSavedStrategiesOpen, setIsSavedStrategiesOpen] = useState(false);
+  const [imageAttachment, setImageAttachment] = useState(null);
+  const [attachmentInputKey, setAttachmentInputKey] = useState(0);
+  const [isRestoringSavedStrategy, setIsRestoringSavedStrategy] = useState(false);
+  const { savedStrategies, saveStrategy, deleteSavedStrategy } = useSavedStrategies();
 
   const [isMentManuallyEdited, setIsMentManuallyEdited] = useState(false);
 
@@ -67,6 +86,10 @@ export default function StrategyGenerator() {
   const { allConditions, isLoading, error } = useBrokerData(selectedBroker);
 
   useEffect(() => { //증권사 데이터 불러오기
+  if (isRestoringSavedStrategy) {
+    setIsRestoringSavedStrategy(false);
+    return;
+  }
   setSelectedConditions([]);
   setAutoMent("");
   setCustomMent("");
@@ -75,6 +98,8 @@ export default function StrategyGenerator() {
   setCheckedLetters(new Set());
   setLastAiResult(null);
   setAiDraftConditions([]);
+  setImageAttachment(null);
+  setAttachmentInputKey(key => key + 1);
 }, [selectedBroker]);
 
 
@@ -95,11 +120,63 @@ export default function StrategyGenerator() {
   setLastAiResult(null);
   setAiDraftConditions([]);
   setCustomerQuery('');
+  setImageAttachment(null);
+  setAttachmentInputKey(key => key + 1);
   setCustomMent('');
   setAutoMent('');
   setFixedType('');
   setCheckedLetters(new Set());
   setIsMentManuallyEdited(false);
+  };
+
+  const handleSaveStrategy = () => {
+    if (!customerQuery.trim() && selectedConditions.length === 0 && aiDraftConditions.length === 0 && !fixedType) {
+      alert('저장할 고객 문의 또는 조건식을 먼저 작성해 주세요.');
+      return;
+    }
+
+    const saved = saveStrategy({
+      title: customerQuery.trim().slice(0, 44) || `${selectedBroker || '미선택'} 조건식`,
+      selectedBroker,
+      customerQuery,
+      selectedConditions,
+      aiDraftConditions,
+      customMent,
+      autoMent,
+      fixedType,
+      activeTab,
+    });
+
+    if (saved) {
+      setIsSavedStrategiesOpen(true);
+      alert('현재 전략을 임시저장했습니다. 24시간 동안 보관됩니다.');
+    } else {
+      alert('임시저장 공간이 부족합니다. 오래된 저장 항목을 삭제해 주세요.');
+    }
+  };
+
+  const handleLoadStrategy = (item) => {
+    if (!window.confirm('저장한 전략을 불러오시겠습니까?\n현재 작업 내용은 불러온 전략으로 변경됩니다.')) {
+      return;
+    }
+    setIsRestoringSavedStrategy(item.selectedBroker !== selectedBroker);
+    setSelectedBroker(item.selectedBroker || '');
+    setCustomerQuery(item.customerQuery || '');
+    setSelectedConditions(Array.isArray(item.selectedConditions) ? item.selectedConditions : []);
+    setAiDraftConditions(Array.isArray(item.aiDraftConditions) ? item.aiDraftConditions : []);
+    setCustomMent(item.customMent || '');
+    setAutoMent(item.autoMent || '');
+    setFixedType(item.fixedType || '');
+    setActiveTab(item.activeTab === 'manual' ? 'manual' : 'ai');
+    setLastAiResult(null);
+    setCheckedLetters(new Set());
+    setIsGrouping(false);
+  };
+
+  const handleDeleteSavedStrategy = (id) => {
+    if (!deleteSavedStrategy(id)) {
+      alert('저장 목록을 정리하지 못했습니다.');
+    }
   };
 
  
@@ -354,6 +431,10 @@ const handleAiGenerate = async () => {
       return;
     }
 
+    if ((selectedConditions.length > 0 || aiDraftConditions.length > 0) && !window.confirm('새 AI 추천을 시작하면 현재 선택한 조건과 추천 초안이 초기화됩니다. 계속할까요?')) {
+      return;
+    }
+
     // ✨ 중요: 함수 호출 시 3번째 인자로 'selectedBroker'를 전달합니다!
     setSelectedConditions([]);
     setLastAiResult(null);
@@ -362,7 +443,7 @@ const handleAiGenerate = async () => {
     setAutoMent('');
     setFixedType('');
     setCheckedLetters(new Set());
-    const matchedConditions = await generateStrategy(customerQuery, allConditions, selectedBroker);
+    const matchedConditions = await generateStrategy(customerQuery, allConditions, selectedBroker, ENABLE_IMAGE_ATTACHMENT ? imageAttachment : null);
 
     // 2. 결과 처리 (여러 개의 매칭 결과를 모두 반영)
     if (matchedConditions && matchedConditions.length > 0) {
@@ -383,14 +464,45 @@ const handleAiGenerate = async () => {
     }
   };
 
+  const handleImageAttachment = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!ALLOWED_ATTACHMENT_TYPES.includes(file.type)) {
+      alert('JPG, PNG, WEBP 형식의 이미지만 첨부할 수 있습니다.');
+      event.target.value = '';
+      return;
+    }
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      alert('이미지는 2MB 이하로 첨부해 주세요.');
+      event.target.value = '';
+      return;
+    }
+
+    try {
+      const data = await readImageAsBase64(file);
+      if (!data) throw new Error('이미지 데이터가 비어 있습니다.');
+      setImageAttachment({ name: file.name, mimeType: file.type, data });
+    } catch (error) {
+      alert(error.message || '이미지를 첨부하지 못했습니다.');
+    }
+  };
+
+  const handleRemoveImageAttachment = () => {
+    setImageAttachment(null);
+    setAttachmentInputKey(key => key + 1);
+  };
+
   //새로운 멘트
   const handleApplyAiDraft = (index) => {
     const draft = aiDraftConditions[index];
     if (!draft) return;
+    const isLastDraft = aiDraftConditions.length === 1;
     setSelectedConditions(prev => [...prev, { ...draft, groupIds: [] }]);
     setAiDraftConditions(prev => prev.filter((_, draftIndex) => draftIndex !== index));
     setFixedType('');
     setCustomMent('');
+    if (isLastDraft) setActiveTab('manual');
   };
 
   const handleApplyAllAiDrafts = () => {
@@ -399,6 +511,7 @@ const handleAiGenerate = async () => {
     setAiDraftConditions([]);
     setFixedType('');
     setCustomMent('');
+    setActiveTab('manual');
   };
 
   const handleDiscardAiDraft = (index) => {
@@ -407,10 +520,6 @@ const handleAiGenerate = async () => {
 
   const handleAiExample = (query) => {
     setCustomerQuery(query);
-  };
-
-  const handleReviewInManual = () => {
-    setActiveTab('manual');
   };
 
 const parseMentForComments = (text, originalConditions) => {
@@ -454,25 +563,114 @@ const parseMentForComments = (text, originalConditions) => {
             <h1>고객 문의 조건식 작성</h1>
             <p className="app-description">문의 내용을 입력하면 AI가 조건 후보를 제안합니다. 검토 후 적용해 주세요.</p>
           </div>
-          <div className="app-status">{selectedBroker ? `${selectedBroker} 조건 데이터 준비됨` : '증권사를 선택해 주세요'}</div>
+          <div className="app-header-actions">
+            <button
+              type="button"
+              className="usage-help-button"
+              onClick={() => setIsHelpOpen(open => !open)}
+              aria-expanded={isHelpOpen}
+              aria-controls="usage-help-popover"
+            >
+              사용 방법
+            </button>
+            <button
+              type="button"
+              className="usage-help-button"
+              onClick={() => setIsSavedStrategiesOpen(open => !open)}
+              aria-expanded={isSavedStrategiesOpen}
+              aria-controls="saved-strategies-popover"
+            >
+              최근 작업
+            </button>
+            <div className={`app-status ${selectedBroker ? 'ready' : 'pending'}`}>{selectedBroker ? `${selectedBroker} 조건 데이터 준비됨` : '증권사를 선택해 주세요'}</div>
+            {isSavedStrategiesOpen && (
+              <section id="saved-strategies-popover" className="saved-strategies-popover" aria-label="최근 임시저장">
+                <div className="saved-strategies-popover-title">
+                  <strong>최근 작업</strong>
+                  <button type="button" onClick={() => setIsSavedStrategiesOpen(false)} aria-label="최근 작업 닫기">×</button>
+                </div>
+                <SavedStrategies items={savedStrategies} onLoad={handleLoadStrategy} onDelete={handleDeleteSavedStrategy} />
+              </section>
+            )}
+            {isHelpOpen && (
+              <div className="usage-help-modal-backdrop" onMouseDown={() => setIsHelpOpen(false)}>
+                <section id="usage-help-popover" className="usage-help-modal" role="dialog" aria-modal="true" aria-label="사용 방법" onMouseDown={(event) => event.stopPropagation()}>
+                  <div className="usage-help-title">
+                    <div><strong>사용 방법</strong><p>아래 순서대로 진행하면 됩니다.</p></div>
+                    <button type="button" onClick={() => setIsHelpOpen(false)} aria-label="사용 방법 닫기">×</button>
+                  </div>
+                  <div className="usage-help-steps">
+                    <article className="usage-help-step">
+                      <div className="help-screen help-query-screen">
+                        <span className="help-mini-title">고객 문의 입력</span>
+                        <i>거래량이 많고 시가총액이 큰 종목을 찾아줘</i>
+                        <b>AI 조건 추천 받기</b>
+                      </div>
+                      <span className="help-step-number">01</span>
+                      <h4>문의 입력</h4>
+                      <p>고객이 원하는 조건을 입력합니다.</p>
+                    </article>
+                    <article className="usage-help-step">
+                      <div className="help-screen help-result-screen">
+                        <span className="help-mini-title">AI 추천 결과</span>
+                        <i>거래량 증가 <em>적용</em></i>
+                        <i>시가총액 1,000억 이상 <em>적용</em></i>
+                        <b>추천 조건 적용</b>
+                      </div>
+                      <span className="help-step-number">02</span>
+                      <h4>추천 조건 검토</h4>
+                      <p>필요한 조건만 적용합니다.</p>
+                    </article>
+                    <article className="usage-help-step">
+                      <div className="help-screen help-edit-screen">
+                        <span className="help-mini-title">조건식 편집</span>
+                        <i>+ 부족한 조건 직접 추가</i>
+                        <i>상세 조건값 수정</i>
+                        <b>수정 내용 반영</b>
+                      </div>
+                      <span className="help-step-number">03</span>
+                      <h4>직접 추가·수정</h4>
+                      <p>부족한 조건과 상세값을 보완합니다.</p>
+                    </article>
+                    <article className="usage-help-step">
+                      <div className="help-screen help-group-screen">
+                        <span className="help-mini-title">조건식 편집</span>
+                        <div><b>A</b><i>AND</i><strong>( B <small>OR</small> C )</strong></div>
+                        <em>그룹 편집 시작</em>
+                      </div>
+                      <span className="help-step-number">04</span>
+                      <h4>조건식 확정</h4>
+                      <p>조건식을 확인하고 답변을 복사합니다.</p>
+                    </article>
+                  </div>
+                  <section className="usage-help-save-note">
+                    <strong>작업 보관</strong>
+                    <div className="help-save-visual">
+                      <div className="help-save-screen">
+                        <span>답변 멘트</span>
+                        <b>임시저장</b>
+                      </div>
+                      <i>→</i>
+                      <div className="help-save-screen">
+                        <span>최근 작업</span>
+                        <b>불러오기</b>
+                      </div>
+                    </div>
+                    <p><b>답변 멘트에서 임시저장</b>을 누르면 현재 작업이 저장됩니다. 상단 <b>최근 작업</b>에서 다시 불러올 수 있으며, 저장본은 24시간 동안 유지됩니다.</p>
+                  </section>
+                </section>
+              </div>
+            )}
+          </div>
         </header>
         <h2 className="title">전략 Q&A 조건 생성기</h2>
         <div className="main-content">
-          {activeTab === 'ai' && (
-            <div className="workflow-steps" aria-label="AI 조건 생성 작업 단계">
-              <span className={`workflow-step ${workflowStage === 1 ? 'active' : 'complete'}`}><b>{workflowStage > 1 ? '✓' : '1'}</b> 고객 문의 입력</span>
-              <span className="workflow-arrow">→</span>
-              <span className={`workflow-step ${workflowStage === 2 ? 'active loading' : workflowStage > 2 ? 'complete' : ''}`}><b>{workflowStage > 2 ? '✓' : '2'}</b> {workflowStage === 2 ? 'AI 조건 분석 중' : 'AI 추천 검토'}</span>
-              <span className="workflow-arrow">→</span>
-              <span className={`workflow-step ${workflowStage === 3 ? 'active' : ''}`}><b>3</b> 조건식 확정</span>
-            </div>
-          )}
           <div className={`top-panel ${activeTab === 'ai' ? 'ai-workflow-layout' : ''}`}>
             <div id="left-panel" className={`panel ${activeTab === 'ai' ? 'ai-request-panel' : ''}`}>
               <div className="tabs-container">
-                <button className={`tab-button ${activeTab === 'manual' ? 'active' : ''}`} onClick={() => setActiveTab('manual')}>조건 생성</button>
+                <button className={`tab-button ${activeTab === 'manual' ? 'active' : ''}`} onClick={() => setActiveTab('manual')}>조건식 편집</button>
                 {/* <button className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`} onClick={() => alert('현재 개발중입니다.')}>AI 자동 생성</button> */}
-                <button className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`} onClick={() => setActiveTab('ai')}>AI 자동 생성</button>
+                <button className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`} onClick={() => setActiveTab('ai')}>AI 추천</button>
               </div>
               
               <div className="broker-actions-container">
@@ -499,9 +697,14 @@ const parseMentForComments = (text, originalConditions) => {
               <div className="panel-content">
                 {activeTab === 'manual' && (
                   <>
-                  <div className="list-header">
-                        <h3>조건 선택</h3>
-                        <ConditionSearch search={search} onSearch={setSearch} />
+                  <div className="manual-condition-toolbar">
+                    <div className="ai-workflow-heading">
+                      <span className="ai-workflow-icon">☷</span>
+                      <div><h3>조건 선택</h3></div>
+                    </div>
+                    <div className="list-header">
+                      <ConditionSearch search={search} onSearch={setSearch} />
+                    </div>
                   </div>
                     <ConditionList conditions={filteredConditions} onConditionClick={handleConditionClick} />
                   </>
@@ -515,12 +718,31 @@ const parseMentForComments = (text, originalConditions) => {
                         <p>고객이 원하는 종목 조건을 자연스럽게 작성해 주세요.</p>
                       </div>
                     </div>
-                    <button type="button" className="ai-clear-query-button" onClick={() => setCustomerQuery('')} disabled={!customerQuery}>입력 내용 초기화</button>
+                    <button type="button" className="ai-clear-query-button" onClick={() => setCustomerQuery('')} disabled={!customerQuery}>문의 지우기</button>
+                    {ENABLE_IMAGE_ATTACHMENT && (
+                      <>
+                        <div className="ai-attachment-row">
+                          <label className="ai-attachment-button">
+                            <input
+                              key={attachmentInputKey}
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              onChange={handleImageAttachment}
+                            />
+                            이미지 첨부
+                          </label>
+                          <span>문의 캡처는 참고용으로만 분석됩니다. JPG·PNG·WEBP, 최대 2MB</span>
+                        </div>
+                        {imageAttachment && (
+                          <div className="ai-attachment-file">
+                            <span>{imageAttachment.name}</span>
+                            <button type="button" onClick={handleRemoveImageAttachment}>제거</button>
+                          </div>
+                        )}
+                      </>
+                    )}
                     {lastAiResult && (
                       <div className="ai-inline-result">최근 AI 추천: {lastAiResult.count}개 조건 초안을 만들었습니다. 검토 후 적용해 주세요.</div>
-                    )}
-                    {selectedConditions.length > 0 && aiDraftConditions.length === 0 && (
-                      <button type="button" className="review-manual-button" onClick={handleReviewInManual}>조건 생성 탭에서 검토·수정하기 →</button>
                     )}
                     <textarea
                       className="ment-box ai-query-input"
@@ -567,15 +789,20 @@ const parseMentForComments = (text, originalConditions) => {
             </div>
             
             <div id="right-panel" className="panel">
-              <div className={`panel-header ${activeTab === 'ai' ? 'ai-results-header' : ''}`}>
+              <div className={`panel-header ${activeTab === 'ai' ? 'ai-results-header' : 'manual-results-header'}`}>
                 {activeTab === 'ai' && (
                   <div className="ai-results-title">
                     <span className="ai-workflow-icon">✦</span>
-                    <div><h3>AI 추천 결과</h3><p>추천 내용을 검토한 뒤 조건 생성 탭에서 수정할 수 있습니다.</p></div>
+                    <div><h3>AI 추천 결과</h3><p>추천 조건을 적용하면 조건식 편집 화면으로 이동합니다.</p></div>
                   </div>
                 )}
-                <h3>선택된 조건</h3>
-                <button className="reset-button" onClick={handleReset}>초기화</button>
+                {activeTab === 'manual' && (
+                  <div className="ai-results-title">
+                    <span className="ai-workflow-icon">✓</span>
+                    <div><h3>선택된 조건</h3><p>조건의 순서와 상세 설정값을 검토해 주세요.</p></div>
+                  </div>
+                )}
+                <button className="reset-button" onClick={handleReset}>전체 초기화</button>
               </div>
               <div className="panel-content">
                 {activeTab === 'ai' && (
@@ -594,11 +821,18 @@ const parseMentForComments = (text, originalConditions) => {
                     <p>고객 문의를 입력하고 AI 조건 추천 받기를 눌러 시작하세요.</p>
                   </div>
                 )}
+                {activeTab === 'ai' && aiDraftConditions.length === 0 && selectedConditions.length > 0 && (
+                  <div className="ai-return-state">
+                    <span>✓</span>
+                    <strong>조건식 편집이 진행 중입니다.</strong>
+                    <p>현재 {selectedConditions.length}개 조건이 적용되어 있습니다. 새 AI 추천을 시작하면 기존 조건은 초기화됩니다.</p>
+                  </div>
+                )}
                 {activeTab === 'ai' && aiDraftConditions.length > 0 && (
                   <div className="ai-draft-list">
                     <div className="ai-draft-actions">
                       <span>추천 초안 {aiDraftConditions.length}개</span>
-                      <button type="button" onClick={handleApplyAllAiDrafts}>전체 적용</button>
+                      <button type="button" onClick={handleApplyAllAiDrafts}>적용하고 편집하기</button>
                     </div>
                     {aiDraftConditions.map((condition, index) => (
                       <article className="ai-draft-card" key={`${condition.path}-${index}`}>
@@ -614,12 +848,6 @@ const parseMentForComments = (text, originalConditions) => {
                         </div>
                       </article>
                     ))}
-                  </div>
-                )}
-                {activeTab === 'ai' && aiDraftConditions.length === 0 && selectedConditions.length > 0 && (
-                  <div className="ai-applied-state">
-                    <strong>{selectedConditions.length}개 조건이 적용되었습니다.</strong>
-                    <button type="button" onClick={handleReviewInManual}>조건 생성 탭에서 검토·수정하기 →</button>
                   </div>
                 )}
                 {activeTab === 'manual' && (
@@ -645,6 +873,7 @@ const parseMentForComments = (text, originalConditions) => {
               onGroup={handleGroupConditions}
               onUngroup={handleUngroupConditions}
               onClearAllGroups={handleClearAllGroups}
+              onSaveDraft={handleSaveStrategy}
               // onMentUpdate={handleMentUpdate}
             />
           </div>

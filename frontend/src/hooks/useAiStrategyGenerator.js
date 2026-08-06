@@ -64,14 +64,17 @@ const responseSchema = {
 export function useAiStrategyGenerator() {
   const [isAiLoading, setIsAiLoading] = useState(false);
 
-  const generateStrategy = async (customerQuery, conditionList, selectedBroker) => {
+  const generateStrategy = async (customerQuery, conditionList, selectedBroker, imageAttachment = null) => {
     setIsAiLoading(true);
 
     try {
+      const imagePart = imageAttachment?.data && imageAttachment?.mimeType
+        ? { inlineData: { mimeType: imageAttachment.mimeType, data: imageAttachment.data } }
+        : null;
       const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerQuery, conditionList, selectedBroker }),
+        body: JSON.stringify({ customerQuery, conditionList, selectedBroker, imageAttachment }),
       };
 
       let response;
@@ -84,7 +87,7 @@ export function useAiStrategyGenerator() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              contents: [{ parts: [{ text: buildLocalPrompt(customerQuery, conditionList, selectedBroker) }] }],
+              contents: [{ parts: [{ text: `${buildLocalPrompt(customerQuery, conditionList, selectedBroker)}${imagePart ? '\n\n# 첨부 이미지 안내\n첨부 이미지는 고객 문의를 파악하는 보조 자료입니다. 이미지에서 확인할 수 있는 내용만 참고하고, 목록에 없는 조건은 만들지 마세요.' : ''}` }, ...(imagePart ? [imagePart] : [])] }],
               generationConfig: { temperature: 0, responseMimeType: 'application/json', responseSchema },
             }),
           },

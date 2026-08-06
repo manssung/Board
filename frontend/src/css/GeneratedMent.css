@@ -171,6 +171,87 @@ display: flex;
 .group-button.clear-all:hover {
   background-color: #c82333;
 }
+
+.save-draft-button {
+  border: 1px solid #bfd2f1;
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: #2d63bd;
+  background: #f6faff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.save-draft-button:hover { border-color: #8eafe4; background: #edf5ff; }
+
+/* 조건식 편집 피드백을 명확하게 보여주는 UI */
+.operator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  margin: 0 2px;
+  padding: 2px 6px;
+  border: 1px solid #d6e1f1;
+  border-radius: 999px;
+  color: #53647c;
+  background: #f8fbff;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: all .18s ease;
+}
+
+.operator:hover {
+  border-color: #8eafe5;
+  color: #1f62c9;
+  background: #edf4ff;
+  transform: translateY(-1px);
+}
+
+.condition-letter.groupable {
+  border: 1px solid #a9c4ec;
+  border-radius: 6px;
+  padding: 2px 6px;
+  color: #2e64bd;
+  background: #f4f8ff;
+}
+
+.condition-letter.groupable:hover {
+  border-color: #5e91df;
+  background: #e8f1ff;
+}
+
+.condition-letter.checked {
+  box-shadow: 0 3px 7px rgba(0, 123, 255, .22);
+}
+
+.group-action-buttons {
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid #d9e5f4;
+  border-radius: 9px;
+  background: #f8fbff;
+}
+
+.group-guide {
+  flex-basis: 100%;
+  margin: 0 0 2px;
+  color: #667993;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.group-guide b { color: #2866ca; }
+
+.group-button {
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-weight: 700;
+}
 .ment-buttons {
   display: flex; /* ✨ 버튼들을 가로로 나란히 배치 */
   gap: 8px; /* ✨ 버튼 사이의 간격 */
