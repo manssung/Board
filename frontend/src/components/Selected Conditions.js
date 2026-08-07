@@ -33,22 +33,24 @@ const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange,
   useAutoSizeTextArea(textAreaRef.current, cond.comment || cond.detail);
 
   return (
-    <div className="selected-item">
-      <div className="condition-content">
-        <div className="condition-pill">
-          <span
-            className={`paren-toggle ${cond.openParen ? 'active' : ''}`}
-            onClick={() => onToggleParen(index, 'open')}
-          >
-            (
-          </span>
-          {cond.type ? `${cond.type} > ` : ''}{cond.path}
-          <span
-            className={`paren-toggle ${cond.closeParen ? 'active' : ''}`}
-            onClick={() => onToggleParen(index, 'close')}
-          >
-            )
-          </span>
+    <div className="selected-item selected-condition-card condition-review-row">
+      <div className="condition-content review-row-main">
+        <div className="review-row-top">
+          <div className="condition-pill">
+            <span
+              className={`paren-toggle ${cond.openParen ? 'active' : ''}`}
+              onClick={() => onToggleParen(index, 'open')}
+            >
+              (
+            </span>
+            {cond.type ? `${cond.type} > ` : ''}{cond.path}
+            <span
+              className={`paren-toggle ${cond.closeParen ? 'active' : ''}`}
+              onClick={() => onToggleParen(index, 'close')}
+            >
+              )
+            </span>
+          </div>
         </div>
         <textarea
           ref={textAreaRef} // ref를 textarea에 연결합니다.

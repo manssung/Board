@@ -2,6 +2,16 @@ const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const MAX_IMAGE_BASE64_LENGTH = Math.ceil((2 * 1024 * 1024 * 4) / 3) + 1024;
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
+const getQuotaDetails = (message = '') => {
+  const retryInSeconds = Number(message.match(/retry in\s+([\d.]+)s/i)?.[1]);
+  const quotaLimit = Number(message.match(/limit:\s*(\d+)/i)?.[1]);
+  return {
+    retryInSeconds: Number.isFinite(retryInSeconds) ? retryInSeconds : undefined,
+    quotaLimit: Number.isFinite(quotaLimit) ? quotaLimit : undefined,
+    isDailyLimit: /per_day|daily|day_limit/i.test(message),
+  };
+};
+
 function buildPrompt(customerQuery, conditionList, selectedBroker) {
   const conditions = conditionList
     .map((item, index) => `ID:${index} | ${item.type || ''} > ${item.path || ''} : ${item.detail || ''}`)
@@ -111,9 +121,11 @@ module.exports = async function handler(request, response) {
     const payload = await geminiResponse.json().catch(() => ({}));
     if (!geminiResponse.ok) {
       const retryInSeconds = Number(payload?.error?.message?.match(/retry in\s+([\d.]+)s/i)?.[1]);
+      const quotaDetails = getQuotaDetails(payload?.error?.message || '');
       return response.status(geminiResponse.status).json({
         error: geminiResponse.status === 429 ? 'AI 요청이 잠시 많습니다. 잠시 후 다시 시도해 주세요.' : 'AI 추천을 생성하지 못했습니다.',
         retryInSeconds: Number.isFinite(retryInSeconds) ? retryInSeconds : undefined,
+        ...quotaDetails,
       });
     }
 

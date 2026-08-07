@@ -1,121 +1,81 @@
-/* src/components/SelectedConditions.css */
-
+/* AI 추천 카드와 동일한 결의 조건 편집 카드 */
 .selected-item {
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  align-items: flex-start; /* 아이콘 버튼과 내용을 위쪽 기준으로 정렬 */
-  background-color: #f8f9fa;
-  border: 1px solid var(--medium-gray);
+  gap: 10px;
   padding: 12px;
-  border-radius: var(--border-radius);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .condition-content {
   display: flex;
+  width: auto;
+  min-width: 0;
+  flex: 1;
   flex-direction: column;
-  gap: 8px; /* 태그와 코멘트 입력창 사이의 간격 */
-  width: calc(100% - 40px); /* 삭제 버튼 너비만큼 공간 확보 */
+  gap: 8px;
 }
 
 .condition-pill {
-  background-color: #e7f3ff;
-  color: #0056b3;
-  padding: 4px 10px;
-  border-radius: 12px; /* 타원형 모양 */
-  font-size: 13px;
-  font-weight: 500;
-  display: inline-block; /* 내용만큼만 너비 차지 */
-  align-self: flex-start; /* 왼쪽 정렬 */
+  display: inline-flex;
+  max-width: 100%;
+  align-self: flex-start;
+  align-items: center;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 0;
+  color: #2662c6;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
 .comment-input {
   width: 100%;
-  height: 35px;
-  font-size: 14px;
-  border: 1px solid var(--medium-gray);
-  border-radius: 4px;
-  padding: 8px;
-  background-color: white;
+  min-height: 35px;
   box-sizing: border-box;
-  resize: none; /* 사용자가 크기를 조절할 수 없도록 설정 */
-}
-
-.move-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin: 0 8px 0 4px; /* 오른쪽 여백 늘려서 삭제 버튼과 간격 확보 */
-}
-
-.move-button {
-  border: 1px solid #e0e0e0;
+  padding: 8px 9px;
+  border: 1px solid #dbe4ef;
+  border-radius: 5px;
+  color: #45556e;
   background: #fff;
-  border-radius: 4px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  resize: none;
+}
+
+.comment-input:focus { border-color: #9ebce8; outline: none; box-shadow: 0 0 0 3px rgba(57, 112, 213, .09); }
+
+.move-buttons { display: flex; flex: 0 0 auto; flex-direction: column; gap: 5px; margin: 0; }
+
+.move-button,
+.delete-button {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid #d9e0ea;
+  border-radius: 7px;
+  color: #68758a;
+  background: #fff;
   cursor: pointer;
   font-size: 13px;
   line-height: 1;
-  width: 24px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-  transition: background 0.15s;
+  transition: border-color .18s ease, color .18s ease, background .18s ease;
 }
 
-.move-button:hover:not(:disabled) {
-  background: #f0f0f0;
-  color: #333;
-}
+.move-button:hover:not(:disabled) { border-color: #b8cdf0; color: #2d62c9; background: #f7fbff; }
+.move-button:disabled { opacity: .3; cursor: default; }
+.delete-button:hover { border-color: #f0c3c9; color: #b42318; background: #fff7f7; }
 
-.move-button:disabled {
-  opacity: 0.25;
-  cursor: default;
-}
-
-.delete-button {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%; /* 원형 버튼 */
-  border: none;
-  background-color: var(--medium-gray);
-  color: var(--dark-gray);
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.2s ease;
-}
-
-.delete-button:hover {
-  background-color: #e63946; /* 빨간색 계열 */
-  color: white;
-}
-
-.ai-match-info {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  color: #4b5563;
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.ai-confidence {
-  flex: 0 0 auto;
-  border-radius: 999px;
-  padding: 2px 6px;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
+.ai-match-info { display: flex; align-items: flex-start; gap: 6px; color: #5f6f84; font-size: 11px; line-height: 1.45; }
+.ai-confidence { flex: 0 0 auto; padding: 2px 6px; border-radius: 999px; color: #fff; font-size: 10px; font-weight: 800; text-transform: uppercase; }
 .ai-confidence-high { background: #16803c; }
 .ai-confidence-medium { background: #a16207; }
 .ai-confidence-low { background: #b42318; }
-
 .ai-match-reason { padding-top: 1px; }

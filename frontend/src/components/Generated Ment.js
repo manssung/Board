@@ -131,8 +131,11 @@ const GeneratedMent = ({
     <div className="ment-box-container">
       <div className="ment-header">
         <div className="ment-title-group">
-        <h3>답변 멘트</h3>
-        
+          <span className="ment-section-icon">✎</span>
+          <div>
+            <h3>답변 멘트</h3>
+            <p>확정한 조건식이 안내 문구에 반영됩니다.</p>
+          </div>
         </div>
         <div className="ment-buttons">
           {onSaveDraft && (

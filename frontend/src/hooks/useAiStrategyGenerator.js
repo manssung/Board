@@ -1,10 +1,59 @@
 import { useState } from 'react';
+import { showAppAlert, showToast } from '../components/AppToast';
 
 // Vercel에서는 같은 도메인의 서버리스 API를 호출하므로 키가 브라우저로 전달되지 않습니다.
 const API_ENDPOINT = process.env.REACT_APP_API_URL || '/api/ai-recommend';
 const LOCAL_GEMINI_API_KEY = process.env.NODE_ENV === 'development'
   ? (process.env.REACT_APP_GEMINI_API_KEY || '').trim()
   : '';
+
+const getQuotaDetails = (message = '', fallbackRetryInSeconds) => {
+  const retryMatch = message.match(/retry in\s+([\d.]+)s/i);
+  const limitMatch = message.match(/limit:\s*(\d+)/i);
+  return {
+    retryInSeconds: Number.isFinite(Number(fallbackRetryInSeconds))
+      ? Number(fallbackRetryInSeconds)
+      : Number(retryMatch?.[1]),
+    quotaLimit: Number(limitMatch?.[1]),
+    isDailyLimit: /per_day|daily|day_limit/i.test(message),
+    isHighDemand: /high demand|temporarily unavailable|overloaded/i.test(message),
+  };
+};
+
+const getAiErrorMessage = (error) => {
+  const details = getQuotaDetails(error?.message || '', error?.retryInSeconds);
+
+  if (error?.status === 429) {
+    const limit = error?.quotaLimit || details.quotaLimit;
+    const limitText = Number.isFinite(limit) ? `무료 요청 한도 ${limit}회` : 'AI 요청 한도';
+    if (error?.isDailyLimit || details.isDailyLimit) return `오늘 사용할 수 있는 ${limitText}에 도달했습니다. 내일 다시 시도해 주세요.`;
+    if (Number.isFinite(details.retryInSeconds) && details.retryInSeconds > 0) {
+      return `${limitText}에 도달했습니다. 약 ${Math.ceil(details.retryInSeconds)}초 후 다시 시도해 주세요.`;
+    }
+    return `${limitText}에 도달했습니다. 잠시 후 다시 시도해 주세요.`;
+  }
+
+  if (error?.status === 503 || details.isHighDemand) return 'AI 서비스 요청이 일시적으로 많습니다. 잠시 후 다시 시도해 주세요.';
+  return `AI 추천을 생성하지 못했습니다.\n${error?.message || '잠시 후 다시 시도해 주세요.'}`;
+};
+
+const getAiErrorAlert = (error) => {
+  const details = getQuotaDetails(error?.message || '', error?.retryInSeconds);
+  if (error?.status === 429) {
+    const limit = error?.quotaLimit || details.quotaLimit;
+    const limitText = Number.isFinite(limit) ? `무료 요청 한도 ${limit}회` : 'AI 요청 한도';
+    const message = error?.isDailyLimit || details.isDailyLimit
+      ? `오늘 사용할 수 있는 ${limitText}에 도달했습니다. 내일 다시 시도해 주세요.`
+      : Number.isFinite(details.retryInSeconds) && details.retryInSeconds > 0
+        ? `${limitText}에 도달했습니다. 약 ${Math.ceil(details.retryInSeconds)}초 후 다시 시도해 주세요.`
+        : `${limitText}에 도달했습니다. 잠시 후 다시 시도해 주세요.`;
+    return { title: 'AI 무료 할당량 안내', message };
+  }
+  if (error?.status === 503 || details.isHighDemand) {
+    return { title: 'AI 서비스가 일시적으로 혼잡합니다', message: '현재 요청이 많아 조건을 추천하지 못했습니다. 잠시 후 다시 시도해 주세요.' };
+  }
+  return null;
+};
 
 const wait = (milliseconds) => new Promise(resolve => setTimeout(resolve, milliseconds));
 
@@ -97,9 +146,20 @@ export function useAiStrategyGenerator() {
         data = response.ok
           ? { matches: JSON.parse(responseText || '[]') }
           : { error: geminiData?.error?.message || `Gemini 요청 실패: ${response.status}` };
+        if (!response.ok) Object.assign(data, getQuotaDetails(data.error));
       } else {
         response = await fetch(API_ENDPOINT, requestOptions);
         data = await response.json().catch(() => ({}));
+      }
+
+      if (response.status === 429) {
+        const quotaDetails = getQuotaDetails(data.error || '', data.retryInSeconds);
+        const quotaError = new Error(data.error || 'AI 요청 한도에 도달했습니다.');
+        quotaError.status = 429;
+        quotaError.retryInSeconds = quotaDetails.retryInSeconds;
+        quotaError.quotaLimit = data.quotaLimit || quotaDetails.quotaLimit;
+        quotaError.isDailyLimit = data.isDailyLimit || quotaDetails.isDailyLimit;
+        throw quotaError;
       }
 
       if (response.status === 429 && data.retryInSeconds) {
@@ -112,7 +172,12 @@ export function useAiStrategyGenerator() {
       }
 
       if (!response.ok) {
-        throw new Error(data.error || `서버 요청 실패: ${response.status}`);
+        const requestError = new Error(data.error || `서버 요청 실패: ${response.status}`);
+        requestError.status = response.status;
+        requestError.retryInSeconds = data.retryInSeconds;
+        requestError.quotaLimit = data.quotaLimit;
+        requestError.isDailyLimit = data.isDailyLimit;
+        throw requestError;
       }
 
       const rawList = Array.isArray(data.matches) ? data.matches : [];
@@ -143,7 +208,9 @@ export function useAiStrategyGenerator() {
       return matchedItems;
     } catch (error) {
       console.error('AI 전략 생성 중 오류 발생:', error);
-      alert(`AI 생성 중 오류가 발생했습니다.\n${error.message}`);
+      const alert = getAiErrorAlert(error);
+      if (alert) showAppAlert(alert.title, alert.message);
+      else showToast(getAiErrorMessage(error), 'error');
       return null;
     } finally {
       setIsAiLoading(false);

@@ -7,6 +7,7 @@ export default function BrokerSelector({ brokers = [], selectedBroker, onChange 
       {/* <label htmlFor="broker-select">증권사 선택</label>  // 제목이 위에 있으므로 라벨은 생략 가능 */}
       <select 
         id="broker-select"
+        className="workspace-select"
         value={selectedBroker} 
         onChange={(e) => onChange(e.target.value)}
       >

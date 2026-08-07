@@ -172,6 +172,33 @@ display: flex;
   background-color: #c82333;
 }
 
+/* 조건 검토 화면과 같은 답변 멘트 헤더 */
+.ment-header {
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid #e9eef5;
+}
+
+.ment-title-group { gap: 10px; }
+.ment-title-group h3 { margin: 0; color: #1e293b; font-size: 16px; }
+.ment-title-group p { margin: 4px 0 0; color: #7b879b; font-size: 12px; }
+
+.ment-section-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 9px;
+  color: #2f70d5;
+  background: #e9f1ff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.ment-display { color: #354862; font-size: 13px; line-height: 1.65; }
+
 .save-draft-button {
   border: 1px solid #bfd2f1;
   border-radius: 6px;
