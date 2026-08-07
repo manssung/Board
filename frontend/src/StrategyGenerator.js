@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './css/StrategyGenerator.css';
 import BrokerSelector from '../src/components/BrokerSelector';
 import ConditionSearch from '../src/components/Condition Search';
@@ -11,13 +11,9 @@ import { useBrokerData } from './hooks/useBrokerData';
 import { generateMent } from './util/generateMent.js';
 import { useAiStrategyGenerator } from './hooks/useAiStrategyGenerator';
 import { useAiWorkflow } from './hooks/useAiWorkflow';
+import { useConditionEditor } from './hooks/useConditionEditor';
 import {
-  addCondition,
-  getConditionIndex,
-  getConditionLabel,
   groupOrConditions,
-  toggleConditionOperator,
-  updateConditionComment,
 } from './util/conditionEditor';
 import { useSavedStrategies } from './hooks/useSavedStrategies';
 import SavedStrategies from './components/SavedStrategies';
@@ -74,7 +70,6 @@ export default function StrategyGenerator() {
 
   const [selectedBroker, setSelectedBroker] = useState("");
   const [search, setSearch] = useState("");
-  const [selectedConditions, setSelectedConditions] = useState([]);
   //const [allConditions, setAllConditions] = useState([]);
   const [customMent, setCustomMent] = useState("");
   const [warning, setWarning] = useState("");
@@ -110,9 +105,46 @@ export default function StrategyGenerator() {
 
   const [isMentManuallyEdited, setIsMentManuallyEdited] = useState(false);
 
+  const handleConditionEditorEdit = useCallback((kind) => {
+    setIsMentManuallyEdited(false);
+    if (kind === 'add') {
+      setWarning('');
+      setFixedType('');
+      setAutoMent('');
+      setCustomMent('');
+      enterConditionEditing();
+      return;
+    }
+    if (kind === 'comment' || kind === 'move' || kind === 'remove') {
+      setCustomMent('');
+      setFixedType('');
+    }
+  }, [enterConditionEditing]);
+
+  const {
+    selectedConditions,
+    setSelectedConditions,
+    checkedLetters,
+    isGrouping,
+    clearConditions,
+    replaceConditions,
+    resetSelection,
+    handleConditionClick,
+    handleCommentChange,
+    handleToggleOperator,
+    handleMoveCondition,
+    handleRemoveCondition,
+    handleLetterCheck,
+    handleGroupConditions,
+    handleToggleGroupMode,
+    handleClearAllGroups,
+  } = useConditionEditor({
+    onEdit: handleConditionEditorEdit,
+    onConditionsEmpty: markEditingEmpty,
+    onRequestConfirmation: setConfirmDialog,
+  });
+
 // ✨ 1. 괄호로 묶을 항목(A, B, C...)을 저장할 상태
-  const [checkedLetters, setCheckedLetters] = useState(new Set());
-  const [isGrouping, setIsGrouping] = useState(false);
   const { allConditions, isLoading, error } = useBrokerData(selectedBroker);
 
   useEffect(() => { //증권사 데이터 불러오기
@@ -120,12 +152,11 @@ export default function StrategyGenerator() {
     setIsRestoringSavedStrategy(false);
     return;
   }
-  setSelectedConditions([]);
+  clearConditions();
   setAutoMent("");
   setCustomMent("");
   setFixedType("");
   setSearch("");
-  setCheckedLetters(new Set());
   resetAiWorkflow();
   setCustomerQuery('');
   setImageAttachment(null);
@@ -152,14 +183,14 @@ export default function StrategyGenerator() {
       return;
     }
     setFixedType(type);
-    setSelectedConditions([]);
+    clearConditions();
     resetAiWorkflow();
     setCustomMent("");
     setAutoMent("");
   };
   
   const handleReset = () => { //초기화 버튼
-  setSelectedConditions([]);
+  clearConditions();
   resetAiWorkflow();
   setCustomerQuery('');
   setImageAttachment(null);
@@ -167,7 +198,7 @@ export default function StrategyGenerator() {
   setCustomMent('');
   setAutoMent('');
   setFixedType('');
-  setCheckedLetters(new Set());
+  resetSelection();
   setIsMentManuallyEdited(false);
   };
 
@@ -211,14 +242,13 @@ export default function StrategyGenerator() {
     setIsRestoringSavedStrategy(item.selectedBroker !== selectedBroker);
     setSelectedBroker(item.selectedBroker || '');
     setCustomerQuery(item.customerQuery || '');
-    setSelectedConditions(Array.isArray(item.selectedConditions) ? item.selectedConditions : []);
+    replaceConditions(item.selectedConditions);
     restoreAiWorkflow(item.aiDraftConditions, item.selectedConditions);
     setCustomMent(item.customMent || '');
     setAutoMent(item.autoMent || '');
     setFixedType(item.fixedType || '');
     setActiveTab('manual');
-    setCheckedLetters(new Set());
-    setIsGrouping(false);
+    resetSelection();
   };
 
   const handleDeleteSavedStrategy = (id) => {
@@ -236,6 +266,7 @@ export default function StrategyGenerator() {
   }
   }, [selectedConditions, fixedType]);
 
+  /* Legacy condition editor handlers moved to useConditionEditor.
   const handleCommentChange = (index, newComment) => {
   setSelectedConditions(prev => updateConditionComment(prev, index, newComment));
       setIsMentManuallyEdited(false);
@@ -442,6 +473,7 @@ const newGroupId = Date.now();
     setIsGrouping(false);
     if (isLastCondition) markEditingEmpty();
   };
+  */
   
 
   useEffect(() => { //멘트 바로 수정
@@ -471,12 +503,12 @@ const newGroupId = Date.now();
 
 const runAiGeneration = async () => {
     // ✨ 중요: 함수 호출 시 3번째 인자로 'selectedBroker'를 전달합니다!
-    setSelectedConditions([]);
+    clearConditions();
     startAiWorkflow();
     setCustomMent('');
     setAutoMent('');
     setFixedType('');
-    setCheckedLetters(new Set());
+    resetSelection();
     const matchedConditions = await generateStrategy(customerQuery, allConditions, selectedBroker, ENABLE_IMAGE_ATTACHMENT ? imageAttachment : null);
 
     if (matchedConditions === null) {
@@ -592,6 +624,7 @@ const runAiGeneration = async () => {
     setCustomerQuery(query);
   };
 
+/* Legacy answer parsing moved to conditionEditor utilities.
 const parseMentForComments = (text, originalConditions) => {
   const lines = text.split('\n');
   const updatedConditions = originalConditions.map(cond => ({ ...cond }));
@@ -618,6 +651,7 @@ const parseMentForComments = (text, originalConditions) => {
     const updatedConditions = parseMentForComments(newMent, selectedConditions);
     setSelectedConditions(updatedConditions);
   };
+*/
 
   const mentButtons = selectedBroker?.includes('신한')
   ? ['조건선물', '기능불가', '작성불가', '전략외문의', '오류답변']
@@ -668,7 +702,7 @@ const parseMentForComments = (text, originalConditions) => {
               <div className="usage-help-modal-backdrop" onMouseDown={() => setIsHelpOpen(false)}>
                 <section id="usage-help-popover" className="usage-help-modal" role="dialog" aria-modal="true" aria-label="사용 방법" onMouseDown={(event) => event.stopPropagation()}>
                   <div className="usage-help-title">
-                    <div><strong>사용 방법</strong><p>아래 순서대로 진행하면 됩니다.</p></div>
+                    <div><strong>사용 방법</strong><p>AI가 초안을 만들고, 작업자가 검토·수정한 뒤 조건식을 확정합니다.</p></div>
                     <button type="button" onClick={() => setIsHelpOpen(false)} aria-label="사용 방법 닫기">×</button>
                   </div>
                   <div className="usage-help-steps">
@@ -680,7 +714,7 @@ const parseMentForComments = (text, originalConditions) => {
                       </div>
                       <span className="help-step-number">01</span>
                       <h4>문의 입력</h4>
-                      <p>고객이 원하는 조건을 입력합니다.</p>
+                      <p>고객 문의를 자연스럽게 입력합니다.</p>
                     </article>
                     <article className="usage-help-step">
                       <div className="help-screen help-result-screen">
@@ -690,29 +724,30 @@ const parseMentForComments = (text, originalConditions) => {
                         <b>추천 조건 적용</b>
                       </div>
                       <span className="help-step-number">02</span>
-                      <h4>추천 조건 검토</h4>
-                      <p>필요한 조건만 적용합니다.</p>
+                      <h4>AI 추천 검토</h4>
+                      <p>추천 이유를 확인하고 필요한 조건만 적용합니다.</p>
                     </article>
                     <article className="usage-help-step">
                       <div className="help-screen help-edit-screen">
                         <span className="help-mini-title">조건식 편집</span>
                         <i>+ 부족한 조건 직접 추가</i>
-                        <i>상세 조건값 수정</i>
+                        <i>상세 조건값 수정 · 필요 시 괄호 그룹 설정</i>
                         <b>수정 내용 반영</b>
                       </div>
                       <span className="help-step-number">03</span>
-                      <h4>직접 추가·수정</h4>
-                      <p>부족한 조건과 상세값을 보완합니다.</p>
+                      <h4>조건식 편집</h4>
+                      <p>부족한 조건을 추가하고 상세값·연결 방식을 수정합니다.</p>
                     </article>
                     <article className="usage-help-step">
-                      <div className="help-screen help-group-screen">
-                        <span className="help-mini-title">조건식 편집</span>
-                        <div><b>A</b><i>AND</i><strong>( B <small>OR</small> C )</strong></div>
-                        <em>그룹 편집 시작</em>
+                      <div className="help-screen help-result-screen">
+                        <span className="help-mini-title">답변 멘트 확인</span>
+                        <i>조건식 ( A OR B ) AND C <em>확정</em></i>
+                        <i>고객 안내 문구 확인 <em>복사</em></i>
+                        <b>답변 멘트 복사</b>
                       </div>
                       <span className="help-step-number">04</span>
-                      <h4>조건식 확정</h4>
-                      <p>조건식을 확인하고 답변을 복사합니다.</p>
+                      <h4>조건식 확정 · 답변 복사</h4>
+                      <p>완성된 조건식과 고객 안내 문구를 확인한 뒤 복사합니다.</p>
                     </article>
                   </div>
                   <section className="usage-help-save-note">
@@ -918,7 +953,6 @@ const parseMentForComments = (text, originalConditions) => {
               onToggleGroupMode={handleToggleGroupMode}
               onLetterCheck={handleLetterCheck}
               onGroup={handleGroupConditions}
-              onUngroup={handleUngroupConditions}
               onClearAllGroups={handleClearAllGroups}
               onSaveDraft={handleSaveStrategy}
               // onMentUpdate={handleMentUpdate}

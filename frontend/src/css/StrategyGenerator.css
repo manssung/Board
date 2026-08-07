@@ -519,9 +519,19 @@ body {
 .usage-help-title p { margin: 5px 0 0; color: #8190a5; font-size: 12px; }
 .usage-help-title button { border: 0; color: #7d8da2; background: transparent; cursor: pointer; font-size: 23px; line-height: 1; }
 
-.usage-help-steps { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
-.usage-help-step { min-width: 0; }
-.help-screen { display: flex; min-height: 160px; flex-direction: column; gap: 9px; padding: 15px; border: 1px solid #dce6f4; border-radius: 11px; background: #f8fbff; box-shadow: inset 0 1px 0 rgba(255,255,255,.7); }
+.usage-help-steps { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.usage-help-step {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 16px;
+  border: 1px solid #dce6f4;
+  border-radius: 13px;
+  background: #fbfdff;
+  box-shadow: 0 5px 14px rgba(37, 62, 104, .04);
+}
+.usage-help-step .help-screen { order: 4; margin-top: 13px; }
+.help-screen { display: flex; min-height: 142px; flex-direction: column; gap: 9px; padding: 14px; border: 1px solid #e0e8f4; border-radius: 9px; background: #f5f8fd; box-shadow: inset 0 1px 0 rgba(255,255,255,.7); }
 .help-mini-title { color: #2d64bd; font-size: 11px; font-weight: 800; }
 .help-screen i { display: block; overflow: hidden; padding: 8px; border: 1px solid #e0e8f4; border-radius: 6px; color: #718198; background: #fff; font-size: 11px; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
 .help-screen > b { display: block; margin-top: auto; border-radius: 6px; padding: 8px; color: #fff; background: #3272d8; text-align: center; font-size: 11px; }
@@ -532,9 +542,9 @@ body {
 .help-group-screen div > i, .help-group-screen small { padding: 4px 5px; border: 1px solid #d6e2f2; border-radius: 999px; color: #5f718a; background: #fff; font-size: 9px; font-style: normal; }
 .help-group-screen div > strong { padding: 6px; border-radius: 6px; color: #42628d; background: #edf5ff; font-size: 11px; }
 .help-group-screen > em { align-self: flex-start; padding: 5px 7px; border: 1px solid #b7ceee; border-radius: 5px; color: #2e65bb; background: #fff; font-size: 10px; font-style: normal; }
-.help-step-number { display: inline-block; margin-top: 11px; color: #3a76d1; font-size: 11px; font-weight: 800; }
-.usage-help-step h4 { margin: 4px 0 0; color: #32465f; font-size: 14px; }
-.usage-help-step p { margin: 5px 0 0; color: #7b8aa0; font-size: 12px; line-height: 1.5; }
+.help-step-number { order: 1; display: inline-flex; width: fit-content; margin: 0; padding: 3px 6px; border-radius: 999px; color: #2d65c2; background: #e9f2ff; font-size: 10px; font-weight: 800; }
+.usage-help-step h4 { order: 2; margin: 8px 0 0; color: #32465f; font-size: 14px; }
+.usage-help-step p { order: 3; margin: 5px 0 0; color: #718199; font-size: 12px; line-height: 1.5; }
 .usage-help-save-note { margin-top: 20px; padding: 16px 0 0; border-top: 1px solid #dce6f2; color: #718199; font-size: 11px; line-height: 1.55; }
 .usage-help-save-note strong { display: block; color: #405977; font-size: 13px; }
 .help-save-visual { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; padding: 11px; border: 1px solid #dce7f5; border-radius: 9px; background: #f8fbff; }
@@ -694,6 +704,10 @@ body {
   .help-save-screen { min-width: 0; flex: 1; gap: 6px; }
   .ai-workflow-layout { height: auto; }
   .ai-query-input { min-height: 130px; }
+  .ai-clear-query-button {
+    align-self: flex-end;
+    margin: 0 0 8px;
+  }
   .manual-condition-toolbar { align-items: flex-start; flex-wrap: wrap; }
   .manual-condition-toolbar .list-header { width: 100%; }
   .ai-empty-state p { white-space: normal; }
