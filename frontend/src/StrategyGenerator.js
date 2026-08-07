@@ -13,6 +13,8 @@ import { useAiStrategyGenerator } from './hooks/useAiStrategyGenerator';
 import { useSavedStrategies } from './hooks/useSavedStrategies';
 import SavedStrategies from './components/SavedStrategies';
 import AppToast, { showToast } from './components/AppToast';
+import AiDraftList from './components/AiDraftList';
+import WorkspaceEmptyState from './components/WorkspaceEmptyState';
 
 const groupOrConditions = (conditions) => {
   const groupedConditions = conditions.map(condition => ({ ...condition, groupIds: [] }));
@@ -72,6 +74,7 @@ export default function StrategyGenerator() {
   const [activeTab, setActiveTab] = useState('ai'); 
   const [lastAiResult, setLastAiResult] = useState(null);
   const [aiDraftConditions, setAiDraftConditions] = useState([]);
+  const [aiWorkflowPhase, setAiWorkflowPhase] = useState('idle');
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isSavedStrategiesOpen, setIsSavedStrategiesOpen] = useState(false);
   const savedStrategiesRef = useRef(null);
@@ -101,6 +104,7 @@ export default function StrategyGenerator() {
   setCheckedLetters(new Set());
   setLastAiResult(null);
   setAiDraftConditions([]);
+  setAiWorkflowPhase('idle');
   setCustomerQuery('');
   setImageAttachment(null);
   setAttachmentInputKey(key => key + 1);
@@ -128,6 +132,7 @@ export default function StrategyGenerator() {
     setFixedType(type);
     setLastAiResult(null);
     setSelectedConditions([]);
+    setAiWorkflowPhase('idle');
     setCustomMent("");
     setAutoMent("");
   };
@@ -136,6 +141,7 @@ export default function StrategyGenerator() {
   setSelectedConditions([]);
   setLastAiResult(null);
   setAiDraftConditions([]);
+  setAiWorkflowPhase('idle');
   setCustomerQuery('');
   setImageAttachment(null);
   setAttachmentInputKey(key => key + 1);
@@ -188,6 +194,13 @@ export default function StrategyGenerator() {
     setCustomerQuery(item.customerQuery || '');
     setSelectedConditions(Array.isArray(item.selectedConditions) ? item.selectedConditions : []);
     setAiDraftConditions(Array.isArray(item.aiDraftConditions) ? item.aiDraftConditions : []);
+    setAiWorkflowPhase(
+      Array.isArray(item.aiDraftConditions) && item.aiDraftConditions.length > 0
+        ? 'review'
+        : Array.isArray(item.selectedConditions) && item.selectedConditions.length > 0
+          ? 'editing'
+          : 'idle'
+    );
     setCustomMent(item.customMent || '');
     setAutoMent(item.autoMent || '');
     setFixedType(item.fixedType || '');
@@ -226,6 +239,7 @@ export default function StrategyGenerator() {
   const handleConditionClick = (condition) => {
     const newCondition = { ...condition, comment: ""}
     setSelectedConditions(prev => [...prev, {...condition, comment: undefined, operator : 'and', groupIds: []}]);
+    setAiWorkflowPhase('editing');
     
     // 고정 멘트 관련 상태 초기화
     setWarning("");
@@ -405,6 +419,7 @@ const newGroupId = Date.now();
   };
  
   const handleRemoveCondition = (index) => {
+    const isLastCondition = selectedConditions.length === 1;
     setSelectedConditions(prev => 
       prev
         .filter((_, i) => i !== index) // 선택한 항목 삭제
@@ -415,6 +430,7 @@ const newGroupId = Date.now();
     setFixedType("");
     setCheckedLetters(new Set()); // 선택 상태도 초기화
     setIsGrouping(false);
+    if (isLastCondition) setAiWorkflowPhase('completed_empty');
   };
   
 
@@ -448,13 +464,17 @@ const runAiGeneration = async () => {
     setSelectedConditions([]);
     setLastAiResult(null);
     setAiDraftConditions([]);
+    setAiWorkflowPhase('loading');
     setCustomMent('');
     setAutoMent('');
     setFixedType('');
     setCheckedLetters(new Set());
     const matchedConditions = await generateStrategy(customerQuery, allConditions, selectedBroker, ENABLE_IMAGE_ATTACHMENT ? imageAttachment : null);
 
-    if (matchedConditions === null) return;
+    if (matchedConditions === null) {
+      setAiWorkflowPhase('error');
+      return;
+    }
 
     // 2. 결과 처리 (여러 개의 매칭 결과를 모두 반영)
     if (matchedConditions && matchedConditions.length > 0) {
@@ -466,11 +486,13 @@ const runAiGeneration = async () => {
       })));
 
       setAiDraftConditions(newConditionItems);
+      setAiWorkflowPhase('review');
       setFixedType("");
       setLastAiResult({ request: customerQuery, count: newConditionItems.length });
       showToast(`AI가 조건 ${newConditionItems.length}개를 추천했습니다. 오른쪽에서 검토 후 적용해 주세요.`, 'success');
 
     } else {
+      setAiWorkflowPhase('no_result');
       showToast("AI가 적절한 조건을 찾지 못했습니다.\n질문을 더 구체적으로 적어주세요.", 'error');
     }
   };
@@ -538,7 +560,12 @@ const runAiGeneration = async () => {
     setAiDraftConditions(prev => prev.filter((_, draftIndex) => draftIndex !== index));
     setFixedType('');
     setCustomMent('');
-    if (isLastDraft) setActiveTab('manual');
+    if (isLastDraft) {
+      setAiWorkflowPhase('editing');
+      setActiveTab('manual');
+    } else {
+      setAiWorkflowPhase('partial_review');
+    }
   };
 
   const handleApplyAllAiDrafts = () => {
@@ -547,13 +574,19 @@ const runAiGeneration = async () => {
     setAiDraftConditions([]);
     setFixedType('');
     setCustomMent('');
+    setAiWorkflowPhase('editing');
     setActiveTab('manual');
   };
 
   const handleDiscardAiDraft = (index) => {
     const isLastDraft = aiDraftConditions.length === 1;
     setAiDraftConditions(prev => prev.filter((_, draftIndex) => draftIndex !== index));
-    if (isLastDraft) setActiveTab('manual');
+    if (isLastDraft) {
+      setAiWorkflowPhase(selectedConditions.length > 0 ? 'editing' : 'completed_empty');
+      setActiveTab('manual');
+    } else {
+      setAiWorkflowPhase(selectedConditions.length > 0 ? 'partial_review' : 'review');
+    }
   };
 
   const handleAiExample = (query) => {
@@ -737,7 +770,10 @@ const parseMentForComments = (text, originalConditions) => {
                 </div>
 
               <div className="panel-content">
-                {activeTab === 'manual' && (
+                {activeTab === 'manual' && aiWorkflowPhase === 'completed_empty' && selectedConditions.length === 0 && (
+                  <WorkspaceEmptyState className="manual-empty-state" icon="✓" title="추천 조건을 모두 제외했습니다." description="왼쪽 조건 목록에서 직접 조건을 추가해 계속 편집할 수 있습니다." />
+                )}
+                {activeTab === 'manual' && aiWorkflowPhase !== 'completed_empty' && (
                   <div className="manual-condition-workspace">
                     <div className="manual-condition-toolbar">
                       <div className="ai-workflow-heading">
@@ -830,58 +866,39 @@ const parseMentForComments = (text, originalConditions) => {
                 <button className="reset-button" onClick={handleReset}>전체 초기화</button>
               </div>
               <div className="panel-content">
-                {activeTab === 'ai' && aiDraftConditions.length === 0 && selectedConditions.length === 0 && (
-                  <div className="ai-empty-state">
-                    <span>✦</span>
-                    <strong>AI가 조건 후보를 추천해 드립니다.</strong>
-                    <p>고객 문의를 입력하고 AI 조건 추천 받기를 눌러 시작하세요.</p>
-                  </div>
+                {activeTab === 'ai' && aiWorkflowPhase === 'idle' && (
+                  <WorkspaceEmptyState className="ai-empty-state" icon="✦" title="AI가 조건 후보를 추천해 드립니다." description="고객 문의를 입력하고 AI 조건 추천 받기를 눌러 시작하세요." />
                 )}
-                {activeTab === 'ai' && aiDraftConditions.length === 0 && selectedConditions.length > 0 && (
+                {activeTab === 'ai' && aiWorkflowPhase === 'loading' && (
+                  <WorkspaceEmptyState className="ai-empty-state ai-loading-state" icon="⋯" title="AI가 조건을 분석하고 있습니다." description="증권사 조건 목록과 고객 문의를 비교하고 있습니다." />
+                )}
+                {activeTab === 'ai' && aiWorkflowPhase === 'no_result' && (
+                  <WorkspaceEmptyState className="ai-empty-state ai-no-result-state" icon="?" title="추천할 조건을 찾지 못했습니다." description="문의 내용을 조금 더 구체적으로 작성하거나 조건 목록을 확인해 주세요." />
+                )}
+                {activeTab === 'ai' && aiWorkflowPhase === 'error' && (
+                  <WorkspaceEmptyState className="ai-empty-state ai-error-state" icon="!" title="AI 추천을 완료하지 못했습니다." description="안내 팝업의 내용을 확인한 뒤 잠시 후 다시 시도해 주세요." />
+                )}
+                {activeTab === 'ai' && aiWorkflowPhase === 'editing' && (
                   <div className="ai-return-state">
                     <span>✓</span>
                     <strong>조건식 편집이 진행 중입니다.</strong>
-                    <p>현재 {selectedConditions.length}개 조건이 적용되어 있습니다. 새 AI 추천을 시작하면 기존 조건은 초기화됩니다.</p>
+                    <p>현재 {selectedConditions.length}개 조건이 적용되어 있습니다.<br />새 AI 추천을 시작하면 기존 조건은 초기화됩니다.</p>
                   </div>
                 )}
-                {activeTab === 'ai' && aiDraftConditions.length > 0 && (
-                  <div className="ai-draft-list">
-                    <div className="ai-draft-actions">
-                      <span>추천 초안 {aiDraftConditions.length}개</span>
-                      <button type="button" onClick={handleApplyAllAiDrafts}>적용하고 편집하기</button>
-                    </div>
-                    {aiDraftConditions.map((condition, index) => (
-                      <article className="ai-draft-card selected-item condition-review-row" key={`${condition.path}-${index}`}>
-                        <div className="condition-content review-row-main">
-                          <div className="review-row-top">
-                            <span className="review-kind">AI 추천 초안</span>
-                            <div className="condition-pill">{condition.type ? `${condition.type} > ` : ''}{condition.path}</div>
-                          </div>
-                          <div className="ai-draft-detail">{condition.detail}</div>
-                          {condition.aiReason && (
-                            <div className="ai-match-info">
-                              <span className={`ai-confidence ai-confidence-${condition.aiConfidence || 'medium'}`}>AI {condition.aiConfidence || 'medium'}</span>
-                              <span className="ai-match-reason">AI 추천 근거: {condition.aiReason}</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="ai-draft-card-actions">
-                          <button type="button" className="draft-apply-button" onClick={() => handleApplyAiDraft(index)}>적용</button>
-                          <button type="button" className="draft-discard-button" onClick={() => handleDiscardAiDraft(index)}>제외</button>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
+                {activeTab === 'ai' && ['review', 'partial_review'].includes(aiWorkflowPhase) && (
+                  <AiDraftList
+                    drafts={aiDraftConditions}
+                    isPartial={aiWorkflowPhase === 'partial_review'}
+                    onApplyAll={handleApplyAllAiDrafts}
+                    onApply={handleApplyAiDraft}
+                    onDiscard={handleDiscardAiDraft}
+                  />
                 )}
                 {activeTab === 'manual' && (
                   selectedConditions.length > 0 ? (
                     <SelectedConditions selectedConditions={selectedConditions} onRemove={handleRemoveCondition} onCommentChange={handleCommentChange} onMove={handleMoveCondition} />
                   ) : (
-                    <div className="manual-empty-state">
-                      <span>＋</span>
-                      <strong>적용된 조건이 없습니다.</strong>
-                      <p>왼쪽 조건 목록에서 필요한 조건을 추가해 주세요.</p>
-                    </div>
+                    <WorkspaceEmptyState className="manual-empty-state" icon="＋" title="적용된 조건이 없습니다." description="왼쪽 조건 목록에서 필요한 조건을 추가해 주세요." />
                   )
                 )}
               </div>

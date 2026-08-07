@@ -25,12 +25,8 @@ const getAiErrorMessage = (error) => {
 
   if (error?.status === 429) {
     const limit = error?.quotaLimit || details.quotaLimit;
-    const limitText = Number.isFinite(limit) ? `무료 요청 한도 ${limit}회` : 'AI 요청 한도';
-    if (error?.isDailyLimit || details.isDailyLimit) return `오늘 사용할 수 있는 ${limitText}에 도달했습니다. 내일 다시 시도해 주세요.`;
-    if (Number.isFinite(details.retryInSeconds) && details.retryInSeconds > 0) {
-      return `${limitText}에 도달했습니다. 약 ${Math.ceil(details.retryInSeconds)}초 후 다시 시도해 주세요.`;
-    }
-    return `${limitText}에 도달했습니다. 잠시 후 다시 시도해 주세요.`;
+    const limitText = Number.isFinite(limit) ? `무료 등급 하루 ${limit}회` : '오늘의 AI 요청 한도';
+    return `오늘 사용 가능한 ${limitText}를 모두 사용했습니다.\n할당량이 갱신된 후 다시 시도해 주세요.`;
   }
 
   if (error?.status === 503 || details.isHighDemand) return 'AI 서비스 요청이 일시적으로 많습니다. 잠시 후 다시 시도해 주세요.';
@@ -41,13 +37,11 @@ const getAiErrorAlert = (error) => {
   const details = getQuotaDetails(error?.message || '', error?.retryInSeconds);
   if (error?.status === 429) {
     const limit = error?.quotaLimit || details.quotaLimit;
-    const limitText = Number.isFinite(limit) ? `무료 요청 한도 ${limit}회` : 'AI 요청 한도';
-    const message = error?.isDailyLimit || details.isDailyLimit
-      ? `오늘 사용할 수 있는 ${limitText}에 도달했습니다. 내일 다시 시도해 주세요.`
-      : Number.isFinite(details.retryInSeconds) && details.retryInSeconds > 0
-        ? `${limitText}에 도달했습니다. 약 ${Math.ceil(details.retryInSeconds)}초 후 다시 시도해 주세요.`
-        : `${limitText}에 도달했습니다. 잠시 후 다시 시도해 주세요.`;
-    return { title: 'AI 무료 할당량 안내', message };
+    const limitText = Number.isFinite(limit) ? `무료 등급 하루 ${limit}회` : '오늘의 AI 요청 한도';
+    return {
+      title: '오늘의 AI 할당량을 모두 사용했습니다',
+      message: `오늘 사용 가능한 ${limitText}를 모두 사용했습니다.\n할당량이 갱신된 후 다시 시도해 주세요.`,
+    };
   }
   if (error?.status === 503 || details.isHighDemand) {
     return { title: 'AI 서비스가 일시적으로 혼잡합니다', message: '현재 요청이 많아 조건을 추천하지 못했습니다. 잠시 후 다시 시도해 주세요.' };
