@@ -10,12 +10,22 @@ import brokerMap from './data/brokerMap.js';
 import { useBrokerData } from './hooks/useBrokerData';
 import { generateMent } from './util/generateMent.js';
 import { useAiStrategyGenerator } from './hooks/useAiStrategyGenerator';
+import { useAiWorkflow } from './hooks/useAiWorkflow';
+import {
+  addCondition,
+  getConditionIndex,
+  getConditionLabel,
+  groupOrConditions,
+  toggleConditionOperator,
+  updateConditionComment,
+} from './util/conditionEditor';
 import { useSavedStrategies } from './hooks/useSavedStrategies';
 import SavedStrategies from './components/SavedStrategies';
 import AppToast, { showToast } from './components/AppToast';
 import AiDraftList from './components/AiDraftList';
 import WorkspaceEmptyState from './components/WorkspaceEmptyState';
 
+/* Legacy copy kept only for migration reference.
 const groupOrConditions = (conditions) => {
   const groupedConditions = conditions.map(condition => ({ ...condition, groupIds: [] }));
 
@@ -46,6 +56,7 @@ const groupOrConditions = (conditions) => {
   return groupedConditions;
 };
 
+*/
 const MAX_ATTACHMENT_BYTES = 2 * 1024 * 1024;
 const ALLOWED_ATTACHMENT_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 // 이미지 첨부 기능은 검토 후 다시 공개할 수 있도록 코드만 보관합니다.
@@ -72,9 +83,22 @@ export default function StrategyGenerator() {
   const [customerQuery, setCustomerQuery] = useState(""); 
   const { isAiLoading, generateStrategy } = useAiStrategyGenerator();
   const [activeTab, setActiveTab] = useState('ai'); 
-  const [lastAiResult, setLastAiResult] = useState(null);
-  const [aiDraftConditions, setAiDraftConditions] = useState([]);
-  const [aiWorkflowPhase, setAiWorkflowPhase] = useState('idle');
+  const {
+    aiWorkflowPhase,
+    aiDraftConditions,
+    lastAiResult,
+    resetAiWorkflow,
+    restoreAiWorkflow,
+    startAiWorkflow,
+    failAiWorkflow,
+    setNoAiResults,
+    setAiRecommendations,
+    enterConditionEditing,
+    markEditingEmpty,
+    applyDraft,
+    applyAllDrafts,
+    discardDraft,
+  } = useAiWorkflow();
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isSavedStrategiesOpen, setIsSavedStrategiesOpen] = useState(false);
   const savedStrategiesRef = useRef(null);
@@ -102,9 +126,7 @@ export default function StrategyGenerator() {
   setFixedType("");
   setSearch("");
   setCheckedLetters(new Set());
-  setLastAiResult(null);
-  setAiDraftConditions([]);
-  setAiWorkflowPhase('idle');
+  resetAiWorkflow();
   setCustomerQuery('');
   setImageAttachment(null);
   setAttachmentInputKey(key => key + 1);
@@ -130,18 +152,15 @@ export default function StrategyGenerator() {
       return;
     }
     setFixedType(type);
-    setLastAiResult(null);
     setSelectedConditions([]);
-    setAiWorkflowPhase('idle');
+    resetAiWorkflow();
     setCustomMent("");
     setAutoMent("");
   };
   
   const handleReset = () => { //초기화 버튼
   setSelectedConditions([]);
-  setLastAiResult(null);
-  setAiDraftConditions([]);
-  setAiWorkflowPhase('idle');
+  resetAiWorkflow();
   setCustomerQuery('');
   setImageAttachment(null);
   setAttachmentInputKey(key => key + 1);
@@ -193,19 +212,11 @@ export default function StrategyGenerator() {
     setSelectedBroker(item.selectedBroker || '');
     setCustomerQuery(item.customerQuery || '');
     setSelectedConditions(Array.isArray(item.selectedConditions) ? item.selectedConditions : []);
-    setAiDraftConditions(Array.isArray(item.aiDraftConditions) ? item.aiDraftConditions : []);
-    setAiWorkflowPhase(
-      Array.isArray(item.aiDraftConditions) && item.aiDraftConditions.length > 0
-        ? 'review'
-        : Array.isArray(item.selectedConditions) && item.selectedConditions.length > 0
-          ? 'editing'
-          : 'idle'
-    );
+    restoreAiWorkflow(item.aiDraftConditions, item.selectedConditions);
     setCustomMent(item.customMent || '');
     setAutoMent(item.autoMent || '');
     setFixedType(item.fixedType || '');
-    setActiveTab(item.activeTab === 'manual' ? 'manual' : 'ai');
-    setLastAiResult(null);
+    setActiveTab('manual');
     setCheckedLetters(new Set());
     setIsGrouping(false);
   };
@@ -226,20 +237,15 @@ export default function StrategyGenerator() {
   }, [selectedConditions, fixedType]);
 
   const handleCommentChange = (index, newComment) => {
-  setSelectedConditions(prev =>
-    prev.map((cond, i) =>
-      i === index ? { ...cond, comment: newComment } : cond
-    )
-      );
+  setSelectedConditions(prev => updateConditionComment(prev, index, newComment));
       setIsMentManuallyEdited(false);
       setCustomMent("");
       setFixedType("");
     };
 
   const handleConditionClick = (condition) => {
-    const newCondition = { ...condition, comment: ""}
-    setSelectedConditions(prev => [...prev, {...condition, comment: undefined, operator : 'and', groupIds: []}]);
-    setAiWorkflowPhase('editing');
+    setSelectedConditions(prev => addCondition(prev, condition));
+    enterConditionEditing();
     
     // 고정 멘트 관련 상태 초기화
     setWarning("");
@@ -272,7 +278,7 @@ export default function StrategyGenerator() {
     }
 
     const sortedIndices = Array.from(checkedLetters)
-      .map(letter => letter.charCodeAt(0) - 'A'.charCodeAt(0))
+      .map(letter => getConditionIndex(letter))
       .sort((a, b) => a - b);
 
     // 인덱스가 1씩 증가하는지(연속된 숫자인지) 확인합니다.
@@ -286,6 +292,16 @@ export default function StrategyGenerator() {
 
     const firstIndex = sortedIndices[0];
     const lastIndex = sortedIndices[sortedIndices.length - 1];
+
+    const sharedSelectedGroupIds = sortedIndices
+      .map(index => selectedConditions[index].groupIds || [])
+      .reduce((sharedIds, groupIds) => sharedIds.filter(id => groupIds.includes(id)));
+
+    if (sharedSelectedGroupIds.length > 0) {
+      showToast('이미 같은 괄호 그룹으로 묶인 조건입니다.', 'error');
+      setCheckedLetters(new Set());
+      return;
+    }
     
     // 3-1. 왼쪽 경계 확인: 선택된 첫 항목이 바로 앞 항목과 그룹을 공유하는지?
     if (firstIndex > 0) {
@@ -318,7 +334,7 @@ export default function StrategyGenerator() {
 const newGroupId = Date.now();
     setSelectedConditions(prev => 
       prev.map((item, index) => {
-        const letter = String.fromCharCode('A'.charCodeAt(0) + index);
+        const letter = getConditionLabel(index);
         const currentGroupIds = item.groupIds || [];
         return checkedLetters.has(letter) 
           ? { ...item, groupIds: [...currentGroupIds, newGroupId] } 
@@ -335,7 +351,7 @@ const newGroupId = Date.now();
     let targetGroupId = null;
     // const indicesArray = Array.from(checkedIndices);
     // const firstCheckedItem = selectedConditions[indicesArray[0]];
-    const sampleIndex = Array.from(checkedLetters)[0].charCodeAt(0) - 'A'.charCodeAt(0);
+    const sampleIndex = getConditionIndex(Array.from(checkedLetters)[0]);
     const sampleItem = selectedConditions[sampleIndex];
     
     if (sampleItem && sampleItem.groupIds && sampleItem.groupIds.length > 0) {
@@ -349,7 +365,7 @@ const newGroupId = Date.now();
     
     setSelectedConditions(prev =>
       prev.map((item, index) => {
-      const letter = String.fromCharCode('A'.charCodeAt(0) + index);
+      const letter = getConditionLabel(index);
           // ✨ 해당 ID만 필터링하여 제거
        return checkedLetters.has(letter) 
           ? { ...item, groupIds: [] } 
@@ -390,13 +406,7 @@ const newGroupId = Date.now();
   //and / or
  const handleToggleOperator = (index) => {
     // index에 해당하는 조건의 operator를 'and' -> 'or', 'or' -> 'and'로 변경
-    const newConditions = selectedConditions.map((item, i) => {
-      if (i === index) {
-        return { ...item, operator: item.operator === 'and' ? 'or' : 'and' };
-      }
-      return item;
-    });
-    setSelectedConditions(newConditions);
+    setSelectedConditions(prev => toggleConditionOperator(prev, index));
     setIsMentManuallyEdited(false); // 멘트가 자동으로 다시 생성되도록 설정
   };
 
@@ -409,7 +419,7 @@ const newGroupId = Date.now();
       const updated = [...prev];
       [updated[index], updated[targetIndex]] = [updated[targetIndex], updated[index]];
       // ✨ 순서가 바뀌면 기존 괄호(그룹) 구조가 인덱스 기준이라 깨지므로 전체 초기화합니다.
-      return updated.map(item => ({ ...item, groupIds: [] }));
+      return updated.map(item => ({ ...item, operator: 'and', groupIds: [] }));
     });
     setCheckedLetters(new Set());
     setIsGrouping(false);
@@ -423,14 +433,14 @@ const newGroupId = Date.now();
     setSelectedConditions(prev => 
       prev
         .filter((_, i) => i !== index) // 선택한 항목 삭제
-        .map(item => ({ ...item, groupIds: [] })) // ✨ 모든 괄호 초기화
+        .map(item => ({ ...item, operator: 'and', groupIds: [] })) // ✨ 모든 괄호와 연결 연산자 초기화
     );
     setIsMentManuallyEdited(false);
     setCustomMent("");
     setFixedType("");
     setCheckedLetters(new Set()); // 선택 상태도 초기화
     setIsGrouping(false);
-    if (isLastCondition) setAiWorkflowPhase('completed_empty');
+    if (isLastCondition) markEditingEmpty();
   };
   
 
@@ -462,9 +472,7 @@ const newGroupId = Date.now();
 const runAiGeneration = async () => {
     // ✨ 중요: 함수 호출 시 3번째 인자로 'selectedBroker'를 전달합니다!
     setSelectedConditions([]);
-    setLastAiResult(null);
-    setAiDraftConditions([]);
-    setAiWorkflowPhase('loading');
+    startAiWorkflow();
     setCustomMent('');
     setAutoMent('');
     setFixedType('');
@@ -472,7 +480,7 @@ const runAiGeneration = async () => {
     const matchedConditions = await generateStrategy(customerQuery, allConditions, selectedBroker, ENABLE_IMAGE_ATTACHMENT ? imageAttachment : null);
 
     if (matchedConditions === null) {
-      setAiWorkflowPhase('error');
+      failAiWorkflow();
       return;
     }
 
@@ -485,14 +493,12 @@ const runAiGeneration = async () => {
         comment: cond.detail,
       })));
 
-      setAiDraftConditions(newConditionItems);
-      setAiWorkflowPhase('review');
       setFixedType("");
-      setLastAiResult({ request: customerQuery, count: newConditionItems.length });
+      setAiRecommendations(newConditionItems, { request: customerQuery, count: newConditionItems.length });
       showToast(`AI가 조건 ${newConditionItems.length}개를 추천했습니다. 오른쪽에서 검토 후 적용해 주세요.`, 'success');
 
     } else {
-      setAiWorkflowPhase('no_result');
+      setNoAiResults();
       showToast("AI가 적절한 조건을 찾지 못했습니다.\n질문을 더 구체적으로 적어주세요.", 'error');
     }
   };
@@ -557,35 +563,28 @@ const runAiGeneration = async () => {
     if (!draft) return;
     const isLastDraft = aiDraftConditions.length === 1;
     setSelectedConditions(prev => [...prev, { ...draft, groupIds: [] }]);
-    setAiDraftConditions(prev => prev.filter((_, draftIndex) => draftIndex !== index));
+    applyDraft(index);
     setFixedType('');
     setCustomMent('');
     if (isLastDraft) {
-      setAiWorkflowPhase('editing');
       setActiveTab('manual');
-    } else {
-      setAiWorkflowPhase('partial_review');
     }
   };
 
   const handleApplyAllAiDrafts = () => {
     if (aiDraftConditions.length === 0) return;
     setSelectedConditions(prev => [...prev, ...aiDraftConditions]);
-    setAiDraftConditions([]);
+    applyAllDrafts();
     setFixedType('');
     setCustomMent('');
-    setAiWorkflowPhase('editing');
     setActiveTab('manual');
   };
 
   const handleDiscardAiDraft = (index) => {
     const isLastDraft = aiDraftConditions.length === 1;
-    setAiDraftConditions(prev => prev.filter((_, draftIndex) => draftIndex !== index));
+    discardDraft(index, selectedConditions.length > 0);
     if (isLastDraft) {
-      setAiWorkflowPhase(selectedConditions.length > 0 ? 'editing' : 'completed_empty');
       setActiveTab('manual');
-    } else {
-      setAiWorkflowPhase(selectedConditions.length > 0 ? 'partial_review' : 'review');
     }
   };
 
@@ -598,9 +597,9 @@ const parseMentForComments = (text, originalConditions) => {
   const updatedConditions = originalConditions.map(cond => ({ ...cond }));
   
   lines.forEach(line => {
-    const match = line.match(/^([A-Z])\s*:\s*(.*)/);
+    const match = line.match(/^([A-Za-z])\s*:\s*(.*)/);
     if (match) {
-      const index = match[1].charCodeAt(0) - 'A'.charCodeAt(0);
+      const index = getConditionIndex(match[1]);
       if (index >= 0 && index < updatedConditions.length) {
         const content = match[2];
         const parts = content.split(' : ');

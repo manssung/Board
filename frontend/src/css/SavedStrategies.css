@@ -4,11 +4,27 @@
   border-top: 1px solid #e7edf5;
 }
 
-.saved-strategies-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.saved-strategies-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .saved-strategies-header h3 { margin: 0; color: #344861; font-size: 14px; }
 .saved-strategies-header p { margin: 4px 0 0; color: #8794a7; font-size: 11px; }
 .saved-strategies-header > span { padding: 4px 7px; border-radius: 999px; color: #5171a2; background: #f2f6fc; font-size: 11px; font-weight: 700; }
-.saved-strategies-empty { margin: 12px 0 0; padding: 13px; border: 1px dashed #d8e2ef; border-radius: 8px; color: #8492a6; background: #fbfcfe; font-size: 12px; }
+
+.saved-strategies-empty {
+  margin: 12px 0 0;
+  padding: 13px;
+  border: 1px dashed #d8e2ef;
+  border-radius: 8px;
+  color: #8492a6;
+  background: #fbfcfe;
+  font-size: 12px;
+}
+
 .saved-strategies-list { display: grid; gap: 7px; margin-top: 12px; }
 .saved-strategy-item { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 11px; border: 1px solid #e0e8f2; border-radius: 8px; background: #fbfdff; }
 .saved-strategy-item > div:first-child { min-width: 0; }

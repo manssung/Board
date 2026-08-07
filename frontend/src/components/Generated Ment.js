@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../css/GeneratedMent.css';
 import useAutoSizeTextArea from '../hooks/useAutoSizeTextArea';
+import { getConditionLabel } from '../util/conditionEditor';
 
 // 멘트 생성 로직 (헬퍼 함수)
 const getMentParts = ({ selectedConditions, fixedMentMap, selectedBroker, fixedType }) => {
@@ -17,7 +18,7 @@ const getMentParts = ({ selectedConditions, fixedMentMap, selectedBroker, fixedT
   // 2. 선택된 조건 처리
   if (selectedConditions && selectedConditions.length > 0) {
     const conditionLines = selectedConditions.map((item, index) => {
-      const letter = String.fromCharCode('A'.charCodeAt(0) + index);
+      const letter = getConditionLabel(index);
       
       const typeStr = item.type && item.type.trim() !== '' ? `${item.type}>` : '';
       // 💡 2. path 맨 앞의 찌꺼기 화살표(>)와 공백을 완전히 청소합니다.
@@ -33,7 +34,7 @@ const getMentParts = ({ selectedConditions, fixedMentMap, selectedBroker, fixedT
     let closingLineText = '조건식 ';
     // const processedGroups = new Set();
     selectedConditions.forEach((item, index) => {
-      const letter = String.fromCharCode('A'.charCodeAt(0) + index);
+      const letter = getConditionLabel(index);
       const prevItem = selectedConditions[index - 1];
       const nextItem = selectedConditions[index + 1];
 
@@ -141,15 +142,6 @@ const GeneratedMent = ({
           {onSaveDraft && (
             <button type="button" className="save-draft-button" onClick={onSaveDraft}>임시저장</button>
           )}
-              {!isFixed && selectedConditions.length > 0 && (
-            <button 
-              className={`group-toggle-button ${isGrouping ? 'active' : ''}`}
-              // onClick={() => setIsGrouping(!isGrouping)}
-              onClick={onToggleGroupMode}
-            >
-              {isGrouping ? '그룹 편집 완료' : '그룹 편집 시작'}
-            </button>
-            )}
           {/* ✨ isEditable이 true일 때만 '수정' 버튼이 보입니다. */}
           <button className={`copy-button ${isCopied ? 'copied' : ''}`} onClick={handleCopy}>
             {isCopied ? '✅ 복사 완료!' : '복사'}
@@ -163,10 +155,19 @@ const GeneratedMent = ({
         {!isFixed && selectedConditions.length > 0 && <br />}
         {!isFixed && selectedConditions.length > 0 && (
           <div className="closing-line-container">
+            <div className="closing-line-toolbar">
+              <strong>조건식</strong>
+              <button
+                type="button"
+                className={`group-toggle-button ${isGrouping ? 'active' : ''}`}
+                onClick={onToggleGroupMode}
+              >
+                {isGrouping ? '그룹 설정 완료' : '괄호 그룹 설정'}
+              </button>
+            </div>
             <p className="closing-line">
-              {'조건식 '}
               {selectedConditions.map((item, index) => {
-                const letter = String.fromCharCode('A'.charCodeAt(0) + index);
+                const letter = getConditionLabel(index);
                 const isChecked = checkedLetters.has(letter);
                 const prevItem = selectedConditions[index - 1];
                 const nextItem = selectedConditions[index + 1];
@@ -211,7 +212,7 @@ const GeneratedMent = ({
             </p>
           {isGrouping && (
               <div className="group-action-buttons">
-                <p className="group-guide">묶을 조건을 선택한 뒤 <b>그룹 생성</b>을 눌러 주세요.</p>
+                <p className="group-guide">묶을 조건의 알파벳을 선택한 뒤 <b>그룹 생성</b>을 눌러 주세요.</p>
                 {/* 1. 항목을 선택했을 때만 나오는 버튼들 */}
                 {checkedLetters.size > 0 && (
                   <>

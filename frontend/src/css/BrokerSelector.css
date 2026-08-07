@@ -1,46 +1,35 @@
-/* src/components/BrokerSelector.css */
-
 .broker-selector-container {
-  position: relative; /* 화살표 아이콘의 기준점이 됩니다 */
+  position: relative;
   display: flex;
   flex-direction: column;
-  margin-bottom: 15px; /* 아래 컴포넌트와의 간격 */
+  margin-bottom: 15px;
 }
 
 .broker-selector-container label {
-  font-weight: 600;
   margin-bottom: 8px;
-  font-size: 14px;
   color: #343a40;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .broker-selector-container select {
-  /* --- 기본 디자인 --- */
-  padding: 10px 30px 10px 12px; /* 오른쪽 화살표 공간 확보 */
-  font-size: 14px;
+  width: 25%;
+  padding: 10px 30px 10px 12px;
   border: 1px solid var(--medium-gray);
   border-radius: var(--border-radius);
-  background-color: white;
-  width: 25%;
-  cursor: pointer;
-  
-  /* --- 기본 OS 스타일 제거 (화살표 포함) --- */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  
-  /* --- 커스텀 화살표 아이콘 (SVG) --- */
+  background-color: #fff;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 10px center;
   background-size: 12px;
-  
-  /* --- 포커스 스타일 --- */
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  font-size: 14px;
+  transition: border-color .2s ease, box-shadow .2s ease;
+  appearance: none;
 }
 
 .broker-selector-container select:focus {
-  outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, .2);
 }

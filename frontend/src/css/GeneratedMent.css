@@ -1,188 +1,39 @@
-/* src/components/GeneratedMent.css */
-
-/* 텍스트 영역과 버튼을 감싸는 컨테이너 */
+/* Answer editor and condition-group controls */
 .ment-box-container {
-  position: relative; /* 버튼을 오른쪽 위에 위치시키기 위한 기준점 */
   display: flex;
-  flex-direction: column;
-  flex-grow: 1; /* 부모(bottom-panel)의 남은 공간을 모두 차지 */
-}
-
-.ment-textarea {
-  width: 100%;
-  flex-grow: 1; /* 컨테이너의 남은 공간을 모두 차지 */
-  font-size: 14px;
-  line-height: 1.6;
-  padding: 12px;
-  padding-top: 40px; /* 버튼이 들어갈 공간 확보 */
-  border: none; /* 부모인 bottom-panel에 테두리가 있으므로 제거 */
-  resize: none;
-  font-family: inherit;
-  background-color: white;
-}
-
-.ment-textarea:focus {
-  outline: none;
-}
-
-/* 새로운 복사 버튼 스타일 */
-.copy-button {
-display: flex;
-  align-items: center;
-  gap: 6px; 
-  background-color: var(--light-gray);
-  color: var(--dark-gray);
-  border: 1px solid var(--medium-gray);
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.copy-button:hover {
-  background-color: var(--medium-gray);
-  color: var(--text-color);
-}
-
-/* 복사 완료 시 스타일 */
-.copy-button.copied {
-  background-color: #d1e7dd; /* 연한 초록색 */
-  color: #0f5132; /* 진한 초록색 */
-  border-color: #badbcc;
-}
-
-.copy-icon {
-  width: 14px;
-  height: 14px;
-}
-
-/* src/components/GeneratedMent.css */
-
-.edit-button {
-  background-color: transparent;
-  color: var(--dark-gray);
-  border: 1px solid var(--medium-gray);
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.edit-button:hover {
-  background-color: var(--medium-gray);
-}
-
-.ment-display pre {
-  margin: 0;
-  font-family: inherit;
-  /* --- ✨ 이 두 줄을 추가해주세요 --- */
-  white-space: pre-wrap; /* 공백/줄바꿈을 유지하면서 자동 줄바꿈 허용 */
-  word-wrap: break-word;   /* 아주 긴 단어(경로 등)도 강제로 줄바꿈 */
-}
-
-/* 편집 모드용 textarea */
-.ment-textarea-edit {
-  width: 100%;
+  position: relative;
   flex-grow: 1;
-  border: none;
-  resize: none;
-  overflow-y: hidden;
-  font-family: inherit;
-  font-size: 14px;
-  line-height: 1.6;
-}
-.ment-textarea-edit:focus {
-  outline: none;
+  flex-direction: column;
 }
 
 .ment-header {
   display: flex;
-  justify-content: space-between; /* 양쪽 끝으로 정렬 */
   align-items: center;
-  margin-bottom: 10px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--medium-gray);
-}
-.ment-title-group {
-  display: flex;
-  align-items: center;
-  gap: 10px; /* 제목과 수정 버튼 사이 간격 */
-}
-
-.ment-title-group h3 {
-  margin: 0; /* h3 태그의 기본 여백 제거 */
-}
-/* src/components/GeneratedMent.css */
-
-.closing-line-container {
-  /* 조건식 라인과 그룹 버튼을 묶는 컨테이너 */
-  /* margin-top : 5px */
-}
-
-.condition-letter {
-  cursor: pointer;
-  border-radius: 4px;
-  padding: 2px 4px;
-  transition: all 0.2s ease;
-  user-select: text;
-}
-.condition-letter:hover {
-  background-color: #f0f0f0;
-}
-.condition-letter.checked {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-.group-action-buttons {
-  margin-top: 10px;
-  display: flex;
-  gap: 8px;
-}
-.group-button {
-  background-color: #17a2b8;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 4px 10px;
-  font-size: 12px;
-  cursor: pointer;
-}
-.group-button.clear {
-  background-color: #dc3545;
-  color: white;
-}
-/* src/components/GeneratedMent.css 파일에 추가 */
-
-.group-button.clear-all {
-  background-color: #dc3545; /* danger red */
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-.group-button.clear-all:hover {
-  background-color: #c82333;
-}
-
-/* 조건 검토 화면과 같은 답변 멘트 헤더 */
-.ment-header {
+  justify-content: space-between;
   gap: 12px;
   margin-bottom: 14px;
   padding-bottom: 13px;
   border-bottom: 1px solid #e9eef5;
 }
 
-.ment-title-group { gap: 10px; }
-.ment-title-group h3 { margin: 0; color: #1e293b; font-size: 16px; }
-.ment-title-group p { margin: 4px 0 0; color: #7b879b; font-size: 12px; }
+.ment-title-group,
+.ment-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ment-title-group h3 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 16px;
+}
+
+.ment-title-group p {
+  margin: 4px 0 0;
+  color: #7b879b;
+  font-size: 12px;
+}
 
 .ment-section-icon {
   display: grid;
@@ -197,27 +48,104 @@ display: flex;
   font-weight: 700;
 }
 
-.ment-display { color: #354862; font-size: 13px; line-height: 1.65; }
+.ment-display {
+  color: #354862;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.ment-display pre {
+  margin: 0;
+  font-family: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ment-textarea,
+.ment-textarea-edit {
+  width: 100%;
+  flex-grow: 1;
+  border: 0;
+  color: #354862;
+  background: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: none;
+}
+
+.ment-textarea { padding: 40px 12px 12px; }
+.ment-textarea-edit { overflow-y: hidden; }
+.ment-textarea:focus,
+.ment-textarea-edit:focus { outline: none; }
+
+.copy-button,
+.edit-button,
+.group-toggle-button,
+.save-draft-button {
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.copy-button,
+.edit-button,
+.group-toggle-button {
+  border: 1px solid var(--medium-gray);
+  color: var(--dark-gray);
+  background: var(--light-gray);
+  padding: 6px 12px;
+}
+
+.copy-button { display: flex; align-items: center; gap: 6px; }
+.copy-button:hover,
+.edit-button:hover,
+.group-toggle-button:hover { color: var(--text-color); background: var(--medium-gray); }
+.copy-button.copied { border-color: #badbcc; color: #0f5132; background: #d1e7dd; }
+.copy-icon { width: 14px; height: 14px; }
 
 .save-draft-button {
   border: 1px solid #bfd2f1;
-  border-radius: 6px;
   padding: 6px 10px;
   color: #2d63bd;
   background: #f6faff;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
 }
-
+.save-draft-button { font-weight: 700; }
 .save-draft-button:hover { border-color: #8eafe4; background: #edf5ff; }
 
-/* 조건식 편집 피드백을 명확하게 보여주는 UI */
+.group-toggle-button { display: flex; align-items: center; justify-content: center; background: #fff; }
+.group-toggle-button.active { border-color: var(--primary-color); color: #fff; background: var(--primary-color); }
+.group-toggle-button.active:hover { background: #0056b3; }
+
+.condition-letter {
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
+  user-select: text;
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.condition-letter:hover { background: #f0f0f0; }
+.condition-letter.groupable {
+  border: 1px dashed #ccc;
+  padding: 0 2px;
+  color: #2e64bd;
+  background: #f4f8ff;
+}
+.condition-letter.checked {
+  border: 1px solid var(--primary-color);
+  color: #fff;
+  background: var(--primary-color);
+  box-shadow: 0 3px 7px rgba(0, 123, 255, .22);
+}
+
 .operator {
   display: inline-flex;
+  min-width: 34px;
   align-items: center;
   justify-content: center;
-  min-width: 34px;
   margin: 0 2px;
   padding: 2px 6px;
   border: 1px solid #d6e1f1;
@@ -230,34 +158,29 @@ display: flex;
   text-transform: uppercase;
   transition: all .18s ease;
 }
+.operator:hover { border-color: #8eafe5; color: #1f62c9; background: #edf4ff; transform: translateY(-1px); }
 
-.operator:hover {
-  border-color: #8eafe5;
-  color: #1f62c9;
-  background: #edf4ff;
-  transform: translateY(-1px);
+.closing-line-container { margin-top: 2px; }
+.closing-line-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+  margin-bottom: 7px;
 }
-
-.condition-letter.groupable {
-  border: 1px solid #a9c4ec;
-  border-radius: 6px;
-  padding: 2px 6px;
-  color: #2e64bd;
-  background: #f4f8ff;
+.closing-line-toolbar strong {
+  color: #52647c;
+  font-size: 12px;
+  font-weight: 700;
 }
-
-.condition-letter.groupable:hover {
-  border-color: #5e91df;
-  background: #e8f1ff;
-}
-
-.condition-letter.checked {
-  box-shadow: 0 3px 7px rgba(0, 123, 255, .22);
-}
+.closing-line { margin: 0; }
 
 .group-action-buttons {
+  display: flex;
   flex-wrap: wrap;
-  margin-top: 12px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
   padding: 10px;
   border: 1px solid #d9e5f4;
   border-radius: 9px;
@@ -271,86 +194,19 @@ display: flex;
   font-size: 12px;
   line-height: 1.45;
 }
-
 .group-guide b { color: #2866ca; }
+.group-action-buttons .divider { width: 1px; height: 20px; margin: 0 4px; background: #ccc; }
 
 .group-button {
+  border: 0;
   border-radius: 6px;
   padding: 6px 10px;
+  color: #fff;
+  background: #17a2b8;
+  cursor: pointer;
+  font-size: 12px;
   font-weight: 700;
 }
-.ment-buttons {
-  display: flex; /* ✨ 버튼들을 가로로 나란히 배치 */
-  gap: 8px; /* ✨ 버튼 사이의 간격 */
-}
-
-.group-toggle-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #fff; /* 흰색 배경 */
-  border: 1px solid var(--medium-gray); /* 회색 테두리 */
-  color: var(--dark-gray); /* 진회색 글자 */
-  border-radius: 6px; /* 둥근 모서리 */
-  padding: 6px 12px; /* 여백 */
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.group-toggle-button:hover {
-  background-color: var(--medium-gray); /* 호버 시 회색 배경 */
-  color: var(--text-color);
-}
-
-/* 활성화되었을 때 (파란색 강조) */
-.group-toggle-button.active {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
-  color: white;
-}
-.group-toggle-button.active:hover {
-  background-color: #0056b3; /* 더 진한 파란색 */
-}
-
-.condition-letter.groupable {
-  cursor: pointer;
-  border: 1px dashed #ccc;
-  padding: 0 2px;
-}
-.condition-letter.checked {
-  background-color: var(--primary-color);
-  color: white;
-  border: 1px solid var(--primary-color);
-}
-
-.group-action-buttons {
-  margin-top: 10px;
-  display: flex;
-  gap: 5px;
-}
-
-.group-action-buttons {
-  margin-top: 10px;
-  display: flex;
-  gap: 8px;
-  align-items: center; /* 세로 중앙 정렬 */
-}
-
-/* 구분선 스타일 */
-.group-action-buttons .divider {
-  width: 1px;
-  height: 20px;
-  background-color: #ccc;
-  margin: 0 4px;
-}
-
-/* 괄호 전체 삭제 버튼 (붉은색) */
-.group-button.clear-all {
-  background-color: #dc3545;
-  color: white;
-}
-.group-button.clear-all:hover {
-  background-color: #c82333;
-}
+.group-button.clear,
+.group-button.clear-all { background: #dc3545; }
+.group-button.clear-all:hover { background: #c82333; }
