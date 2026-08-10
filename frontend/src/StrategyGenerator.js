@@ -112,14 +112,14 @@ export default function StrategyGenerator() {
       setFixedType('');
       setAutoMent('');
       setCustomMent('');
-      enterConditionEditing();
+      if (aiDraftConditions.length === 0) enterConditionEditing();
       return;
     }
     if (kind === 'comment' || kind === 'move' || kind === 'remove') {
       setCustomMent('');
       setFixedType('');
     }
-  }, [enterConditionEditing]);
+  }, [aiDraftConditions.length, enterConditionEditing]);
 
   const {
     selectedConditions,
@@ -140,7 +140,9 @@ export default function StrategyGenerator() {
     handleClearAllGroups,
   } = useConditionEditor({
     onEdit: handleConditionEditorEdit,
-    onConditionsEmpty: markEditingEmpty,
+    onConditionsEmpty: () => {
+      if (aiDraftConditions.length === 0) markEditingEmpty();
+    },
     onRequestConfirmation: setConfirmDialog,
   });
 
