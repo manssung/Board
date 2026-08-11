@@ -950,3 +950,26 @@ select {
   .app-intro { margin: -24px -24px 0; padding: 23px 22px; }
   .app-status { font-size: 11px; }
 }
+/* Multiple condition strategies */
+.strategy-switcher {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 16px 12px;
+  padding: 8px;
+  border: 1px solid #dce6f5;
+  border-radius: 10px;
+  background: #f8fbff;
+}
+.strategy-switcher-list { display: flex; gap: 6px; min-width: 0; overflow-x: auto; }
+.strategy-switcher-button, .strategy-add-button, .strategy-remove-button {
+  white-space: nowrap; border: 1px solid #cddcf2; border-radius: 7px; background: #fff; color: #46617f; padding: 7px 10px; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.strategy-switcher-button.active { background: #3679de; color: #fff; border-color: #3679de; box-shadow: 0 3px 8px rgba(54,121,222,.18); }
+.strategy-add-button { color: #2164c8; margin-left: auto; }
+.strategy-remove-button { color: #b14646; }
+@media (max-width: 640px) {
+  .strategy-switcher { flex-wrap: wrap; }
+  .strategy-switcher-list { width: 100%; }
+  .strategy-add-button { margin-left: 0; }
+}

@@ -74,7 +74,6 @@ export default function StrategyGenerator() {
   const [customMent, setCustomMent] = useState("");
   const [warning, setWarning] = useState("");
   const [autoMent, setAutoMent] = useState("");
-  const [fixedType, setFixedType] = useState("");
   const [customerQuery, setCustomerQuery] = useState(""); 
   const { isAiLoading, generateStrategy } = useAiStrategyGenerator();
   const [activeTab, setActiveTab] = useState('ai'); 
@@ -109,7 +108,6 @@ export default function StrategyGenerator() {
     setIsMentManuallyEdited(false);
     if (kind === 'add') {
       setWarning('');
-      setFixedType('');
       setAutoMent('');
       setCustomMent('');
       if (aiDraftConditions.length === 0) enterConditionEditing();
@@ -117,17 +115,24 @@ export default function StrategyGenerator() {
     }
     if (kind === 'comment' || kind === 'move' || kind === 'remove') {
       setCustomMent('');
-      setFixedType('');
     }
   }, [aiDraftConditions.length, enterConditionEditing]);
 
   const {
     selectedConditions,
     setSelectedConditions,
+    strategies,
+    activeStrategyId,
+    activeStrategyKind,
+    activeTemplateType: fixedType,
+    setActiveTemplateType: setFixedType,
+    addStrategy,
+    selectStrategy,
+    removeStrategy,
+    resetStrategies,
+    restoreStrategies,
     checkedLetters,
     isGrouping,
-    clearConditions,
-    replaceConditions,
     resetSelection,
     handleConditionClick,
     handleCommentChange,
@@ -154,7 +159,7 @@ export default function StrategyGenerator() {
     setIsRestoringSavedStrategy(false);
     return;
   }
-  clearConditions();
+  resetStrategies();
   setAutoMent("");
   setCustomMent("");
   setFixedType("");
@@ -185,14 +190,12 @@ export default function StrategyGenerator() {
       return;
     }
     setFixedType(type);
-    clearConditions();
-    resetAiWorkflow();
     setCustomMent("");
     setAutoMent("");
   };
   
   const handleReset = () => { //초기화 버튼
-  clearConditions();
+  resetStrategies();
   resetAiWorkflow();
   setCustomerQuery('');
   setImageAttachment(null);
@@ -205,7 +208,7 @@ export default function StrategyGenerator() {
   };
 
   const handleSaveStrategy = () => {
-    if (!customerQuery.trim() && selectedConditions.length === 0 && aiDraftConditions.length === 0 && !fixedType) {
+    if (!customerQuery.trim() && !strategies.some((strategy) => strategy.conditions.length > 0 || strategy.fixedType) && aiDraftConditions.length === 0) {
       showToast('저장할 고객 문의 또는 조건식을 먼저 작성해 주세요.', 'error');
       return;
     }
@@ -215,6 +218,7 @@ export default function StrategyGenerator() {
       selectedBroker,
       customerQuery,
       selectedConditions,
+      strategies,
       aiDraftConditions,
       customMent,
       autoMent,
@@ -244,7 +248,7 @@ export default function StrategyGenerator() {
     setIsRestoringSavedStrategy(item.selectedBroker !== selectedBroker);
     setSelectedBroker(item.selectedBroker || '');
     setCustomerQuery(item.customerQuery || '');
-    replaceConditions(item.selectedConditions);
+    restoreStrategies(item.strategies, item.selectedConditions);
     restoreAiWorkflow(item.aiDraftConditions, item.selectedConditions);
     setCustomMent(item.customMent || '');
     setAutoMent(item.autoMent || '');
@@ -505,7 +509,7 @@ const newGroupId = Date.now();
 
 const runAiGeneration = async () => {
     // ✨ 중요: 함수 호출 시 3번째 인자로 'selectedBroker'를 전달합니다!
-    clearConditions();
+  resetStrategies();
     startAiWorkflow();
     setCustomMent('');
     setAutoMent('');
@@ -538,6 +542,10 @@ const runAiGeneration = async () => {
   };
 
   const handleAiGenerate = () => {
+    if (activeStrategyKind !== 'condition') {
+      showToast('AI 조건 추천은 조건식 블록에서만 사용할 수 있습니다.', 'error');
+      return;
+    }
     if (!selectedBroker) {
       showToast('먼저 증권사를 선택해주세요.', 'error');
       return;
@@ -550,7 +558,7 @@ const runAiGeneration = async () => {
       showToast('선택하신 증권사의 조건 데이터가 없습니다.', 'error');
       return;
     }
-    if (selectedConditions.length > 0 || aiDraftConditions.length > 0) {
+    if (strategies.some((strategy) => strategy.conditions.length > 0) || aiDraftConditions.length > 0) {
       setConfirmDialog({
         title: '새 AI 추천을 시작할까요?',
         description: '현재 선택한 조건과 추천 초안은 초기화됩니다.',
@@ -598,7 +606,6 @@ const runAiGeneration = async () => {
     const isLastDraft = aiDraftConditions.length === 1;
     setSelectedConditions(prev => [...prev, { ...draft, groupIds: [] }]);
     applyDraft(index);
-    setFixedType('');
     setCustomMent('');
     if (isLastDraft) {
       setActiveTab('manual');
@@ -609,7 +616,6 @@ const runAiGeneration = async () => {
     if (aiDraftConditions.length === 0) return;
     setSelectedConditions(prev => [...prev, ...aiDraftConditions]);
     applyAllDrafts();
-    setFixedType('');
     setCustomMent('');
     setActiveTab('manual');
   };
@@ -792,9 +798,7 @@ const parseMentForComments = (text, originalConditions) => {
                  <div className="ment-template-control">
                    <select
                      value={fixedType}
-                     onChange={(event) => {
-                       if (event.target.value) insertMent(event.target.value);
-                     }}
+                    onChange={(event) => insertMent(event.target.value)}
                      className="workspace-select"
                      aria-label="답변 템플릿 선택"
                    >
@@ -805,11 +809,32 @@ const parseMentForComments = (text, originalConditions) => {
                )}
                 </div>
 
+              {activeTab === 'manual' && (
+                <div className="strategy-switcher" aria-label="조건식 전략 선택">
+                  <div className="strategy-switcher-list">
+                    {strategies.map((strategy, index) => (
+                      <button
+                        key={strategy.id}
+                        type="button"
+                        className={`strategy-switcher-button ${strategy.id === activeStrategyId ? 'active' : ''}`}
+                        onClick={() => selectStrategy(strategy.id)}
+                      >
+                        전략 {index + 1}
+                      </button>
+                    ))}
+                  </div>
+                  <button type="button" className="strategy-add-button" onClick={() => addStrategy('condition')}>+ 전략 추가</button>
+                  {strategies.length > 1 && (
+                    <button type="button" className="strategy-remove-button" onClick={() => removeStrategy(activeStrategyId)}>현재 전략 삭제</button>
+                  )}
+                </div>
+              )}
+              
               <div className="panel-content">
-                {activeTab === 'manual' && aiWorkflowPhase === 'completed_empty' && selectedConditions.length === 0 && (
+                {activeTab === 'manual' && activeStrategyKind === 'condition' && aiWorkflowPhase === 'completed_empty' && selectedConditions.length === 0 && (
                   <WorkspaceEmptyState className="manual-empty-state" icon="✓" title="추천 조건을 모두 제외했습니다." description="왼쪽 조건 목록에서 직접 조건을 추가해 계속 편집할 수 있습니다." />
                 )}
-                {activeTab === 'manual' && aiWorkflowPhase !== 'completed_empty' && (
+                {activeTab === 'manual' && activeStrategyKind === 'condition' && aiWorkflowPhase !== 'completed_empty' && (
                   <div className="manual-condition-workspace">
                     <div className="manual-condition-toolbar">
                       <div className="ai-workflow-heading">
@@ -822,6 +847,9 @@ const parseMentForComments = (text, originalConditions) => {
                     </div>
                     <ConditionList conditions={filteredConditions} onConditionClick={handleConditionClick} isSearching={Boolean(search.trim())} />
                   </div>
+                )}
+                {activeTab === 'manual' && activeStrategyKind === 'template' && (
+                  <WorkspaceEmptyState className="manual-empty-state" icon="✉" title="답변 템플릿 블록입니다." description="상단에서 템플릿을 선택하면 답변 순서에 그대로 삽입됩니다." />
                 )}
                 {activeTab === 'ai' && (
                   <div className="ai-workflow">
@@ -931,7 +959,9 @@ const parseMentForComments = (text, originalConditions) => {
                   />
                 )}
                 {activeTab === 'manual' && (
-                  selectedConditions.length > 0 ? (
+                  activeStrategyKind === 'template' ? (
+                    <WorkspaceEmptyState className="manual-empty-state" icon="✉" title={fixedType ? '답변 템플릿이 선택되었습니다.' : '답변 템플릿을 선택해 주세요.'} description={fixedType ? '답변 멘트의 현재 순서에 이 템플릿이 삽입됩니다.' : '왼쪽 상단의 답변 템플릿 선택에서 내용을 골라 주세요.'} />
+                  ) : selectedConditions.length > 0 ? (
                     <SelectedConditions selectedConditions={selectedConditions} onRemove={handleRemoveCondition} onCommentChange={handleCommentChange} onMove={handleMoveCondition} />
                   ) : (
                     <WorkspaceEmptyState className="manual-empty-state" icon="＋" title="적용된 조건이 없습니다." description="왼쪽 조건 목록에서 필요한 조건을 추가해 주세요." />
@@ -944,6 +974,8 @@ const parseMentForComments = (text, originalConditions) => {
           <div className="bottom-panel">
             <GeneratedMent 
               selectedConditions={selectedConditions} 
+              strategies={strategies}
+              activeStrategyId={activeStrategyId}
               onToggleOperator={handleToggleOperator} 
               fixedMentMap={fixedMentMap}
               selectedBroker={selectedBroker}

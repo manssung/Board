@@ -210,3 +210,16 @@
 .group-button.clear,
 .group-button.clear-all { background: #dc3545; }
 .group-button.clear-all:hover { background: #c82333; }
+.ment-strategy-block {
+  margin: 0 0 20px;
+  padding: 14px 0 4px;
+  border-top: 1px solid #e2eaf5;
+}
+.ment-strategy-block:first-of-type { border-top: 0; padding-top: 0; }
+.ment-strategy-title {
+  display: block;
+  margin: 0 0 10px;
+  color: #234d85;
+  font-size: 14px;
+}
+.closing-line-static { padding-top: 8px; }
