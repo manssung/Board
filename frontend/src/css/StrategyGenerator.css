@@ -845,8 +845,15 @@ body {
   margin: 0;
 }
 
+#right-panel .selected-condition-card .condition-action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
 #right-panel .selected-condition-card .move-button,
-#right-panel .selected-condition-card .delete-button {
+#right-panel .selected-condition-card .delete-button,
+#right-panel .selected-condition-card .duplicate-button {
   width: 28px;
   height: 28px;
   border: 1px solid #d9e0ea;
@@ -859,6 +866,20 @@ body {
   border-color: #b8cdf0;
   color: #2d62c9;
   background: #f7fbff;
+}
+
+#right-panel .selected-condition-card .duplicate-button {
+  width: auto;
+  min-width: 38px;
+  padding: 0 7px;
+  color: #2d62c9;
+  border-color: #cbdcf6;
+  font-size: 11px;
+  font-weight: 700;
+}
+#right-panel .selected-condition-card .duplicate-button:hover {
+  background: #f3f8ff;
+  border-color: #9fbdec;
 }
 
 #right-panel .selected-condition-card .delete-button:hover {

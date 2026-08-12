@@ -136,6 +136,22 @@ export function useConditionEditor({ onEdit, onConditionsEmpty, onRequestConfirm
     if (isLastCondition) onConditionsEmpty?.();
   }, [onConditionsEmpty, onEdit, resetSelection, selectedConditions.length, setSelectedConditions]);
 
+  const handleDuplicateCondition = useCallback((index) => {
+    setSelectedConditions((previous) => {
+      const source = previous[index];
+      if (!source) return previous;
+      const copied = {
+        ...source,
+        id: `copied-${Date.now()}`,
+        groupIds: [],
+        operator: 'and',
+      };
+      return [...previous, copied];
+    });
+    resetSelection();
+    onEdit?.('duplicate');
+  }, [onEdit, resetSelection, setSelectedConditions]);
+
   const handleLetterCheck = useCallback((letter) => {
     setCheckedLetters((previous) => {
       const next = new Set(previous);
@@ -207,7 +223,7 @@ export function useConditionEditor({ onEdit, onConditionsEmpty, onRequestConfirm
   return {
     strategies, activeStrategy, activeStrategyId: activeStrategy?.id, activeStrategyKind: activeStrategy?.kind || 'condition', activeTemplateType: activeStrategy?.fixedType || '', setActiveTemplateType, addStrategy, selectStrategy, removeStrategy, resetStrategies, restoreStrategies,
     selectedConditions, setSelectedConditions, checkedLetters, isGrouping, clearConditions, replaceConditions, resetSelection,
-    handleConditionClick, handleCommentChange, handleToggleOperator, handleMoveCondition, handleRemoveCondition,
+    handleConditionClick, handleCommentChange, handleToggleOperator, handleMoveCondition, handleRemoveCondition, handleDuplicateCondition,
     handleLetterCheck, handleGroupConditions, handleToggleGroupMode, handleClearAllGroups,
   };
 }

@@ -106,7 +106,7 @@ export default function StrategyGenerator() {
 
   const handleConditionEditorEdit = useCallback((kind) => {
     setIsMentManuallyEdited(false);
-    if (kind === 'add') {
+    if (kind === 'add' || kind === 'duplicate') {
       setWarning('');
       setAutoMent('');
       setCustomMent('');
@@ -139,6 +139,7 @@ export default function StrategyGenerator() {
     handleToggleOperator,
     handleMoveCondition,
     handleRemoveCondition,
+    handleDuplicateCondition,
     handleLetterCheck,
     handleGroupConditions,
     handleToggleGroupMode,
@@ -831,10 +832,7 @@ const parseMentForComments = (text, originalConditions) => {
               )}
               
               <div className="panel-content">
-                {activeTab === 'manual' && activeStrategyKind === 'condition' && aiWorkflowPhase === 'completed_empty' && selectedConditions.length === 0 && (
-                  <WorkspaceEmptyState className="manual-empty-state" icon="✓" title="추천 조건을 모두 제외했습니다." description="왼쪽 조건 목록에서 직접 조건을 추가해 계속 편집할 수 있습니다." />
-                )}
-                {activeTab === 'manual' && activeStrategyKind === 'condition' && aiWorkflowPhase !== 'completed_empty' && (
+                {activeTab === 'manual' && activeStrategyKind === 'condition' && (
                   <div className="manual-condition-workspace">
                     <div className="manual-condition-toolbar">
                       <div className="ai-workflow-heading">
@@ -962,7 +960,7 @@ const parseMentForComments = (text, originalConditions) => {
                   activeStrategyKind === 'template' ? (
                     <WorkspaceEmptyState className="manual-empty-state" icon="✉" title={fixedType ? '답변 템플릿이 선택되었습니다.' : '답변 템플릿을 선택해 주세요.'} description={fixedType ? '답변 멘트의 현재 순서에 이 템플릿이 삽입됩니다.' : '왼쪽 상단의 답변 템플릿 선택에서 내용을 골라 주세요.'} />
                   ) : selectedConditions.length > 0 ? (
-                    <SelectedConditions selectedConditions={selectedConditions} onRemove={handleRemoveCondition} onCommentChange={handleCommentChange} onMove={handleMoveCondition} />
+                    <SelectedConditions selectedConditions={selectedConditions} onRemove={handleRemoveCondition} onCommentChange={handleCommentChange} onMove={handleMoveCondition} onDuplicate={handleDuplicateCondition} />
                   ) : (
                     <WorkspaceEmptyState className="manual-empty-state" icon="＋" title="적용된 조건이 없습니다." description="왼쪽 조건 목록에서 필요한 조건을 추가해 주세요." />
                   )

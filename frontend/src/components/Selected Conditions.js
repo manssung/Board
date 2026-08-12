@@ -2,7 +2,7 @@ import React, { useRef } from 'react'; // useRef를 import 합니다.
 import '../css/SelectedConditions.css';
 import useAutoSizeTextArea from '../hooks/useAutoSizeTextArea'; // 1단계에서 만든 훅을 import 합니다.
 
-const SelectedConditions = ({ selectedConditions, onRemove, onCommentChange, onToggleParen, onMove }) => {
+const SelectedConditions = ({ selectedConditions, onRemove, onCommentChange, onToggleParen, onMove, onDuplicate }) => {
   return (
     <>
       {selectedConditions.map((cond, index) => (
@@ -17,6 +17,7 @@ const SelectedConditions = ({ selectedConditions, onRemove, onCommentChange, onT
           onCommentChange={onCommentChange}
           onToggleParen={onToggleParen}
           onMove={onMove}
+          onDuplicate={onDuplicate}
         />
       ))}
     </>
@@ -24,7 +25,7 @@ const SelectedConditions = ({ selectedConditions, onRemove, onCommentChange, onT
 };
 
 // --- ✨ 각 아이템을 렌더링하는 별도의 컴포넌트 ---
-const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange, onToggleParen, onMove, isChecked }) => {
+const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange, onToggleParen, onMove, onDuplicate, isChecked }) => {
   // textarea DOM 요소에 접근하기 위해 useRef를 사용합니다.
   const textAreaRef = useRef(null);
 
@@ -88,13 +89,23 @@ const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange,
           ▼
         </button>
       </div>
-      <button
-        className="delete-button"
-        onClick={() => onRemove(index)}
-        title="삭제"
-      >
-        &times;
-      </button>
+      <div className="condition-action-buttons">
+        <button
+          className="delete-button"
+          onClick={() => onRemove(index)}
+          title="삭제"
+        >
+          &times;
+        </button>
+        <button
+          type="button"
+          className="duplicate-button"
+          onClick={() => onDuplicate(index)}
+          title="이 조건을 맨 아래에 복사"
+        >
+          복사
+        </button>
+      </div>
     </div>
   );
 };
