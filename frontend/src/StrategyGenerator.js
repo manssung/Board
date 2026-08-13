@@ -832,7 +832,7 @@ const parseMentForComments = (text, originalConditions) => {
               )}
               
               <div className="panel-content">
-                {activeTab === 'manual' && activeStrategyKind === 'condition' && (
+                {activeTab === 'manual' && (
                   <div className="manual-condition-workspace">
                     <div className="manual-condition-toolbar">
                       <div className="ai-workflow-heading">
@@ -845,9 +845,6 @@ const parseMentForComments = (text, originalConditions) => {
                     </div>
                     <ConditionList conditions={filteredConditions} onConditionClick={handleConditionClick} isSearching={Boolean(search.trim())} />
                   </div>
-                )}
-                {activeTab === 'manual' && activeStrategyKind === 'template' && (
-                  <WorkspaceEmptyState className="manual-empty-state" icon="✉" title="답변 템플릿 블록입니다." description="상단에서 템플릿을 선택하면 답변 순서에 그대로 삽입됩니다." />
                 )}
                 {activeTab === 'ai' && (
                   <div className="ai-workflow">
