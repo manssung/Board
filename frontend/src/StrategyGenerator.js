@@ -8,7 +8,6 @@ import GeneratedMent from '../src/components/Generated Ment';
 import fixedMentMap from './data/fixedMentMap.js';
 import brokerMap from './data/brokerMap.js';
 import { useBrokerData } from './hooks/useBrokerData';
-import { generateMent } from './util/generateMent.js';
 import { useAiStrategyGenerator } from './hooks/useAiStrategyGenerator';
 import { useAiWorkflow } from './hooks/useAiWorkflow';
 import { useConditionEditor } from './hooks/useConditionEditor';
@@ -71,9 +70,6 @@ export default function StrategyGenerator() {
   const [selectedBroker, setSelectedBroker] = useState("");
   const [search, setSearch] = useState("");
   //const [allConditions, setAllConditions] = useState([]);
-  const [customMent, setCustomMent] = useState("");
-  const [warning, setWarning] = useState("");
-  const [autoMent, setAutoMent] = useState("");
   const [customerQuery, setCustomerQuery] = useState(""); 
   const { isAiLoading, generateStrategy } = useAiStrategyGenerator();
   const [activeTab, setActiveTab] = useState('ai'); 
@@ -102,19 +98,10 @@ export default function StrategyGenerator() {
   const [confirmDialog, setConfirmDialog] = useState(null);
   const { savedStrategies, saveStrategy, deleteSavedStrategy } = useSavedStrategies();
 
-  const [isMentManuallyEdited, setIsMentManuallyEdited] = useState(false);
-
   const handleConditionEditorEdit = useCallback((kind) => {
-    setIsMentManuallyEdited(false);
     if (kind === 'add' || kind === 'duplicate') {
-      setWarning('');
-      setAutoMent('');
-      setCustomMent('');
       if (aiDraftConditions.length === 0) enterConditionEditing();
       return;
-    }
-    if (kind === 'comment' || kind === 'move' || kind === 'remove') {
-      setCustomMent('');
     }
   }, [aiDraftConditions.length, enterConditionEditing]);
 
@@ -161,9 +148,6 @@ export default function StrategyGenerator() {
     return;
   }
   resetStrategies();
-  setAutoMent("");
-  setCustomMent("");
-  setFixedType("");
   setSearch("");
   resetAiWorkflow();
   setCustomerQuery('');
@@ -191,8 +175,6 @@ export default function StrategyGenerator() {
       return;
     }
     setFixedType(type);
-    setCustomMent("");
-    setAutoMent("");
   };
   
   const handleReset = () => { //초기화 버튼
@@ -201,11 +183,7 @@ export default function StrategyGenerator() {
   setCustomerQuery('');
   setImageAttachment(null);
   setAttachmentInputKey(key => key + 1);
-  setCustomMent('');
-  setAutoMent('');
-  setFixedType('');
   resetSelection();
-  setIsMentManuallyEdited(false);
   };
 
   const handleSaveStrategy = () => {
@@ -221,9 +199,6 @@ export default function StrategyGenerator() {
       selectedConditions,
       strategies,
       aiDraftConditions,
-      customMent,
-      autoMent,
-      fixedType,
       activeTab,
     });
 
@@ -251,9 +226,6 @@ export default function StrategyGenerator() {
     setCustomerQuery(item.customerQuery || '');
     restoreStrategies(item.strategies, item.selectedConditions);
     restoreAiWorkflow(item.aiDraftConditions, item.selectedConditions);
-    setCustomMent(item.customMent || '');
-    setAutoMent(item.autoMent || '');
-    setFixedType(item.fixedType || '');
     setActiveTab('manual');
     resetSelection();
   };
@@ -263,15 +235,6 @@ export default function StrategyGenerator() {
       showToast('저장 목록을 정리하지 못했습니다.', 'error');
     }
   };
-
- 
-  useEffect(() => { //멘트 바로 수정
-  if (fixedType && selectedConditions.length === 0) {
-    const ment = generateMent(fixedType);
-    setAutoMent(ment);
-    setCustomMent(ment);
-  }
-  }, [selectedConditions, fixedType]);
 
   /* Legacy condition editor handlers moved to useConditionEditor.
   const handleCommentChange = (index, newComment) => {
@@ -486,9 +449,6 @@ const newGroupId = Date.now();
   useEffect(() => { //멘트 바로 수정
     if (fixedType && selectedConditions.length === 0) {
       //  필요한 모든 재료를 객체 형태로 전달해줍니다.
-      const ment = generateMent({ typeOverride: fixedType, fixedMentMap, selectedBroker });
-      setAutoMent(ment);
-      setCustomMent(ment);
     }
   }, [selectedConditions, fixedType, selectedBroker]); 
 
@@ -501,20 +461,10 @@ const newGroupId = Date.now();
     )
   ) || [];
 
-   const effectiveMent = customMent || autoMent || generateMent({
-     selectedConditions,
-     fixedMentMap,
-     selectedBroker,
-     fixedType
-     });
-
 const runAiGeneration = async () => {
     // ✨ 중요: 함수 호출 시 3번째 인자로 'selectedBroker'를 전달합니다!
   resetStrategies();
     startAiWorkflow();
-    setCustomMent('');
-    setAutoMent('');
-    setFixedType('');
     resetSelection();
     const matchedConditions = await generateStrategy(customerQuery, allConditions, selectedBroker, ENABLE_IMAGE_ATTACHMENT ? imageAttachment : null);
 
@@ -532,7 +482,6 @@ const runAiGeneration = async () => {
         comment: cond.detail,
       })));
 
-      setFixedType("");
       setAiRecommendations(newConditionItems, { request: customerQuery, count: newConditionItems.length });
       showToast(`AI가 조건 ${newConditionItems.length}개를 추천했습니다. 오른쪽에서 검토 후 적용해 주세요.`, 'success');
 
@@ -608,7 +557,6 @@ const runAiGeneration = async () => {
     const isLastDraft = aiDraftConditions.length === 1;
     setSelectedConditions(prev => [...prev, { ...draft, groupIds: [] }]);
     applyDraft(index);
-    setCustomMent('');
     if (isLastDraft) {
       setActiveTab('manual');
     }
@@ -618,7 +566,6 @@ const runAiGeneration = async () => {
     if (aiDraftConditions.length === 0) return;
     setSelectedConditions(prev => [...prev, ...aiDraftConditions]);
     applyAllDrafts();
-    setCustomMent('');
     setActiveTab('manual');
   };
 
@@ -975,8 +922,6 @@ const parseMentForComments = (text, originalConditions) => {
               onToggleOperator={handleToggleOperator} 
               fixedMentMap={fixedMentMap}
               selectedBroker={selectedBroker}
-              fixedType={fixedType}
-              ment={effectiveMent}
               isGrouping={isGrouping}
               // setIsGrouping={setIsGrouping}
               checkedLetters={checkedLetters}
