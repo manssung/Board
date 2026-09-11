@@ -79,3 +79,210 @@
 .ai-confidence-medium { background: #a16207; }
 .ai-confidence-low { background: #b42318; }
 .ai-match-reason { padding-top: 1px; }
+
+/* 선택된 조건을 보며 바로 수정하는 작은 조건식 편집 바 */
+.condition-row-letter {
+  display: inline-grid;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 6px;
+  color: #2463c7;
+  background: #eaf2ff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.selected-conditions-workspace {
+  display: flex;
+  min-height: 0;
+  height: 100%;
+  flex: 1;
+  flex-direction: column;
+}
+
+.selected-conditions-list {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.condition-grouped-entry {
+  position: relative;
+}
+
+.condition-grouped-entry.is-grouped {
+  margin: 3px 0;
+  padding-left: 22px;
+  background: #f5f9ff;
+}
+
+.condition-grouped-entry.is-grouped::before {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  left: 12px;
+  width: 8px;
+  border-left: 1px solid #7fa8e5;
+  content: "";
+}
+
+.condition-grouped-entry.is-grouped.start { margin-top: 9px; padding-top: 23px; border-radius: 8px 8px 0 0; }
+.condition-grouped-entry.is-grouped.end { margin-bottom: 9px; border-radius: 0 0 8px 8px; }
+.condition-grouped-entry.is-grouped.start::before { top: 22px; border-top: 1px solid #7fa8e5; border-radius: 5px 0 0 0; }
+.condition-grouped-entry.is-grouped.end::before { bottom: 11px; border-bottom: 1px solid #7fa8e5; border-radius: 0 0 0 5px; }
+.condition-grouped-entry.is-grouped .selected-item { position: relative; z-index: 2; }
+.condition-group-label {
+  position: absolute;
+  z-index: 3;
+  top: 7px;
+  left: 31px;
+  padding: 3px 7px;
+  border-radius: 99px;
+  color: #2662c6;
+  background: #e8f2ff;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.condition-formula-bar {
+  flex: 0 0 auto;
+  margin: 12px 0 0;
+  padding: 12px;
+  border: 1px solid #d9e5f4;
+  border-radius: 9px;
+  background: #f8fbff;
+}
+
+.condition-formula-heading,
+.condition-group-actions {
+  display: flex;
+  align-items: center;
+}
+
+.condition-formula-heading { justify-content: space-between; gap: 10px; }
+.condition-formula-heading strong { color: #52647c; font-size: 12px; font-weight: 800; }
+.condition-group-mode-button {
+  border: 1px solid #c7d8f2;
+  border-radius: 6px;
+  padding: 5px 8px;
+  color: #2864c4;
+  background: #fff;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+.condition-group-mode-button.active { border-color: #2864c4; color: #fff; background: #2864c4; }
+.condition-formula-line { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-top: 9px; color: #546982; }
+.condition-formula-letter {
+  min-width: 24px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 5px;
+  color: #2662c6;
+  background: #eaf2ff;
+  cursor: default;
+  font-size: 11px;
+  font-weight: 800;
+}
+.condition-formula-letter.grouping { outline: 1px dashed #8aaee4; outline-offset: 2px; cursor: pointer; }
+.condition-formula-letter.checked { color: #fff; background: #2864c4; outline-color: #2864c4; }
+.condition-formula-operator {
+  padding: 3px 6px;
+  border: 1px solid #d4e0f0;
+  border-radius: 999px;
+  color: #5e7089;
+  background: #fff;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.condition-formula-operator:hover { border-color: #9dbbe9; color: #245fbe; background: #f1f6ff; }
+.condition-formula-paren { color: #4c617d; font-size: 14px; font-weight: 800; }
+.condition-group-actions { flex-wrap: wrap; gap: 7px; margin-top: 10px; padding-top: 9px; border-top: 1px solid #dce6f3; }
+.condition-group-actions span { flex: 1 1 160px; color: #6b7d95; font-size: 11px; }
+.condition-group-actions button { border: 1px solid #c5d8f4; border-radius: 6px; padding: 5px 8px; color: #245fc1; background: #fff; cursor: pointer; font-size: 11px; font-weight: 700; }
+.condition-group-actions button:disabled { opacity: .45; cursor: default; }
+.condition-group-actions .condition-group-clear { border-color: transparent; color: #758399; background: transparent; }
+
+/* 긴 전략에서는 한 항목만 펼쳐 편집합니다. */
+#right-panel .compact-condition-row {
+  display: block;
+  padding: 0;
+  border-left: 0;
+  background: transparent;
+}
+
+#right-panel .condition-summary-button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  min-height: 43px;
+  padding: 8px 10px;
+  border: 0;
+  color: #314763;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+#right-panel .condition-summary-button:hover,
+#right-panel .compact-condition-row.expanded .condition-summary-button { background: #f6f9fd; }
+.condition-summary-main { display: flex; min-width: 0; flex: 1 1 52%; align-items: center; gap: 8px; }
+.compact-condition-name { overflow: hidden; color: #2862c1; font-size: 12px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.compact-condition-value { overflow: hidden; flex: 1 1 38%; color: #63748b; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.compact-expand-icon { color: #77879b; font-size: 13px; }
+
+#right-panel .condition-edit-area { padding: 0 10px 10px 42px; }
+#right-panel .condition-edit-area .comment-input { margin: 0; }
+.condition-expanded-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 7px; }
+#right-panel .condition-expanded-actions .move-buttons,
+#right-panel .condition-expanded-actions .condition-action-buttons { display: flex; flex-direction: row; gap: 5px; }
+
+@media screen and (max-width: 700px) {
+  .compact-condition-value { display: none; }
+  #right-panel .condition-edit-area { padding-left: 10px; }
+}
+
+/* 조건명과 설정값을 한 줄에서 바로 수정하는 작업 행 */
+#right-panel .inline-condition-row {
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-left: 0;
+  background: transparent;
+}
+
+#right-panel .inline-condition-row:hover { background: #f8fbff; }
+#right-panel .inline-condition-row .condition-summary-main { flex: 0 1 43%; }
+#right-panel .inline-condition-row .compact-condition-name { max-width: 100%; }
+.inline-condition-value {
+  min-width: 0;
+  flex: 1 1 42%;
+  height: 34px;
+  padding: 7px 9px;
+  border: 1px solid #c9d8ec;
+  border-radius: 6px;
+  color: #405774;
+  background: #eaf2fc;
+  font: inherit;
+  font-size: 12px;
+}
+.inline-condition-value:hover { border-color: #a9c3e5; background: #f1f6fd; }
+.inline-condition-value:focus { border-color: #5d95dd; outline: none; background: #fff; box-shadow: 0 0 0 3px rgba(55, 110, 208, .14); }
+.inline-condition-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 4px; }
+#right-panel .inline-condition-actions .move-button,
+#right-panel .inline-condition-actions .delete-button,
+#right-panel .inline-condition-actions .duplicate-button { width: 26px; height: 26px; min-width: 26px; padding: 0; font-size: 11px; }
+#right-panel .inline-condition-actions .duplicate-button { width: auto; min-width: 34px; padding: 0 6px; }
+
+@media screen and (max-width: 700px) {
+  #right-panel .inline-condition-row { flex-wrap: wrap; }
+  #right-panel .inline-condition-row .condition-summary-main { flex-basis: calc(100% - 145px); }
+  .inline-condition-value { flex-basis: calc(100% - 42px); margin-left: 32px; }
+}

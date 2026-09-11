@@ -66,6 +66,9 @@ export default function GeneratedMent({
   onGroup,
   onClearAllGroups,
   onSaveDraft,
+  showLogicControls = true,
+  isCollapsed = false,
+  onToggleCollapsed,
 }) {
   const [isCopied, setIsCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -114,18 +117,19 @@ export default function GeneratedMent({
     <div className="ment-header">
       <div className="ment-title-group"><span className="ment-section-icon">✎</span><div><h3>답변 멘트</h3><p>확정한 조건식이 안내 문구에 반영됩니다.</p></div></div>
       <div className="ment-buttons">
+        {onToggleCollapsed && <button type="button" className="ment-collapse-button" onClick={onToggleCollapsed}>{isCollapsed ? '펼치기' : '접기'}</button>}
         {onSaveDraft && <button type="button" className="save-draft-button" onClick={onSaveDraft}>임시저장</button>}
         <button type="button" className={`copy-button ${isCopied ? 'copied' : ''}`} onClick={handleCopy}>{isCopied ? '✓ 복사 완료!' : '복사'}</button>
       </div>
     </div>
-    <div className="ment-display">
+    {!isCollapsed && <div className="ment-display">
       <pre>{parts.header}</pre>
       {parts.blocks.map((block) => block.kind === 'template'
         ? <section key={block.id} className="ment-strategy-block ment-template-block">{parts.blocks.length > 1 && <strong className="ment-strategy-title">{block.title}</strong>}<pre>{block.text}</pre></section>
         : <section key={block.id} className="ment-strategy-block">
         {parts.blocks.length > 1 && <strong className="ment-strategy-title">{block.title}</strong>}
         <pre>{block.lines}</pre>
-        {block.id === activeStrategyId ? <div className="closing-line-container">
+        {block.id === activeStrategyId && showLogicControls ? <div className="closing-line-container">
           <div className="closing-line-toolbar"><strong>조건식</strong><button type="button" className={`group-toggle-button ${isGrouping ? 'active' : ''}`} onClick={onToggleGroupMode}>{isGrouping ? '그룹 설정 완료' : '괄호 그룹 설정'}</button></div>
           {renderActiveFormula()}
           {isGrouping && <div className="group-action-buttons">
@@ -136,6 +140,6 @@ export default function GeneratedMent({
         </div> : <p className="closing-line closing-line-static">{block.formula}</p>}
       </section>)}
       <pre>{parts.footer}</pre>
-    </div>
+    </div>}
   </div>;
 }

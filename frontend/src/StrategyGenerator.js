@@ -73,6 +73,7 @@ export default function StrategyGenerator() {
   const [customerQuery, setCustomerQuery] = useState(""); 
   const { isAiLoading, generateStrategy } = useAiStrategyGenerator();
   const [activeTab, setActiveTab] = useState('ai'); 
+  const [isMentCollapsed, setIsMentCollapsed] = useState(true);
   const {
     aiWorkflowPhase,
     aiDraftConditions,
@@ -728,7 +729,7 @@ const parseMentForComments = (text, originalConditions) => {
           </div>
         </header>
         <div className="main-content">
-          <div className={`top-panel ${activeTab === 'ai' ? 'ai-workflow-layout' : ''}`}>
+          <div className={`top-panel ${activeTab === 'ai' ? 'ai-workflow-layout' : ''} ${activeTab === 'manual' && isMentCollapsed ? 'manual-workspace-expanded' : ''}`}>
             <div id="left-panel" className={`panel ${activeTab === 'ai' ? 'ai-request-panel' : ''}`}>
               <div className="tabs-container">
                 <button className={`tab-button ${activeTab === 'manual' ? 'active' : ''}`} onClick={() => setActiveTab('manual')}>조건식 편집</button>
@@ -872,7 +873,7 @@ const parseMentForComments = (text, originalConditions) => {
                 )}
                 <button className="reset-button" onClick={handleReset}>전체 초기화</button>
               </div>
-              <div className="panel-content">
+              <div className={`panel-content ${activeTab === 'manual' ? 'manual-panel-content' : ''}`}>
                 {activeTab === 'ai' && aiWorkflowPhase === 'idle' && (
                   <WorkspaceEmptyState className="ai-empty-state" icon="✦" title="AI가 조건 후보를 추천해 드립니다." description="고객 문의를 입력하고 AI 조건 추천 받기를 눌러 시작하세요." />
                 )}
@@ -905,7 +906,20 @@ const parseMentForComments = (text, originalConditions) => {
                   activeStrategyKind === 'template' ? (
                     <WorkspaceEmptyState className="manual-empty-state" icon="✉" title={fixedType ? '답변 템플릿이 선택되었습니다.' : '답변 템플릿을 선택해 주세요.'} description={fixedType ? '답변 멘트의 현재 순서에 이 템플릿이 삽입됩니다.' : '왼쪽 상단의 답변 템플릿 선택에서 내용을 골라 주세요.'} />
                   ) : selectedConditions.length > 0 ? (
-                    <SelectedConditions selectedConditions={selectedConditions} onRemove={handleRemoveCondition} onCommentChange={handleCommentChange} onMove={handleMoveCondition} onDuplicate={handleDuplicateCondition} />
+                    <SelectedConditions
+                      selectedConditions={selectedConditions}
+                      onRemove={handleRemoveCondition}
+                      onCommentChange={handleCommentChange}
+                      onMove={handleMoveCondition}
+                      onDuplicate={handleDuplicateCondition}
+                      onToggleOperator={handleToggleOperator}
+                      isGrouping={isGrouping}
+                      checkedLetters={checkedLetters}
+                      onToggleGroupMode={handleToggleGroupMode}
+                      onLetterCheck={handleLetterCheck}
+                      onGroup={handleGroupConditions}
+                      onClearAllGroups={handleClearAllGroups}
+                    />
                   ) : (
                     <WorkspaceEmptyState className="manual-empty-state" icon="＋" title="적용된 조건이 없습니다." description="왼쪽 조건 목록에서 필요한 조건을 추가해 주세요." />
                   )
@@ -914,7 +928,7 @@ const parseMentForComments = (text, originalConditions) => {
             </div>
           </div>
 
-          <div className="bottom-panel">
+          <div className={`bottom-panel ${isMentCollapsed ? 'ment-collapsed-panel' : ''}`}>
             <GeneratedMent 
               selectedConditions={selectedConditions} 
               strategies={strategies}
@@ -930,6 +944,9 @@ const parseMentForComments = (text, originalConditions) => {
               onGroup={handleGroupConditions}
               onClearAllGroups={handleClearAllGroups}
               onSaveDraft={handleSaveStrategy}
+              showLogicControls={false}
+              isCollapsed={isMentCollapsed}
+              onToggleCollapsed={() => setIsMentCollapsed((collapsed) => !collapsed)}
               // onMentUpdate={handleMentUpdate}
             />
           </div>

@@ -112,6 +112,13 @@ body {
   overflow-y: auto;
 }
 
+#right-panel .manual-panel-content {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 /*증권사 문의사항*/
 .broker-actions-container {
   display: flex;
@@ -911,6 +918,26 @@ body {
 .ai-request-panel .panel-content,
 .top-panel.ai-workflow-layout #right-panel .panel-content {
   overflow-y: visible;
+}
+
+/* 답변 멘트를 접으면 조건 편집 영역에 집중할 수 있습니다. */
+.top-panel.manual-workspace-expanded {
+  height: 70vh;
+}
+
+.ment-collapsed-panel {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.ment-collapsed-panel .ment-header {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+@media screen and (max-width: 1024px) {
+  .top-panel.manual-workspace-expanded { height: auto; }
 }
 
 /* Workspace typography scale */

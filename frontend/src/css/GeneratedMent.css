@@ -82,7 +82,8 @@
 .copy-button,
 .edit-button,
 .group-toggle-button,
-.save-draft-button {
+.save-draft-button,
+.ment-collapse-button {
   border-radius: 6px;
   cursor: pointer;
   font-size: 12px;
@@ -114,6 +115,14 @@
 }
 .save-draft-button { font-weight: 700; }
 .save-draft-button:hover { border-color: #8eafe4; background: #edf5ff; }
+
+.ment-collapse-button {
+  border: 1px solid #d8e1ed;
+  padding: 6px 9px;
+  color: #63738a;
+  background: #fff;
+}
+.ment-collapse-button:hover { border-color: #aec3e4; color: #2c62bd; background: #f6f9ff; }
 
 .group-toggle-button { display: flex; align-items: center; justify-content: center; background: #fff; }
 .group-toggle-button.active { border-color: var(--primary-color); color: #fff; background: var(--primary-color); }
