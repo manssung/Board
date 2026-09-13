@@ -17,7 +17,7 @@ const SelectedConditions = ({
   onGroup,
   onClearAllGroups,
 }) => {
-  const [focusIndex, setFocusIndex] = useState(null);
+  const [editingIndex, setEditingIndex] = useState(null);
   const previousLengthRef = useRef(selectedConditions.length);
 
   useEffect(() => {
@@ -26,12 +26,12 @@ const SelectedConditions = ({
 
     if (nextLength === previousLength + 1) {
       // 직접 추가·복제는 곧바로 값 수정으로 이어지는 흐름입니다.
-      setFocusIndex(nextLength - 1);
+      setEditingIndex(nextLength - 1);
     } else if (nextLength > previousLength + 1) {
       // AI가 여러 조건을 한 번에 적용한 경우에는 목록을 압축 상태로 유지합니다.
-      setFocusIndex(null);
+      setEditingIndex(null);
     } else if (nextLength < previousLength) {
-      setFocusIndex((current) => current !== null && current >= nextLength ? null : current);
+      setEditingIndex((current) => current !== null && current >= nextLength ? null : current);
     }
 
     previousLengthRef.current = nextLength;
@@ -71,8 +71,8 @@ const SelectedConditions = ({
               onToggleParen={onToggleParen}
               onMove={onMove}
               onDuplicate={onDuplicate}
-              shouldFocus={focusIndex === index}
-              onFocusComplete={() => setFocusIndex(null)}
+              isEditing={editingIndex === index}
+              onStartEditing={() => setEditingIndex(index)}
             />
           </div>;
         })}
@@ -128,61 +128,46 @@ const ConditionFormulaBar = ({ selectedConditions, onToggleOperator, isGrouping,
 );
 
 // --- ✨ 각 아이템을 렌더링하는 별도의 컴포넌트 ---
-const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange, onMove, onDuplicate, shouldFocus, onFocusComplete }) => {
+const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange, onMove, onDuplicate, isEditing, onStartEditing }) => {
   const inputRef = useRef(null);
 
   useEffect(() => {
-    if (!shouldFocus) return;
+    if (!isEditing) return;
     inputRef.current?.focus();
-    onFocusComplete?.();
-  }, [onFocusComplete, shouldFocus]);
+  }, [isEditing]);
 
   return (
-    <div className="selected-item selected-condition-card condition-review-row inline-condition-row">
-      <div className="condition-summary-main">
+    <div className={`selected-item selected-condition-card condition-review-row inline-condition-row ${isEditing ? 'is-editing' : ''}`}>
+      <button type="button" className="inline-condition-summary" onClick={onStartEditing}>
+        <span className="condition-summary-main">
           <span className="condition-row-letter">{getConditionLabel(index)}</span>
           <span className="compact-condition-name">{cond.type ? `${cond.type} > ` : ''}{cond.path}</span>
-      </div>
-      <input
-          ref={inputRef}
-          className="inline-condition-value"
-          value={cond.comment !== undefined ? cond.comment : cond.detail || ""}
-          onChange={(e) => onCommentChange(index, e.target.value)}
-          placeholder="세부 설정값 입력"
-        />
+        </span>
+        {!isEditing && <span className="compact-condition-value">{cond.comment !== undefined ? cond.comment : cond.detail || '세부값 없음'}</span>}
+      </button>
       <div className="inline-condition-actions">
         <button
           className="move-button"
           onClick={() => onMove(index, 'up')}
           disabled={isFirst}
           title="위로 이동"
-        >
-          ▲
-        </button>
+        >▲</button>
         <button
           className="move-button"
           onClick={() => onMove(index, 'down')}
           disabled={isLast}
           title="아래로 이동"
-        >
-          ▼
-        </button>
-        <button
-          className="delete-button"
-          onClick={() => onRemove(index)}
-          title="삭제"
-        >
-          &times;
-        </button>
-        <button
-          type="button"
-          className="duplicate-button"
-          onClick={() => onDuplicate(index)}
-          title="이 조건을 맨 아래에 복사"
-        >
-          복사
-        </button>
+        >▼</button>
+        <button className="delete-button" onClick={() => onRemove(index)} title="삭제">&times;</button>
+        <button type="button" className="duplicate-button" onClick={() => onDuplicate(index)} title="이 조건을 맨 아래에 복사">복사</button>
       </div>
+      {isEditing && <input
+          ref={inputRef}
+          className="inline-condition-value"
+          value={cond.comment !== undefined ? cond.comment : cond.detail || ""}
+          onChange={(e) => onCommentChange(index, e.target.value)}
+          placeholder="세부 설정값 입력"
+        />}
     </div>
   );
 };
