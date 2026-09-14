@@ -163,7 +163,8 @@
 }
 
 .condition-formula-heading { justify-content: space-between; gap: 10px; }
-.condition-formula-heading strong { color: #52647c; font-size: 12px; font-weight: 800; }
+.condition-formula-heading strong { display: flex; align-items: center; gap: 6px; color: #52647c; font-size: 12px; font-weight: 800; }
+.condition-group-count { padding: 3px 6px; border-radius: 99px; color: #2361c3; background: #e5f0ff; font-size: 10px; }
 .condition-group-mode-button {
   border: 1px solid #c7d8f2;
   border-radius: 6px;
@@ -175,7 +176,8 @@
   font-weight: 700;
 }
 .condition-group-mode-button.active { border-color: #2864c4; color: #fff; background: #2864c4; }
-.condition-formula-line { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-top: 9px; color: #546982; }
+.condition-formula-line { display: flex; flex-wrap: nowrap; align-items: center; gap: 5px; margin-top: 9px; overflow-x: auto; padding-bottom: 2px; color: #546982; white-space: nowrap; }
+.condition-formula-line > * { flex: 0 0 auto; }
 .condition-formula-letter {
   min-width: 24px;
   padding: 4px 6px;

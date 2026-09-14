@@ -122,6 +122,8 @@ export default function StrategyGenerator() {
     checkedLetters,
     isGrouping,
     resetSelection,
+    canUndo,
+    undoLastEdit,
     handleConditionClick,
     handleCommentChange,
     handleToggleOperator,
@@ -871,7 +873,10 @@ const parseMentForComments = (text, originalConditions) => {
                     <div><h3>선택된 조건</h3><p>조건의 순서와 상세 설정값을 검토해 주세요.</p></div>
                   </div>
                 )}
-                <button className="reset-button" onClick={handleReset}>전체 초기화</button>
+                <div className="workspace-header-actions">
+                  {activeTab === 'manual' && <button type="button" className="undo-button" onClick={undoLastEdit} disabled={!canUndo}>되돌리기</button>}
+                  <button className="reset-button" onClick={handleReset}>전체 초기화</button>
+                </div>
               </div>
               <div className={`panel-content ${activeTab === 'manual' ? 'manual-panel-content' : ''}`}>
                 {activeTab === 'ai' && aiWorkflowPhase === 'idle' && (

@@ -18,11 +18,20 @@ const createStrategy = (index, kind = 'condition') => ({
   conditions: [],
 });
 
+const cloneStrategies = (items) => items.map((strategy) => ({
+  ...strategy,
+  conditions: (strategy.conditions || []).map((condition) => ({
+    ...condition,
+    groupIds: [...(condition.groupIds || [])],
+  })),
+}));
+
 export function useConditionEditor({ onEdit, onConditionsEmpty, onRequestConfirmation }) {
   const [strategies, setStrategies] = useState(() => [createStrategy(1)]);
   const [activeStrategyId, setActiveStrategyId] = useState(null);
   const [checkedLetters, setCheckedLetters] = useState(new Set());
   const [isGrouping, setIsGrouping] = useState(false);
+  const [history, setHistory] = useState([]);
 
   const activeStrategy = useMemo(
     () => strategies.find((strategy) => strategy.id === activeStrategyId) || strategies[0],
@@ -34,6 +43,23 @@ export function useConditionEditor({ onEdit, onConditionsEmpty, onRequestConfirm
     setCheckedLetters(new Set());
     setIsGrouping(false);
   }, []);
+
+  const saveHistory = useCallback(() => {
+    setHistory((previous) => [...previous, {
+      strategies: cloneStrategies(strategies),
+      activeStrategyId,
+    }].slice(-30));
+  }, [activeStrategyId, strategies]);
+
+  const undoLastEdit = useCallback(() => {
+    const snapshot = history.at(-1);
+    if (!snapshot) return;
+    setStrategies(cloneStrategies(snapshot.strategies));
+    setActiveStrategyId(snapshot.activeStrategyId);
+    setHistory((previous) => previous.slice(0, -1));
+    resetSelection();
+    showToast('직전 조건식 변경을 되돌렸습니다.', 'success');
+  }, [history, resetSelection]);
 
   const setSelectedConditions = useCallback((nextValue) => {
     setStrategies((previous) => previous.map((strategy) => {
@@ -55,6 +81,7 @@ export function useConditionEditor({ onEdit, onConditionsEmpty, onRequestConfirm
     initial.conditions = Array.isArray(conditions) ? conditions : [];
     setStrategies([initial]);
     setActiveStrategyId(initial.id);
+    setHistory([]);
     resetSelection();
   }, [resetSelection]);
 
@@ -70,16 +97,18 @@ export function useConditionEditor({ onEdit, onConditionsEmpty, onRequestConfirm
       : [{ ...createStrategy(1), conditions: Array.isArray(legacyConditions) ? legacyConditions : [] }];
     setStrategies(restored);
     setActiveStrategyId(restored[0].id);
+    setHistory([]);
     resetSelection();
   }, [resetSelection]);
 
   const addStrategy = useCallback((kind = 'condition') => {
+    saveHistory();
     const next = createStrategy(strategies.length + 1, kind);
     setStrategies((previous) => [...previous, next]);
     setActiveStrategyId(next.id);
     resetSelection();
     onEdit?.('strategy-add');
-  }, [onEdit, resetSelection, strategies.length]);
+  }, [onEdit, resetSelection, saveHistory, strategies.length]);
 
   const selectStrategy = useCallback((id) => {
     setActiveStrategyId(id);
@@ -87,11 +116,12 @@ export function useConditionEditor({ onEdit, onConditionsEmpty, onRequestConfirm
   }, [resetSelection]);
 
   const setActiveTemplateType = useCallback((fixedType) => {
+    saveHistory();
     setStrategies((previous) => previous.map((strategy) => (
       strategy.id === activeStrategy?.id ? { ...strategy, kind: fixedType ? 'template' : 'condition', fixedType, conditions: fixedType ? [] : strategy.conditions } : strategy
     )));
     onEdit?.('template');
-  }, [activeStrategy?.id, onEdit]);
+  }, [activeStrategy?.id, onEdit, saveHistory]);
 
   const removeStrategy = useCallback((id) => {
     if (strategies.length === 1) {
@@ -100,17 +130,19 @@ export function useConditionEditor({ onEdit, onConditionsEmpty, onRequestConfirm
     }
     const index = strategies.findIndex((strategy) => strategy.id === id);
     const nextActive = strategies[index - 1] || strategies[index + 1];
+    saveHistory();
     setStrategies((previous) => previous.filter((strategy) => strategy.id !== id));
     setActiveStrategyId(nextActive.id);
     resetSelection();
-  }, [clearConditions, resetSelection, strategies]);
+  }, [clearConditions, resetSelection, saveHistory, strategies]);
 
   const handleConditionClick = useCallback((condition) => {
+    saveHistory();
     setStrategies((previous) => previous.map((strategy) => (
       strategy.id === activeStrategy?.id ? { ...strategy, kind: 'condition', fixedType: '', conditions: addCondition(strategy.conditions, condition) } : strategy
     )));
     onEdit?.('add');
-  }, [activeStrategy?.id, onEdit]);
+  }, [activeStrategy?.id, onEdit, saveHistory]);
 
   const handleCommentChange = useCallback((index, comment) => {
     setSelectedConditions((previous) => updateConditionComment(previous, index, comment));
@@ -118,25 +150,30 @@ export function useConditionEditor({ onEdit, onConditionsEmpty, onRequestConfirm
   }, [onEdit, setSelectedConditions]);
 
   const handleToggleOperator = useCallback((index) => {
+    saveHistory();
     setSelectedConditions((previous) => toggleConditionOperator(previous, index));
     onEdit?.('operator');
-  }, [onEdit, setSelectedConditions]);
+  }, [onEdit, saveHistory, setSelectedConditions]);
 
   const handleMoveCondition = useCallback((index, direction) => {
+    saveHistory();
     setSelectedConditions((previous) => moveConditionAndClearGroups(previous, index, direction));
     resetSelection();
     onEdit?.('move');
-  }, [onEdit, resetSelection, setSelectedConditions]);
+  }, [onEdit, resetSelection, saveHistory, setSelectedConditions]);
 
   const handleRemoveCondition = useCallback((index) => {
     const isLastCondition = selectedConditions.length === 1;
+    saveHistory();
     setSelectedConditions((previous) => removeConditionAndClearGroups(previous, index));
     resetSelection();
     onEdit?.('remove');
+    showToast('조건을 삭제했습니다. 상단 되돌리기로 복구할 수 있습니다.', 'info');
     if (isLastCondition) onConditionsEmpty?.();
-  }, [onConditionsEmpty, onEdit, resetSelection, selectedConditions.length, setSelectedConditions]);
+  }, [onConditionsEmpty, onEdit, resetSelection, saveHistory, selectedConditions.length, setSelectedConditions]);
 
   const handleDuplicateCondition = useCallback((index) => {
+    saveHistory();
     setSelectedConditions((previous) => {
       const source = previous[index];
       if (!source) return previous;
@@ -150,7 +187,7 @@ export function useConditionEditor({ onEdit, onConditionsEmpty, onRequestConfirm
     });
     resetSelection();
     onEdit?.('duplicate');
-  }, [onEdit, resetSelection, setSelectedConditions]);
+  }, [onEdit, resetSelection, saveHistory, setSelectedConditions]);
 
   const handleLetterCheck = useCallback((letter) => {
     setCheckedLetters((previous) => {
@@ -196,11 +233,12 @@ export function useConditionEditor({ onEdit, onConditionsEmpty, onRequestConfirm
       return;
     }
     const groupId = `manual-group-${Date.now()}`;
+    saveHistory();
     setSelectedConditions((previous) => previous.map((condition, index) => (
       checkedLetters.has(getConditionLabel(index)) ? { ...condition, groupIds: [...(condition.groupIds || []), groupId] } : condition
     )));
     setCheckedLetters(new Set());
-  }, [checkedLetters, selectedConditions, setSelectedConditions]);
+  }, [checkedLetters, saveHistory, selectedConditions, setSelectedConditions]);
 
   const handleToggleGroupMode = useCallback(() => {
     setIsGrouping((previous) => !previous);
@@ -208,9 +246,10 @@ export function useConditionEditor({ onEdit, onConditionsEmpty, onRequestConfirm
   }, []);
 
   const clearAllGroups = useCallback(() => {
+    saveHistory();
     setSelectedConditions((previous) => previous.map((condition) => ({ ...condition, groupIds: [] })));
     setCheckedLetters(new Set());
-  }, [setSelectedConditions]);
+  }, [saveHistory, setSelectedConditions]);
 
   const handleClearAllGroups = useCallback(() => {
     if (!selectedConditions.some((condition) => (condition.groupIds || []).length)) {
@@ -222,7 +261,7 @@ export function useConditionEditor({ onEdit, onConditionsEmpty, onRequestConfirm
 
   return {
     strategies, activeStrategy, activeStrategyId: activeStrategy?.id, activeStrategyKind: activeStrategy?.kind || 'condition', activeTemplateType: activeStrategy?.fixedType || '', setActiveTemplateType, addStrategy, selectStrategy, removeStrategy, resetStrategies, restoreStrategies,
-    selectedConditions, setSelectedConditions, checkedLetters, isGrouping, clearConditions, replaceConditions, resetSelection,
+    selectedConditions, setSelectedConditions, checkedLetters, isGrouping, clearConditions, replaceConditions, resetSelection, canUndo: history.length > 0, undoLastEdit,
     handleConditionClick, handleCommentChange, handleToggleOperator, handleMoveCondition, handleRemoveCondition, handleDuplicateCondition,
     handleLetterCheck, handleGroupConditions, handleToggleGroupMode, handleClearAllGroups,
   };

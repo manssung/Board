@@ -96,12 +96,12 @@ const SelectedConditions = ({
 const ConditionFormulaBar = ({ selectedConditions, onToggleOperator, isGrouping, checkedLetters, onToggleGroupMode, onLetterCheck, onGroup, onClearAllGroups }) => (
   <section className="condition-formula-bar" aria-label="조건식 편집">
     <div className="condition-formula-heading">
-      <strong>조건식</strong>
+      <strong>조건식 {isGrouping && <span className="condition-group-count">{checkedLetters?.size || 0}개 선택됨</span>}</strong>
       <button type="button" className={`condition-group-mode-button ${isGrouping ? 'active' : ''}`} onClick={onToggleGroupMode}>
         {isGrouping ? '선택 완료' : '괄호 묶기'}
       </button>
     </div>
-    <div className="condition-formula-line">
+      <div className="condition-formula-line" aria-label="현재 조건식">
       {selectedConditions.map((condition, index) => {
         const letter = getConditionLabel(index);
         const previous = selectedConditions[index - 1];
