@@ -14,6 +14,7 @@ import { useConditionEditor } from './hooks/useConditionEditor';
 import {
   groupOrConditions,
 } from './util/conditionEditor';
+import { getRecommendationCandidates } from './util/conditionCandidateFilter';
 import { useSavedStrategies } from './hooks/useSavedStrategies';
 import SavedStrategies from './components/SavedStrategies';
 import AppToast, { showToast } from './components/AppToast';
@@ -73,7 +74,6 @@ export default function StrategyGenerator() {
   const [customerQuery, setCustomerQuery] = useState(""); 
   const { isAiLoading, generateStrategy } = useAiStrategyGenerator();
   const [activeTab, setActiveTab] = useState('ai'); 
-  const [isMentCollapsed, setIsMentCollapsed] = useState(true);
   const {
     aiWorkflowPhase,
     aiDraftConditions,
@@ -469,12 +469,15 @@ const runAiGeneration = async () => {
   resetStrategies();
     startAiWorkflow();
     resetSelection();
-    const matchedConditions = await generateStrategy(customerQuery, allConditions, selectedBroker, ENABLE_IMAGE_ATTACHMENT ? imageAttachment : null);
+    const recommendationCandidates = getRecommendationCandidates(customerQuery, allConditions);
+    const aiResult = await generateStrategy(customerQuery, recommendationCandidates, selectedBroker, ENABLE_IMAGE_ATTACHMENT ? imageAttachment : null);
 
-    if (matchedConditions === null) {
+    if (aiResult === null) {
       failAiWorkflow();
       return;
     }
+
+    const matchedConditions = aiResult.conditions;
 
     // 2. 결과 처리 (여러 개의 매칭 결과를 모두 반영)
     if (matchedConditions && matchedConditions.length > 0) {
@@ -485,18 +488,18 @@ const runAiGeneration = async () => {
         comment: cond.detail,
       })));
 
-      setAiRecommendations(newConditionItems, { request: customerQuery, count: newConditionItems.length });
-      showToast(`AI가 조건 ${newConditionItems.length}개를 추천했습니다. 오른쪽에서 검토 후 적용해 주세요.`, 'success');
+      setAiRecommendations(newConditionItems, { request: customerQuery, count: newConditionItems.length, coverage: aiResult.coverage });
+      showToast(`조건 ${newConditionItems.length}개를 추천했습니다. 오른쪽에서 검토 후 적용해 주세요.`, 'success');
 
     } else {
       setNoAiResults();
-      showToast("AI가 적절한 조건을 찾지 못했습니다.\n질문을 더 구체적으로 적어주세요.", 'error');
+      showToast("적절한 조건을 찾지 못했습니다.\n질문을 더 구체적으로 적어주세요.", 'error');
     }
   };
 
   const handleAiGenerate = () => {
     if (activeStrategyKind !== 'condition') {
-      showToast('AI 조건 추천은 조건식 블록에서만 사용할 수 있습니다.', 'error');
+      showToast('조건 추천은 조건식 블록에서만 사용할 수 있습니다.', 'error');
       return;
     }
     if (!selectedBroker) {
@@ -513,7 +516,7 @@ const runAiGeneration = async () => {
     }
     if (strategies.some((strategy) => strategy.conditions.length > 0) || aiDraftConditions.length > 0) {
       setConfirmDialog({
-        title: '새 AI 추천을 시작할까요?',
+        title: '새 추천을 시작할까요?',
         description: '현재 선택한 조건과 추천 초안은 초기화됩니다.',
         confirmLabel: '새 추천 시작',
         onConfirm: runAiGeneration,
@@ -625,7 +628,7 @@ const parseMentForComments = (text, originalConditions) => {
           <div>
             <p className="app-eyebrow">AI 전략 Q&amp;A · 업무용</p>
             <h1>고객 문의 조건식 작성</h1>
-            <p className="app-description">문의 내용을 입력하면 AI가 조건 후보를 제안합니다. 검토 후 적용해 주세요.</p>
+            <p className="app-description">문의 내용을 입력하면 조건 후보를 제안합니다. 검토 후 적용해 주세요.</p>
           </div>
           <div className="app-header-actions">
             <button
@@ -662,7 +665,7 @@ const parseMentForComments = (text, originalConditions) => {
               <div className="usage-help-modal-backdrop" onMouseDown={() => setIsHelpOpen(false)}>
                 <section id="usage-help-popover" className="usage-help-modal" role="dialog" aria-modal="true" aria-label="사용 방법" onMouseDown={(event) => event.stopPropagation()}>
                   <div className="usage-help-title">
-                    <div><strong>사용 방법</strong><p>AI가 초안을 만들고, 작업자가 검토·수정한 뒤 조건식을 확정합니다.</p></div>
+                    <div><strong>사용 방법</strong><p>문의에서 조건 초안을 만들고, 작업자가 검토·수정한 뒤 조건식을 확정합니다.</p></div>
                     <button type="button" onClick={() => setIsHelpOpen(false)} aria-label="사용 방법 닫기">×</button>
                   </div>
                   <div className="usage-help-steps">
@@ -670,7 +673,7 @@ const parseMentForComments = (text, originalConditions) => {
                       <div className="help-screen help-query-screen">
                         <span className="help-mini-title">고객 문의 입력</span>
                         <i>거래량이 많고 시가총액이 큰 종목을 찾아줘</i>
-                        <b>AI 조건 추천 받기</b>
+                        <b>조건 추천 받기</b>
                       </div>
                       <span className="help-step-number">01</span>
                       <h4>문의 입력</h4>
@@ -678,13 +681,13 @@ const parseMentForComments = (text, originalConditions) => {
                     </article>
                     <article className="usage-help-step">
                       <div className="help-screen help-result-screen">
-                        <span className="help-mini-title">AI 추천 결과</span>
+                        <span className="help-mini-title">추천 결과</span>
                         <i>거래량 증가 <em>적용</em></i>
                         <i>시가총액 1,000억 이상 <em>적용</em></i>
                         <b>추천 조건 적용</b>
                       </div>
                       <span className="help-step-number">02</span>
-                      <h4>AI 추천 검토</h4>
+                      <h4>추천 조건 검토</h4>
                       <p>추천 이유를 확인하고 필요한 조건만 적용합니다.</p>
                     </article>
                     <article className="usage-help-step">
@@ -731,7 +734,7 @@ const parseMentForComments = (text, originalConditions) => {
           </div>
         </header>
         <div className="main-content">
-          <div className={`top-panel ${activeTab === 'ai' ? 'ai-workflow-layout' : ''} ${activeTab === 'manual' && isMentCollapsed ? 'manual-workspace-expanded' : ''}`}>
+          <div className={`top-panel ${activeTab === 'ai' ? 'ai-workflow-layout' : ''}`}>
             <div id="left-panel" className={`panel ${activeTab === 'ai' ? 'ai-request-panel' : ''}`}>
               <div className="tabs-container">
                 <button className={`tab-button ${activeTab === 'manual' ? 'active' : ''}`} onClick={() => setActiveTab('manual')}>조건식 편집</button>
@@ -799,12 +802,14 @@ const parseMentForComments = (text, originalConditions) => {
                 )}
                 {activeTab === 'ai' && (
                   <div className="ai-workflow">
-                    <div className="ai-workflow-heading">
-                      <span className="ai-workflow-icon">✦</span>
+                    <div className="ai-workflow-heading recommendation-input-heading">
+                      <span className="recommendation-step-number">01</span>
                       <div>
-                        <h3>고객 문의 입력</h3>
+                        <span className="recommendation-kicker">CUSTOMER INQUIRY</span>
+                        <h3>고객 문의</h3>
                         <p>고객이 원하는 종목 조건을 자연스럽게 작성해 주세요.</p>
                       </div>
+                      <span className="recommendation-catalog-status">{selectedBroker ? `${selectedBroker} · ${allConditions.length.toLocaleString()}개 조건` : '증권사 선택 필요'}</span>
                     </div>
                     <button type="button" className="ai-clear-query-button" onClick={() => setCustomerQuery('')} disabled={!customerQuery}>문의 지우기</button>
                     {ENABLE_IMAGE_ATTACHMENT && (
@@ -830,7 +835,7 @@ const parseMentForComments = (text, originalConditions) => {
                       </>
                     )}
                     {lastAiResult && (
-                      <div className="ai-inline-result">최근 AI 추천: {lastAiResult.count}개 조건 초안을 만들었습니다. 검토 후 적용해 주세요.</div>
+                      <div className="ai-inline-result">최근 추천: {lastAiResult.count}개 조건 초안을 만들었습니다. 검토 후 적용해 주세요.</div>
                     )}
                     <textarea
                       className="ment-box ai-query-input"
@@ -851,7 +856,7 @@ const parseMentForComments = (text, originalConditions) => {
                       </div>
                     </div>
                     <button className="generate-button ai-primary-button" onClick={handleAiGenerate} disabled={isAiLoading || isLoading}>
-                      {isAiLoading || isLoading ? 'AI가 조건을 분석하고 있습니다...' : 'AI 조건 추천 받기'}
+                      {isAiLoading || isLoading ? '조건을 분석하고 있습니다...' : '조건 추천 받기'}
                     </button>
                     <p className="ai-keyboard-hint">Ctrl + Enter로 바로 분석할 수 있습니다.</p>
                   </div>
@@ -863,8 +868,8 @@ const parseMentForComments = (text, originalConditions) => {
               <div className={`panel-header ${activeTab === 'ai' ? 'ai-results-header' : 'manual-results-header'}`}>
                 {activeTab === 'ai' && (
                   <div className="ai-results-title">
-                    <span className="ai-workflow-icon">✦</span>
-                    <div><h3>AI 추천 결과</h3><p>추천 조건을 적용하면 조건식 편집 화면으로 이동합니다.</p></div>
+                    <span className="recommendation-step-number">02</span>
+                    <div><span className="recommendation-kicker">STRATEGY DRAFT</span><h3>전략 초안</h3><p>추천 조건을 적용하면 조건식 편집 화면으로 이동합니다.</p></div>
                   </div>
                 )}
                 {activeTab === 'manual' && (
@@ -879,28 +884,27 @@ const parseMentForComments = (text, originalConditions) => {
                 </div>
               </div>
               <div className={`panel-content ${activeTab === 'manual' ? 'manual-panel-content' : ''}`}>
-                {activeTab === 'ai' && aiWorkflowPhase === 'idle' && (
-                  <WorkspaceEmptyState className="ai-empty-state" icon="✦" title="AI가 조건 후보를 추천해 드립니다." description="고객 문의를 입력하고 AI 조건 추천 받기를 눌러 시작하세요." />
-                )}
                 {activeTab === 'ai' && aiWorkflowPhase === 'loading' && (
-                  <WorkspaceEmptyState className="ai-empty-state ai-loading-state" icon="⋯" title="AI가 조건을 분석하고 있습니다." description="증권사 조건 목록과 고객 문의를 비교하고 있습니다." />
+                  <WorkspaceEmptyState className="ai-empty-state ai-loading-state" icon="⋯" title="조건을 분석하고 있습니다." description="증권사 조건 목록과 고객 문의를 비교하고 있습니다." />
                 )}
                 {activeTab === 'ai' && aiWorkflowPhase === 'no_result' && (
                   <WorkspaceEmptyState className="ai-empty-state ai-no-result-state" icon="?" title="추천할 조건을 찾지 못했습니다." description="문의 내용을 조금 더 구체적으로 작성하거나 조건 목록을 확인해 주세요." />
                 )}
                 {activeTab === 'ai' && aiWorkflowPhase === 'error' && (
-                  <WorkspaceEmptyState className="ai-empty-state ai-error-state" icon="!" title="AI 추천을 완료하지 못했습니다." description="안내 팝업의 내용을 확인한 뒤 잠시 후 다시 시도해 주세요." />
+                  <WorkspaceEmptyState className="ai-empty-state ai-error-state" icon="!" title="조건 추천을 완료하지 못했습니다." description="안내 팝업의 내용을 확인한 뒤 잠시 후 다시 시도해 주세요." />
                 )}
                 {activeTab === 'ai' && aiWorkflowPhase === 'editing' && (
                   <div className="ai-return-state">
                     <span>✓</span>
                     <strong>조건식 편집이 진행 중입니다.</strong>
-                    <p>현재 {selectedConditions.length}개 조건이 적용되어 있습니다.<br />새 AI 추천을 시작하면 기존 조건은 초기화됩니다.</p>
+                    <p>현재 {selectedConditions.length}개 조건이 적용되어 있습니다.<br />새 추천을 시작하면 기존 조건은 초기화됩니다.</p>
                   </div>
                 )}
                 {activeTab === 'ai' && ['review', 'partial_review'].includes(aiWorkflowPhase) && (
                   <AiDraftList
                     drafts={aiDraftConditions}
+                    coverage={lastAiResult?.coverage}
+                    brokerName={selectedBroker}
                     isPartial={aiWorkflowPhase === 'partial_review'}
                     onApplyAll={handleApplyAllAiDrafts}
                     onApply={handleApplyAiDraft}
@@ -933,7 +937,7 @@ const parseMentForComments = (text, originalConditions) => {
             </div>
           </div>
 
-          <div className={`bottom-panel ${isMentCollapsed ? 'ment-collapsed-panel' : ''}`}>
+          {activeTab === 'manual' && <div className="bottom-panel">
             <GeneratedMent 
               selectedConditions={selectedConditions} 
               strategies={strategies}
@@ -950,11 +954,9 @@ const parseMentForComments = (text, originalConditions) => {
               onClearAllGroups={handleClearAllGroups}
               onSaveDraft={handleSaveStrategy}
               showLogicControls={false}
-              isCollapsed={isMentCollapsed}
-              onToggleCollapsed={() => setIsMentCollapsed((collapsed) => !collapsed)}
               // onMentUpdate={handleMentUpdate}
             />
-          </div>
+          </div>}
         </div>
       </div>
       <AppToast />

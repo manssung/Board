@@ -2,6 +2,15 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'; // useRef�
 import '../css/SelectedConditions.css';
 import { getConditionLabel } from '../util/conditionEditor';
 
+const getConditionDisplay = (condition) => {
+  const parts = [condition.type, ...(condition.path || '').split('>')]
+    .map((part) => part?.trim())
+    .filter(Boolean)
+    .filter((part, index, all) => index === 0 || part !== all[index - 1]);
+  const name = parts.pop() || condition.path || condition.type || '이름 없는 조건';
+  return { name, context: parts.join(' › ') };
+};
+
 const SelectedConditions = ({
   selectedConditions,
   onRemove,
@@ -130,6 +139,7 @@ const ConditionFormulaBar = ({ selectedConditions, onToggleOperator, isGrouping,
 // --- ✨ 각 아이템을 렌더링하는 별도의 컴포넌트 ---
 const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange, onMove, onDuplicate, isEditing, onStartEditing }) => {
   const inputRef = useRef(null);
+  const display = getConditionDisplay(cond);
 
   useEffect(() => {
     if (!isEditing) return;
@@ -141,7 +151,10 @@ const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange,
       <button type="button" className="inline-condition-summary" onClick={onStartEditing}>
         <span className="condition-summary-main">
           <span className="condition-row-letter">{getConditionLabel(index)}</span>
-          <span className="compact-condition-name">{cond.type ? `${cond.type} > ` : ''}{cond.path}</span>
+          <span className="condition-label-stack">
+            <span className="compact-condition-name">{display.name}</span>
+            {display.context && <span className="compact-condition-path">{display.context}</span>}
+          </span>
         </span>
         {!isEditing && <span className="compact-condition-value">{cond.comment !== undefined ? cond.comment : cond.detail || '세부값 없음'}</span>}
       </button>

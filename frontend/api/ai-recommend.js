@@ -25,7 +25,7 @@ function buildPrompt(customerQuery, conditionList, selectedBroker) {
 1. 사용자의 요청 사항을 분석합니다.
 2. 아래 제공된 ${selectedBroker} 조건 목록을 꼼꼼히 읽고, 각 항목의 상세조건까지 반드시 비교해서 판단하세요.
 3. 목록 중 사용자의 요청을 구현하기에 적합한 조건을 모두 찾으세요. 하나일 수도, 여러 개일 수도 있습니다. 확실하지 않은 후보는 넣지 마세요.
-4. 찾은 각 조건의 ID(originalIndex), 상세 설정값(detail), 선택 근거(reason), 신뢰도(confidence), 다음 조건과의 연결 연산자(nextOperator)를 JSON 배열로 반환합니다.
+4. 추천 조건(matches)과 고객 요청 반영 현황(coverage)을 JSON 객체로 반환합니다.
 
 # 논리 연산자 규칙 (중요)
 - 선택한 조건은 사용자가 의도한 평가 순서대로 반환하세요.
@@ -46,30 +46,58 @@ ${conditions}
 - 각 선택 객체의 detail 수치만 사용자의 요청에 맞게 수정하세요. 원래 상세조건의 형식(단위, 표현 방식)은 최대한 유지하세요.
 - reason은 고객이 읽는 안내문처럼 자연스럽고 쉬운 한국어 한 문장으로 작성하세요. "고객님께서 [원하는 결과]를 찾으셔서, [이 조건이 도움이 되는 이유]를 반영했습니다."처럼 요청과 조건의 연결을 설명하세요. 단순히 조건명을 반복하거나 "AI가 선택했습니다"라고 쓰지 말고, 전문 용어는 풀어서 설명하세요. 60자 이내로 핵심 수치·기간만 담으세요.
 - confidence에는 high, medium, low 중 하나만 작성하세요. 고객 요청과 조건명이 직접 일치하면 high, 일부 해석이 필요하면 medium, 가능성만 있으면 low입니다.
+- 기준 기간·수치처럼 작업자의 확인이 필요한 경우에도 가장 적합한 조건을 matches에 넣으세요. 이때 requiresConfirmation을 true로 하고 confirmationNote에 확인할 내용을 짧게 작성하세요. 확정 가능한 조건은 false와 빈 문자열을 넣으세요.
 - 모든 응답 객체에는 nextOperator를 반드시 포함하고 값은 "and" 또는 "or" 중 하나여야 합니다.
-- 응답은 originalIndex, detail, reason, confidence, nextOperator 키를 가진 객체들의 JSON 배열이어야 합니다. 적합한 조건이 하나면 배열 원소도 1개, 없으면 빈 배열 []을 반환하세요.
+- coverage에는 고객 요청에서 실제 조건으로 판단할 수 있는 핵심 요구사항을 2~5개로 나눠 넣으세요. 선택 조건이 직접 반영했을 때만 status를 "covered"로, 기준이 모호하거나 제공 조건으로 확정할 수 없을 때는 "needs_confirmation"으로 설정하세요.
+- 응답은 { "matches": [...], "coverage": [...] } JSON 객체여야 합니다. matches의 각 객체에는 originalIndex, detail, reason, confidence, nextOperator, requiresConfirmation, confirmationNote 키를 포함하세요.
 
 # 예시
 사용자 요청: "거래량 10만주 이상이고 시가총액 1000억 이상인 종목 찾아줘"
-[
-  { "originalIndex": 42, "detail": "거래량이 100,000주 이상", "reason": "고객님께서 거래가 활발한 종목을 찾으셔서, 거래량이 많은 종목만 보도록 반영했습니다.", "confidence": "high", "nextOperator": "and" },
-  { "originalIndex": 17, "detail": "시가총액이 1000억원 이상", "reason": "고객님께서 규모가 큰 기업을 원하셔서, 시가총액 기준을 반영했습니다.", "confidence": "high", "nextOperator": "and" }
-]`;
+{
+  "matches": [
+    { "originalIndex": 42, "detail": "거래량이 100,000주 이상", "reason": "고객님께서 거래가 활발한 종목을 찾으셔서, 거래량이 많은 종목만 보도록 반영했습니다.", "confidence": "high", "nextOperator": "and", "requiresConfirmation": false, "confirmationNote": "" },
+    { "originalIndex": 17, "detail": "시가총액이 1000억원 이상", "reason": "고객님께서 규모가 큰 기업을 원하셔서, 시가총액 기준을 반영했습니다.", "confidence": "high", "nextOperator": "and", "requiresConfirmation": false, "confirmationNote": "" }
+  ],
+  "coverage": [
+    { "request": "거래량 10만주 이상", "status": "covered", "reason": "거래량 조건에 반영" },
+    { "request": "시가총액 1000억 이상", "status": "covered", "reason": "시가총액 조건에 반영" }
+  ]
+}`;
 }
 
 const responseSchema = {
-  type: 'ARRAY',
-  items: {
-    type: 'OBJECT',
-    properties: {
-      originalIndex: { type: 'INTEGER' },
-      detail: { type: 'STRING' },
-      reason: { type: 'STRING' },
-      confidence: { type: 'STRING' },
-      nextOperator: { type: 'STRING', enum: ['and', 'or'] },
+  type: 'OBJECT',
+  properties: {
+    matches: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          originalIndex: { type: 'INTEGER' },
+          detail: { type: 'STRING' },
+          reason: { type: 'STRING' },
+          confidence: { type: 'STRING' },
+          nextOperator: { type: 'STRING', enum: ['and', 'or'] },
+          requiresConfirmation: { type: 'BOOLEAN' },
+          confirmationNote: { type: 'STRING' },
+        },
+        required: ['originalIndex', 'detail', 'reason', 'confidence', 'nextOperator', 'requiresConfirmation', 'confirmationNote'],
+      },
     },
-    required: ['originalIndex', 'detail', 'reason', 'confidence', 'nextOperator'],
+    coverage: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          request: { type: 'STRING' },
+          status: { type: 'STRING', enum: ['covered', 'needs_confirmation'] },
+          reason: { type: 'STRING' },
+        },
+        required: ['request', 'status', 'reason'],
+      },
+    },
   },
+  required: ['matches', 'coverage'],
 };
 
 module.exports = async function handler(request, response) {
@@ -123,7 +151,7 @@ module.exports = async function handler(request, response) {
       const retryInSeconds = Number(payload?.error?.message?.match(/retry in\s+([\d.]+)s/i)?.[1]);
       const quotaDetails = getQuotaDetails(payload?.error?.message || '');
       return response.status(geminiResponse.status).json({
-        error: geminiResponse.status === 429 ? 'AI 요청이 잠시 많습니다. 잠시 후 다시 시도해 주세요.' : 'AI 추천을 생성하지 못했습니다.',
+        error: geminiResponse.status === 429 ? '요청이 잠시 많습니다. 잠시 후 다시 시도해 주세요.' : '조건 추천을 생성하지 못했습니다.',
         retryInSeconds: Number.isFinite(retryInSeconds) ? retryInSeconds : undefined,
         ...quotaDetails,
       });
@@ -131,10 +159,14 @@ module.exports = async function handler(request, response) {
 
     const text = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text) throw new Error('Gemini returned no recommendation text.');
-    const matches = JSON.parse(text.trim());
-    return response.status(200).json({ matches: Array.isArray(matches) ? matches : [matches] });
+    const parsed = JSON.parse(text.trim());
+    const result = Array.isArray(parsed) ? { matches: parsed, coverage: [] } : parsed;
+    return response.status(200).json({
+      matches: Array.isArray(result.matches) ? result.matches : [],
+      coverage: Array.isArray(result.coverage) ? result.coverage : [],
+    });
   } catch (error) {
     console.error('AI recommendation failed:', error.message);
-    return response.status(502).json({ error: 'AI 추천을 처리하는 중 오류가 발생했습니다.' });
+    return response.status(502).json({ error: '조건 추천을 처리하는 중 오류가 발생했습니다.' });
   }
 };

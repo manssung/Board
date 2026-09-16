@@ -277,7 +277,9 @@
   text-align: left;
 }
 #right-panel .inline-condition-row .condition-summary-main { flex: 0 1 43%; }
-#right-panel .inline-condition-row .compact-condition-name { max-width: 100%; }
+.condition-label-stack { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 2px; }
+#right-panel .inline-condition-row .compact-condition-name { max-width: 100%; color: #245fbe; font-size: 12px; font-weight: 800; }
+.compact-condition-path { overflow: hidden; color: #8897aa; font-size: 10px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
 .inline-condition-value {
   min-width: 0;
   flex: 1 1 42%;
