@@ -102,6 +102,31 @@
   flex-direction: column;
 }
 
+.source-inquiry-context {
+  flex: 0 0 auto;
+  margin: 0 10px 8px;
+  padding: 8px 10px;
+  border: 1px solid #dce7f5;
+  border-radius: 7px;
+  background: #f7faff;
+}
+
+.source-inquiry-context-head { display: flex; min-width: 0; align-items: center; gap: 7px; }
+.source-inquiry-label { flex: 0 0 auto; color: #2c67c7; font-size: 10px; font-weight: 800; }
+.source-inquiry-meta { overflow: hidden; min-width: 0; color: #7e8da0; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.source-inquiry-context-head button { flex: 0 0 auto; margin-left: auto; border: 0; padding: 2px 0; color: #386bc0; background: transparent; cursor: pointer; font-size: 10px; font-weight: 750; }
+.source-inquiry-context > strong { display: block; overflow: hidden; margin-top: 5px; color: #7e8da0; font-size: 10px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.source-inquiry-context > p { display: block; max-height: 150px; overflow-y: auto; margin: 9px 0 0; padding-right: 8px; color: #334760; font-size: 13px; line-height: 1.85; white-space: pre-wrap; overflow-wrap: anywhere; }
+.source-inquiry-context-head button + button { margin-left: 5px; }
+.source-inquiry-dialog { width: min(820px, calc(100vw - 32px)); max-height: 85vh; box-sizing: border-box; padding: 28px; border: 1px solid #dbe5f2; border-radius: 16px; color: #334760; background: #fff; box-shadow: 0 24px 80px #16335a33; }
+.source-inquiry-dialog::backdrop { background: #172d4b66; }
+.source-inquiry-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.source-inquiry-dialog-header span { color: #426ca5; font-size: 11px; }
+.source-inquiry-dialog-header h3 { margin: 7px 0; font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.source-inquiry-dialog-header button { flex-shrink: 0; padding: 7px 12px; border: 1px solid #dbe5f2; border-radius: 7px; background: #f7faff; color: #426ca5; cursor: pointer; }
+.source-inquiry-dialog-meta { color: #7e8da0; font-size: 11px; padding: 8px 0 16px; border-bottom: 1px solid #e6edf5; }
+.source-inquiry-dialog-body { max-height: 55vh; overflow-y: auto; margin-top: 20px; padding-right: 12px; font-size: 15px; line-height: 1.95; white-space: pre-wrap; overflow-wrap: anywhere; }
+
 .selected-conditions-list {
   min-height: 0;
   flex: 1;

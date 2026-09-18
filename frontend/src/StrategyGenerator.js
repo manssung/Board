@@ -20,6 +20,7 @@ import SavedStrategies from './components/SavedStrategies';
 import AppToast, { showToast } from './components/AppToast';
 import AiDraftList from './components/AiDraftList';
 import WorkspaceEmptyState from './components/WorkspaceEmptyState';
+import { useUnansweredInquiries } from './hooks/useUnansweredInquiries';
 
 /* Legacy copy kept only for migration reference.
 const groupOrConditions = (conditions) => {
@@ -57,6 +58,8 @@ const MAX_ATTACHMENT_BYTES = 2 * 1024 * 1024;
 const ALLOWED_ATTACHMENT_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 // 이미지 첨부 기능은 검토 후 다시 공개할 수 있도록 코드만 보관합니다.
 const ENABLE_IMAGE_ATTACHMENT = false;
+const INBOX_PAGE_SIZE = 5;
+
 
 const readImageAsBase64 = (file) => new Promise((resolve, reject) => {
   const reader = new FileReader();
@@ -93,11 +96,60 @@ export default function StrategyGenerator() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isSavedStrategiesOpen, setIsSavedStrategiesOpen] = useState(false);
   const savedStrategiesRef = useRef(null);
+  const isImportingInboxInquiryRef = useRef(false);
   const [imageAttachment, setImageAttachment] = useState(null);
   const [attachmentInputKey, setAttachmentInputKey] = useState(0);
   const [isRestoringSavedStrategy, setIsRestoringSavedStrategy] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState(null);
+  const [isInboxPickerOpen, setIsInboxPickerOpen] = useState(false);
+  const { inquiries: inboxInquiries, loading: inboxLoading, error: inboxError, refresh: refreshInbox } = useUnansweredInquiries(isInboxPickerOpen);
+  const [inboxBrokerFilter, setInboxBrokerFilter] = useState('전체');
+  const [inboxSortOrder, setInboxSortOrder] = useState('oldest');
+  const [inboxPage, setInboxPage] = useState(1);
+  const [inboxAttachmentNotice, setInboxAttachmentNotice] = useState(false);
+  const [inboxSourceInquiry, setInboxSourceInquiry] = useState(null);
   const { savedStrategies, saveStrategy, deleteSavedStrategy } = useSavedStrategies();
+
+  const inboxBrokers = [...new Set(inboxInquiries.map((inquiry) => inquiry.broker))];
+  const visibleInboxInquiries = inboxInquiries
+    .filter((inquiry) => inboxBrokerFilter === '전체' || inquiry.broker === inboxBrokerFilter)
+    .sort((left, right) => (inboxSortOrder === 'oldest' ? left.receivedAt.localeCompare(right.receivedAt) : right.receivedAt.localeCompare(left.receivedAt)));
+  const inboxPageCount = Math.max(1, Math.ceil(visibleInboxInquiries.length / INBOX_PAGE_SIZE));
+  const currentInboxPage = Math.min(inboxPage, inboxPageCount);
+  const pagedInboxInquiries = visibleInboxInquiries.slice(
+    (currentInboxPage - 1) * INBOX_PAGE_SIZE,
+    currentInboxPage * INBOX_PAGE_SIZE,
+  );
+  const inboxPageNumbers = Array.from({ length: inboxPageCount }, (_, index) => index + 1)
+    .filter((page) => page === 1 || page === inboxPageCount || Math.abs(page - currentInboxPage) <= 1);
+  const usageGuide = activeTab === 'manual'
+    ? {
+        title: '사용 방법 · 조건식 편집',
+        description: '조건 카탈로그에서 항목을 직접 구성하고, 상세값과 논리 구조를 검토해 조건식을 완성합니다.',
+        steps: [
+          { screenTitle: '조건 카탈로그', visual: ['가격지표 · 거래량분석', '기술적지표 · 재무분석'], cta: '조건 추가', title: '조건 찾기', description: '좌측 카탈로그에서 필요한 조건을 전략에 추가합니다.' },
+          { screenTitle: '선택된 조건', visual: ['A  종가 · 60일 이동평균 상향', 'B  거래량 · 평균 대비 3배'], cta: '상세값 수정', title: '상세값 조정', description: '하단 설정 영역에서 기간·값·비교 기준을 바로 수정합니다.' },
+          { screenTitle: '조건식', visual: ['A  AND  B', '( A  OR  B )  AND  C'], cta: '그룹 설정', title: '논리 구조 편집', description: '연결 방식과 괄호 그룹을 설정해 의도한 조건식을 만듭니다.' },
+          { screenTitle: '답변 멘트', visual: ['확정 조건식 확인', '고객 안내 문구 확인'], cta: '복사', title: '검토 · 답변', description: '최종 조건식과 안내 문구를 확인한 뒤 답변에 사용합니다.' },
+        ],
+        noteTitle: '작업 보관',
+        note: '<b>답변 멘트에서 임시저장</b>을 누르면 현재 작업이 저장됩니다. 상단 <b>최근 작업</b>에서 다시 불러올 수 있으며, 저장본은 24시간 동안 유지됩니다.',
+      }
+      : {
+        title: '사용 방법 · 자동 추천',
+        description: '문의에서 조건 초안을 만들고, 작업자가 검토·수정한 뒤 조건식을 확정합니다.',
+        steps: [
+          { screenTitle: '고객 문의 입력', visual: ['거래량이 많고 시가총액이 큰 종목을 찾아줘'], cta: '조건 추천 받기', title: '문의 입력', description: '고객 문의를 자연스럽게 입력하거나 미응답 문의에서 원글을 불러옵니다.' },
+          { screenTitle: '추천 결과', visual: ['거래량 증가', '시가총액 1,000억 이상'], cta: '추천 조건 적용', title: '추천 조건 검토', description: '추천 이유를 확인하고 필요한 조건만 적용합니다.' },
+          { screenTitle: '조건식 편집', visual: ['부족한 조건 직접 추가', '상세 조건값 · 괄호 그룹 설정'], cta: '수정 내용 반영', title: '조건식 편집', description: '부족한 조건을 추가하고 상세값·연결 방식을 수정합니다.' },
+          { screenTitle: '답변 멘트 확인', visual: ['조건식 ( A OR B ) AND C', '고객 안내 문구 확인'], cta: '답변 멘트 복사', title: '조건식 확정 · 답변 복사', description: '완성된 조건식과 고객 안내 문구를 확인한 뒤 복사합니다.' },
+        ],
+        noteTitle: '작업 보관',
+        note: '<b>답변 멘트에서 임시저장</b>을 누르면 현재 작업이 저장됩니다. 상단 <b>최근 작업</b>에서 다시 불러올 수 있으며, 저장본은 24시간 동안 유지됩니다.',
+      };
+  const usageFlow = activeTab === 'manual'
+    ? ['조건 카탈로그', '조건 추가', '상세값 설정', 'AND · OR · 괄호', '답변 복사']
+    : ['증권사 선택', '문의 입력', '조건 추천 받기', '추천 검토', '조건식 · 답변 복사'];
 
   const handleConditionEditorEdit = useCallback((kind) => {
     if (kind === 'add' || kind === 'duplicate') {
@@ -150,10 +202,15 @@ export default function StrategyGenerator() {
     setIsRestoringSavedStrategy(false);
     return;
   }
+  const shouldKeepImportedInquiry = isImportingInboxInquiryRef.current;
+  isImportingInboxInquiryRef.current = false;
   resetStrategies();
   setSearch("");
   resetAiWorkflow();
-  setCustomerQuery('');
+  if (!shouldKeepImportedInquiry) {
+    setCustomerQuery('');
+    setInboxSourceInquiry(null);
+  }
   setImageAttachment(null);
   setAttachmentInputKey(key => key + 1);
 }, [selectedBroker]);
@@ -184,6 +241,8 @@ export default function StrategyGenerator() {
   resetStrategies();
   resetAiWorkflow();
   setCustomerQuery('');
+  setInboxSourceInquiry(null);
+  setInboxAttachmentNotice(false);
   setImageAttachment(null);
   setAttachmentInputKey(key => key + 1);
   resetSelection();
@@ -466,6 +525,14 @@ const newGroupId = Date.now();
 
 const runAiGeneration = async () => {
     // ✨ 중요: 함수 호출 시 3번째 인자로 'selectedBroker'를 전달합니다!
+  setInboxSourceInquiry((current) => current || {
+    broker: selectedBroker,
+    title: '고객 문의',
+    author: '직접 입력',
+    receivedAt: '',
+    query: customerQuery,
+    isFollowUp: false,
+  });
   resetStrategies();
     startAiWorkflow();
     resetSelection();
@@ -498,10 +565,6 @@ const runAiGeneration = async () => {
   };
 
   const handleAiGenerate = () => {
-    if (activeStrategyKind !== 'condition') {
-      showToast('조건 추천은 조건식 블록에서만 사용할 수 있습니다.', 'error');
-      return;
-    }
     if (!selectedBroker) {
       showToast('먼저 증권사를 선택해주세요.', 'error');
       return;
@@ -524,6 +587,22 @@ const runAiGeneration = async () => {
       return;
     }
     runAiGeneration();
+  };
+
+  const handleUseInboxInquiry = ({ broker, query, title, author, receivedAt, isFollowUp, hasImageAttachment }) => {
+    if (!brokerMap[broker]) {
+      showToast(`${broker}은 지원하지 않는 증권사입니다.`, 'error');
+      return;
+    }
+    // 증권사가 바뀌면 위 초기화 effect가 실행됩니다. 이 경우에도 가져온 원글은 유지합니다.
+    isImportingInboxInquiryRef.current = broker !== selectedBroker;
+    setSelectedBroker(broker);
+    setCustomerQuery(query);
+    setInboxSourceInquiry({ broker, title, author, receivedAt, query, isFollowUp });
+    setInboxAttachmentNotice(Boolean(hasImageAttachment));
+    resetAiWorkflow();
+    setIsInboxPickerOpen(false);
+    showToast(`${title} 내용을 자동 추천에 불러왔습니다.`, 'success');
   };
 
   
@@ -583,8 +662,25 @@ const runAiGeneration = async () => {
     }
   };
 
-  const handleAiExample = (query) => {
+  const handleCustomerQueryChange = (query) => {
     setCustomerQuery(query);
+    setInboxSourceInquiry((current) => {
+      // 게시판에서 가져온 원글의 출처 정보는 사용자가 내용을 보완해도 유지합니다.
+      if (current && current.author !== '직접 입력') return current;
+      if (!query.trim()) return null;
+      return {
+        broker: selectedBroker,
+        title: '고객 문의',
+        author: '직접 입력',
+        receivedAt: '',
+        query,
+        isFollowUp: false,
+      };
+    });
+  };
+
+  const handleAiExample = (query) => {
+    handleCustomerQueryChange(query);
   };
 
 /* Legacy answer parsing moved to conditionEditor utilities.
@@ -665,68 +761,34 @@ const parseMentForComments = (text, originalConditions) => {
               <div className="usage-help-modal-backdrop" onMouseDown={() => setIsHelpOpen(false)}>
                 <section id="usage-help-popover" className="usage-help-modal" role="dialog" aria-modal="true" aria-label="사용 방법" onMouseDown={(event) => event.stopPropagation()}>
                   <div className="usage-help-title">
-                    <div><strong>사용 방법</strong><p>문의에서 조건 초안을 만들고, 작업자가 검토·수정한 뒤 조건식을 확정합니다.</p></div>
+                    <div><strong>{usageGuide.title}</strong><p>{usageGuide.description}</p></div>
                     <button type="button" onClick={() => setIsHelpOpen(false)} aria-label="사용 방법 닫기">×</button>
                   </div>
+                  <div className="usage-help-flow" aria-label="작업 순서">
+                    {usageFlow.map((label, index) => (
+                      <React.Fragment key={label}>
+                        <span className={index === 0 ? 'current' : ''}><b>{index + 1}</b>{label}</span>
+                        {index < usageFlow.length - 1 && <i>→</i>}
+                      </React.Fragment>
+                    ))}
+                  </div>
                   <div className="usage-help-steps">
-                    <article className="usage-help-step">
-                      <div className="help-screen help-query-screen">
-                        <span className="help-mini-title">고객 문의 입력</span>
-                        <i>거래량이 많고 시가총액이 큰 종목을 찾아줘</i>
-                        <b>조건 추천 받기</b>
-                      </div>
-                      <span className="help-step-number">01</span>
-                      <h4>문의 입력</h4>
-                      <p>고객 문의를 자연스럽게 입력합니다.</p>
-                    </article>
-                    <article className="usage-help-step">
-                      <div className="help-screen help-result-screen">
-                        <span className="help-mini-title">추천 결과</span>
-                        <i>거래량 증가 <em>적용</em></i>
-                        <i>시가총액 1,000억 이상 <em>적용</em></i>
-                        <b>추천 조건 적용</b>
-                      </div>
-                      <span className="help-step-number">02</span>
-                      <h4>추천 조건 검토</h4>
-                      <p>추천 이유를 확인하고 필요한 조건만 적용합니다.</p>
-                    </article>
-                    <article className="usage-help-step">
-                      <div className="help-screen help-edit-screen">
-                        <span className="help-mini-title">조건식 편집</span>
-                        <i>+ 부족한 조건 직접 추가</i>
-                        <i>상세 조건값 수정 · 필요 시 괄호 그룹 설정</i>
-                        <b>수정 내용 반영</b>
-                      </div>
-                      <span className="help-step-number">03</span>
-                      <h4>조건식 편집</h4>
-                      <p>부족한 조건을 추가하고 상세값·연결 방식을 수정합니다.</p>
-                    </article>
-                    <article className="usage-help-step">
-                      <div className="help-screen help-result-screen">
-                        <span className="help-mini-title">답변 멘트 확인</span>
-                        <i>조건식 ( A OR B ) AND C <em>확정</em></i>
-                        <i>고객 안내 문구 확인 <em>복사</em></i>
-                        <b>답변 멘트 복사</b>
-                      </div>
-                      <span className="help-step-number">04</span>
-                      <h4>조건식 확정 · 답변 복사</h4>
-                      <p>완성된 조건식과 고객 안내 문구를 확인한 뒤 복사합니다.</p>
-                    </article>
+                    {usageGuide.steps.map((step, index) => (
+                      <article className="usage-help-step" key={step.title}>
+                        <div className="help-screen help-result-screen">
+                          <span className="help-mini-title">{step.screenTitle}</span>
+                          {step.visual.map((line) => <i key={line}>{line}</i>)}
+                          <b>{step.cta}</b>
+                        </div>
+                        <span className="help-step-number">{String(index + 1).padStart(2, '0')}</span>
+                        <h4>{step.title}</h4>
+                        <p>{step.description}</p>
+                      </article>
+                    ))}
                   </div>
                   <section className="usage-help-save-note">
-                    <strong>작업 보관</strong>
-                    <div className="help-save-visual">
-                      <div className="help-save-screen">
-                        <span>답변 멘트</span>
-                        <b>임시저장</b>
-                      </div>
-                      <i>→</i>
-                      <div className="help-save-screen">
-                        <span>최근 작업</span>
-                        <b>불러오기</b>
-                      </div>
-                    </div>
-                    <p><b>답변 멘트에서 임시저장</b>을 누르면 현재 작업이 저장됩니다. 상단 <b>최근 작업</b>에서 다시 불러올 수 있으며, 저장본은 24시간 동안 유지됩니다.</p>
+                    <strong>{usageGuide.noteTitle}</strong>
+                    <p dangerouslySetInnerHTML={{ __html: usageGuide.note }} />
                   </section>
                 </section>
               </div>
@@ -800,7 +862,60 @@ const parseMentForComments = (text, originalConditions) => {
                     <ConditionList conditions={filteredConditions} onConditionClick={handleConditionClick} isSearching={Boolean(search.trim())} />
                   </div>
                 )}
-                {activeTab === 'ai' && (
+                {activeTab === 'ai' && isInboxPickerOpen && (
+                  <div className="board-inquiry-browser" aria-label="미응답 문의 선택">
+                    <div className="board-inquiry-browser-head">
+                      <div><span>BOARD INBOX</span><h3>증권사별 업무 큐</h3><p>처리할 문의를 고르면 원글을 자동 추천 입력창으로 가져옵니다.</p></div>
+                      <button type="button" onClick={() => setIsInboxPickerOpen(false)}>입력으로 돌아가기</button>
+                    </div>
+                    <div className="board-queue-summary" aria-label="문의 현황">
+                      <span><b>{inboxInquiries.length}</b> 전체 문의</span>
+                      <span><b>{inboxBrokers.length}</b> 증권사</span>
+                      <span>원문을 선택하면 자동 추천 입력창으로 가져옵니다.</span>
+                    </div>
+                    <div className="board-queue-layout">
+                      <aside className="board-queue-brokers" aria-label="증권사 필터">
+                        <button type="button" className={inboxBrokerFilter === '전체' ? 'active' : ''} onClick={() => { setInboxBrokerFilter('전체'); setInboxPage(1); }}><span>전체 문의</span><b>{inboxInquiries.length}</b></button>
+                        {inboxBrokers.map((broker) => {
+                          const count = inboxInquiries.filter((inquiry) => inquiry.broker === broker).length;
+                          return <button type="button" key={broker} className={inboxBrokerFilter === broker ? 'active' : ''} onClick={() => { setInboxBrokerFilter(broker); setInboxPage(1); }}><span>{broker}</span><b>{count}</b></button>;
+                        })}
+                      </aside>
+                      <section className="board-queue-list">
+                        <div className="board-queue-list-head">
+                          <strong>{inboxBrokerFilter === '전체' ? '전체 미응답 문의' : `${inboxBrokerFilter} 문의`}</strong>
+                          <div className="board-queue-list-actions">
+                            <small>{inboxLoading ? '불러오는 중…' : `${visibleInboxInquiries.length}건`}</small>
+                            <button type="button" disabled={inboxLoading} onClick={refreshInbox}>새로고침</button>
+                            <button type="button" onClick={() => { setInboxSortOrder((order) => order === 'oldest' ? 'latest' : 'oldest'); setInboxPage(1); }}>
+                              {inboxSortOrder === 'oldest' ? '오래된순 ↑' : '최신순 ↓'}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="board-inquiry-browser-list">
+                          {pagedInboxInquiries.map((inquiry) => (
+                            <button type="button" key={inquiry.id} onClick={() => handleUseInboxInquiry(inquiry)}>
+                              <span><em>{inquiry.broker}</em><small>게시글 #{inquiry.id} · {inquiry.author} · {inquiry.receivedAt}</small></span>
+                              <strong>{inquiry.isFollowUp && <mark>재문의</mark>}{inquiry.hasImageAttachment && <mark className="attachment">첨부파일</mark>}{inquiry.title}</strong>
+                              <p>{inquiry.query}</p>
+                            </button>
+                          ))}
+                          {inboxLoading && <div className="board-queue-empty" role="status">미답변 문의를 불러오는 중입니다…</div>}
+                          {inboxError && <div className="board-queue-empty" role="alert">{inboxError}</div>}
+                          {!inboxLoading && !inboxError && visibleInboxInquiries.length === 0 && <div className="board-queue-empty">조건에 맞는 문의가 없습니다.</div>}
+                        </div>
+                        {inboxPageCount > 1 && (
+                          <nav className="board-queue-pagination" aria-label="문의 페이지">
+                            <button type="button" disabled={currentInboxPage === 1} onClick={() => setInboxPage((page) => Math.max(1, page - 1))}>이전</button>
+                            {inboxPageNumbers.map((page, index) => <React.Fragment key={page}>{index > 0 && inboxPageNumbers[index - 1] !== page - 1 && <i>…</i>}<button type="button" className={page === currentInboxPage ? 'active' : ''} onClick={() => setInboxPage(page)}>{page}</button></React.Fragment>)}
+                            <button type="button" disabled={currentInboxPage === inboxPageCount} onClick={() => setInboxPage((page) => Math.min(inboxPageCount, page + 1))}>다음</button>
+                          </nav>
+                        )}
+                      </section>
+                    </div>
+                  </div>
+                )}
+                {activeTab === 'ai' && !isInboxPickerOpen && (
                   <div className="ai-workflow">
                     <div className="ai-workflow-heading recommendation-input-heading">
                       <span className="recommendation-step-number">01</span>
@@ -811,7 +926,11 @@ const parseMentForComments = (text, originalConditions) => {
                       </div>
                       <span className="recommendation-catalog-status">{selectedBroker ? `${selectedBroker} · ${allConditions.length.toLocaleString()}개 조건` : '증권사 선택 필요'}</span>
                     </div>
-                    <button type="button" className="ai-clear-query-button" onClick={() => setCustomerQuery('')} disabled={!customerQuery}>문의 지우기</button>
+                    <div className="board-inquiry-import">
+                      <button type="button" onClick={() => setIsInboxPickerOpen(true)}>미응답 문의 선택 </button>
+                    </div>
+                    <button type="button" className="ai-clear-query-button" onClick={() => { setCustomerQuery(''); setInboxAttachmentNotice(false); setInboxSourceInquiry(null); }} disabled={!customerQuery}>문의 지우기</button>
+                    {inboxAttachmentNotice && <div className="inbox-attachment-notice"><b>첨부파일가 있는 문의입니다.</b> 첨부파일 내용은 자동 추천에 포함되지 않으므로, 답변 전 게시판 원글의 첨부파일을 확인해 주세요.</div>}
                     {ENABLE_IMAGE_ATTACHMENT && (
                       <>
                         <div className="ai-attachment-row">
@@ -841,7 +960,7 @@ const parseMentForComments = (text, originalConditions) => {
                       className="ment-box ai-query-input"
                       rows={7}
                       value={customerQuery}
-                      onChange={(e) => setCustomerQuery(e.target.value)}
+                      onChange={(e) => handleCustomerQueryChange(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.ctrlKey && e.key === 'Enter') handleAiGenerate();
                       }}
@@ -914,9 +1033,10 @@ const parseMentForComments = (text, originalConditions) => {
                 {activeTab === 'manual' && (
                   activeStrategyKind === 'template' ? (
                     <WorkspaceEmptyState className="manual-empty-state" icon="✉" title={fixedType ? '답변 템플릿이 선택되었습니다.' : '답변 템플릿을 선택해 주세요.'} description={fixedType ? '답변 멘트의 현재 순서에 이 템플릿이 삽입됩니다.' : '왼쪽 상단의 답변 템플릿 선택에서 내용을 골라 주세요.'} />
-                  ) : selectedConditions.length > 0 ? (
+                  ) : selectedConditions.length > 0 || inboxSourceInquiry ? (
                     <SelectedConditions
                       selectedConditions={selectedConditions}
+                      sourceInquiry={inboxSourceInquiry}
                       onRemove={handleRemoveCondition}
                       onCommentChange={handleCommentChange}
                       onMove={handleMoveCondition}
