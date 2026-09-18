@@ -22,38 +22,7 @@ import AiDraftList from './components/AiDraftList';
 import WorkspaceEmptyState from './components/WorkspaceEmptyState';
 import { useUnansweredInquiries } from './hooks/useUnansweredInquiries';
 
-/* Legacy copy kept only for migration reference.
-const groupOrConditions = (conditions) => {
-  const groupedConditions = conditions.map(condition => ({ ...condition, groupIds: [] }));
 
-  // 조건이 둘뿐인 "A or B"는 괄호 없이 표현합니다.
-  if (groupedConditions.length < 3) {
-    return groupedConditions;
-  }
-
-  let index = 0;
-
-  while (index < groupedConditions.length - 1) {
-    if (groupedConditions[index].operator !== 'or') {
-      index += 1;
-      continue;
-    }
-
-    const groupStart = index;
-    while (index < groupedConditions.length - 1 && groupedConditions[index].operator === 'or') {
-      index += 1;
-    }
-
-    const groupId = `ai-or-${Date.now()}-${groupStart}`;
-    for (let memberIndex = groupStart; memberIndex <= index; memberIndex += 1) {
-      groupedConditions[memberIndex].groupIds = [groupId];
-    }
-  }
-
-  return groupedConditions;
-};
-
-*/
 const MAX_ATTACHMENT_BYTES = 2 * 1024 * 1024;
 const ALLOWED_ATTACHMENT_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 // 이미지 첨부 기능은 검토 후 다시 공개할 수 있도록 코드만 보관합니다.
@@ -73,7 +42,7 @@ export default function StrategyGenerator() {
 
   const [selectedBroker, setSelectedBroker] = useState("");
   const [search, setSearch] = useState("");
-  //const [allConditions, setAllConditions] = useState([]);
+
   const [customerQuery, setCustomerQuery] = useState(""); 
   const { isAiLoading, generateStrategy } = useAiStrategyGenerator();
   const [activeTab, setActiveTab] = useState('ai'); 
@@ -102,7 +71,7 @@ export default function StrategyGenerator() {
   const [isRestoringSavedStrategy, setIsRestoringSavedStrategy] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState(null);
   const [isInboxPickerOpen, setIsInboxPickerOpen] = useState(false);
-  const { inquiries: inboxInquiries, loading: inboxLoading, error: inboxError, refresh: refreshInbox } = useUnansweredInquiries(isInboxPickerOpen);
+  const { inquiries: inboxInquiries, loading: inboxLoading, error: inboxError, refresh: refreshInbox, lastUpdatedAt: inboxLastUpdatedAt } = useUnansweredInquiries(isInboxPickerOpen && activeTab === 'ai');
   const [inboxBrokerFilter, setInboxBrokerFilter] = useState('전체');
   const [inboxSortOrder, setInboxSortOrder] = useState('oldest');
   const [inboxPage, setInboxPage] = useState(1);
@@ -298,214 +267,7 @@ export default function StrategyGenerator() {
     }
   };
 
-  /* Legacy condition editor handlers moved to useConditionEditor.
-  const handleCommentChange = (index, newComment) => {
-  setSelectedConditions(prev => updateConditionComment(prev, index, newComment));
-      setIsMentManuallyEdited(false);
-      setCustomMent("");
-      setFixedType("");
-    };
-
-  const handleConditionClick = (condition) => {
-    setSelectedConditions(prev => addCondition(prev, condition));
-    enterConditionEditing();
-    
-    // 고정 멘트 관련 상태 초기화
-    setWarning("");
-    setFixedType("");
-    setAutoMent("");
-    setCustomMent("");
-    setIsMentManuallyEdited(false);
-  };
-
-  /////괄호 기능//////////
-  const handleLetterCheck = (letter) => {
-    setCheckedLetters(prev => {
-      const newChecked = new Set(prev);
-      if (newChecked.has(letter)) {
-        newChecked.delete(letter);
-      } else {
-        newChecked.add(letter);
-      }
-      return newChecked;
-    });
-  };
-
-
-
-  const handleGroupConditions = () => {
-    if (checkedLetters.size < 2) {
-      showToast('괄호로 묶을 항목을 2개 이상 선택해주세요.', 'error');
-      setCheckedLetters(new Set())
-      return;
-    }
-
-    const sortedIndices = Array.from(checkedLetters)
-      .map(letter => getConditionIndex(letter))
-      .sort((a, b) => a - b);
-
-    // 인덱스가 1씩 증가하는지(연속된 숫자인지) 확인합니다.
-    for (let i = 0; i < sortedIndices.length - 1; i++) {
-      if (sortedIndices[i + 1] - sortedIndices[i] !== 1) {
-        showToast('연속된 조건끼리만 그룹으로 묶을 수 있습니다.', 'error');
-        setCheckedLetters(new Set());
-        return;
-      }
-    }
-
-    const firstIndex = sortedIndices[0];
-    const lastIndex = sortedIndices[sortedIndices.length - 1];
-
-    const sharedSelectedGroupIds = sortedIndices
-      .map(index => selectedConditions[index].groupIds || [])
-      .reduce((sharedIds, groupIds) => sharedIds.filter(id => groupIds.includes(id)));
-
-    if (sharedSelectedGroupIds.length > 0) {
-      showToast('이미 같은 괄호 그룹으로 묶인 조건입니다.', 'error');
-      setCheckedLetters(new Set());
-      return;
-    }
-    
-    // 3-1. 왼쪽 경계 확인: 선택된 첫 항목이 바로 앞 항목과 그룹을 공유하는지?
-    if (firstIndex > 0) {
-      const currentItem = selectedConditions[firstIndex];
-      const prevItem = selectedConditions[firstIndex - 1];
-      
-      // 두 항목이 공통으로 가진 그룹 ID가 하나라도 있다면?
-      const sharedGroups = currentItem.groupIds.filter(id => prevItem.groupIds.includes(id));
-      if (sharedGroups.length > 0) {
-        showToast('기존 괄호를 가로질러 그룹을 만들 수 없습니다. 앞쪽 괄호 범위를 확인해 주세요.', 'error');
-        setCheckedLetters(new Set());
-        return;
-      }
-    }
-
-    // 3-2. 오른쪽 경계 확인: 선택된 마지막 항목이 바로 뒤 항목과 그룹을 공유하는지?
-    if (lastIndex < selectedConditions.length - 1) {
-      const currentItem = selectedConditions[lastIndex];
-      const nextItem = selectedConditions[lastIndex + 1];
-      
-      // 두 항목이 공통으로 가진 그룹 ID가 하나라도 있다면?
-      const sharedGroups = currentItem.groupIds.filter(id => nextItem.groupIds.includes(id));
-      if (sharedGroups.length > 0) {
-        showToast('기존 괄호를 가로질러 그룹을 만들 수 없습니다. 뒤쪽 괄호 범위를 확인해 주세요.', 'error');
-        setCheckedLetters(new Set());
-        return;
-      }
-    }
-
-const newGroupId = Date.now();
-    setSelectedConditions(prev => 
-      prev.map((item, index) => {
-        const letter = getConditionLabel(index);
-        const currentGroupIds = item.groupIds || [];
-        return checkedLetters.has(letter) 
-          ? { ...item, groupIds: [...currentGroupIds, newGroupId] } 
-          : item;
-      })
-    );
-    setCheckedLetters(new Set());
-  };
-
-
-  const handleUngroupConditions = () => {
-    if(checkedLetters.size === 0) return
-
-    let targetGroupId = null;
-    // const indicesArray = Array.from(checkedIndices);
-    // const firstCheckedItem = selectedConditions[indicesArray[0]];
-    const sampleIndex = getConditionIndex(Array.from(checkedLetters)[0]);
-    const sampleItem = selectedConditions[sampleIndex];
-    
-    if (sampleItem && sampleItem.groupIds && sampleItem.groupIds.length > 0) {
-      targetGroupId = sampleItem.groupIds[sampleItem.groupIds.length - 1];
-    }
-
-    if (!targetGroupId) {
-      showToast("해제할 그룹이 없습니다.", 'error');
-      return;
-    }
-    
-    setSelectedConditions(prev =>
-      prev.map((item, index) => {
-      const letter = getConditionLabel(index);
-          // ✨ 해당 ID만 필터링하여 제거
-       return checkedLetters.has(letter) 
-          ? { ...item, groupIds: [] } 
-          : item;
-      })
-    );
-    setCheckedLetters(new Set());
-    setIsGrouping(false);
-  };
-
-  const handleToggleGroupMode = () => {
-    if (isGrouping) {
-      setCheckedLetters(new Set());
-    }
-    setIsGrouping(!isGrouping); // 모드 토글
-  };
-
-  //괄호 초기화//
-  const handleClearAllGroups = () => {
-    const hasGroups = selectedConditions.some(item => item.groupIds && item.groupIds.length > 0);
-
-    // 2. 괄호가 없으면 알림 표시 후 종료
-    if (!hasGroups) {
-      showToast("삭제할 괄호가 없습니다.", 'error');
-      return;
-    }
-    setConfirmDialog({
-      title: '모든 그룹을 해제하시겠습니까?',
-      description: '설정된 괄호가 모두 삭제됩니다.',
-      confirmLabel: '모든 그룹 해제',
-      onConfirm: () => {
-        setSelectedConditions(prev => prev.map(item => ({ ...item, groupIds: [] })));
-        setCheckedLetters(new Set());
-      },
-    });
-  };
-
-  //and / or
- const handleToggleOperator = (index) => {
-    // index에 해당하는 조건의 operator를 'and' -> 'or', 'or' -> 'and'로 변경
-    setSelectedConditions(prev => toggleConditionOperator(prev, index));
-    setIsMentManuallyEdited(false); // 멘트가 자동으로 다시 생성되도록 설정
-  };
-
-
-  const handleMoveCondition = (index, direction) => {
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= selectedConditions.length) return;
- 
-    setSelectedConditions(prev => {
-      const updated = [...prev];
-      [updated[index], updated[targetIndex]] = [updated[targetIndex], updated[index]];
-      // ✨ 순서가 바뀌면 기존 괄호(그룹) 구조가 인덱스 기준이라 깨지므로 전체 초기화합니다.
-      return updated.map(item => ({ ...item, operator: 'and', groupIds: [] }));
-    });
-    setCheckedLetters(new Set());
-    setIsGrouping(false);
-    setIsMentManuallyEdited(false);
-    setCustomMent("");
-    setFixedType("");
-  };
- 
-  const handleRemoveCondition = (index) => {
-    const isLastCondition = selectedConditions.length === 1;
-    setSelectedConditions(prev => 
-      prev
-        .filter((_, i) => i !== index) // 선택한 항목 삭제
-        .map(item => ({ ...item, operator: 'and', groupIds: [] })) // ✨ 모든 괄호와 연결 연산자 초기화
-    );
-    setIsMentManuallyEdited(false);
-    setCustomMent("");
-    setFixedType("");
-    setCheckedLetters(new Set()); // 선택 상태도 초기화
-    setIsGrouping(false);
-    if (isLastCondition) markEditingEmpty();
-  };
-  */
+  
   
 
   useEffect(() => { //멘트 바로 수정
@@ -589,20 +351,39 @@ const runAiGeneration = async () => {
     runAiGeneration();
   };
 
-  const handleUseInboxInquiry = ({ broker, query, title, author, receivedAt, isFollowUp, hasImageAttachment }) => {
+  const handleUseInboxInquiry = ({ id, broker, query, title, author, receivedAt, isFollowUp, hasImageAttachment }) => {
     if (!brokerMap[broker]) {
       showToast(`${broker}은 지원하지 않는 증권사입니다.`, 'error');
       return;
     }
-    // 증권사가 바뀌면 위 초기화 effect가 실행됩니다. 이 경우에도 가져온 원글은 유지합니다.
+    if (inboxSourceInquiry?.id === id && inboxSourceInquiry?.broker === broker && inboxSourceInquiry?.query === query) {
+      setIsInboxPickerOpen(false);
+      return;
+    }
+    const applyInquiry = () => {
+    resetStrategies();
+    setSearch('');
+    setImageAttachment(null);
+    setAttachmentInputKey((key) => key + 1);
+    // 증권사가 바뀌어도 가져온 원글은 유지합니다.
     isImportingInboxInquiryRef.current = broker !== selectedBroker;
     setSelectedBroker(broker);
     setCustomerQuery(query);
-    setInboxSourceInquiry({ broker, title, author, receivedAt, query, isFollowUp });
+    setInboxSourceInquiry({ id, broker, title, author, receivedAt, query, isFollowUp });
     setInboxAttachmentNotice(Boolean(hasImageAttachment));
     resetAiWorkflow();
     setIsInboxPickerOpen(false);
     showToast(`${title} 내용을 자동 추천에 불러왔습니다.`, 'success');
+    };
+    const hasWork = strategies.some((strategy) => strategy.conditions?.length > 0 || strategy.kind === 'template') || aiDraftConditions.length > 0 || Boolean(customerQuery.trim());
+    if (hasWork) {
+      setConfirmDialog({
+        title: '다른 문의로 전환할까요?',
+        description: '현재 입력한 문의와 모든 전략·추천 초안이 초기화됩니다. 보관이 필요하면 취소 후 임시저장해 주세요.',
+        confirmLabel: '초기화 후 문의 가져오기',
+        onConfirm: applyInquiry,
+      });
+    } else applyInquiry();
   };
 
   
@@ -683,34 +464,7 @@ const runAiGeneration = async () => {
     handleCustomerQueryChange(query);
   };
 
-/* Legacy answer parsing moved to conditionEditor utilities.
-const parseMentForComments = (text, originalConditions) => {
-  const lines = text.split('\n');
-  const updatedConditions = originalConditions.map(cond => ({ ...cond }));
-  
-  lines.forEach(line => {
-    const match = line.match(/^([A-Za-z])\s*:\s*(.*)/);
-    if (match) {
-      const index = getConditionIndex(match[1]);
-      if (index >= 0 && index < updatedConditions.length) {
-        const content = match[2];
-        const parts = content.split(' : ');
-        const newComment = parts.length > 1 ? parts.slice(1).join(' : ') : '';
-        if (updatedConditions[index]) {
-          updatedConditions[index].comment = newComment.trim();
-        }
-      }
-    }
-  });
-  return updatedConditions;
-};
 
-// ✨ '편집 완료' 핸들러 다시 추가
-  const handleMentUpdate = (newMent) => {
-    const updatedConditions = parseMentForComments(newMent, selectedConditions);
-    setSelectedConditions(updatedConditions);
-  };
-*/
 
   const mentButtons = selectedBroker?.includes('신한')
   ? ['조건선물', '기능불가', '작성불가', '전략외문의', '오류답변']
@@ -796,7 +550,7 @@ const parseMentForComments = (text, originalConditions) => {
           </div>
         </header>
         <div className="main-content">
-          <div className={`top-panel ${activeTab === 'ai' ? 'ai-workflow-layout' : ''}`}>
+          <div className={`top-panel ${activeTab === 'ai' ? 'ai-workflow-layout' : 'manual-editor-layout'}`}>
             <div id="left-panel" className={`panel ${activeTab === 'ai' ? 'ai-request-panel' : ''}`}>
               <div className="tabs-container">
                 <button className={`tab-button ${activeTab === 'manual' ? 'active' : ''}`} onClick={() => setActiveTab('manual')}>조건식 편집</button>
@@ -883,10 +637,9 @@ const parseMentForComments = (text, originalConditions) => {
                       </aside>
                       <section className="board-queue-list">
                         <div className="board-queue-list-head">
-                          <strong>{inboxBrokerFilter === '전체' ? '전체 미응답 문의' : `${inboxBrokerFilter} 문의`}</strong>
+                          <strong>{inboxBrokerFilter === '전체' ? '전체 미응답 문의' : `${inboxBrokerFilter} 문의`} <small className="board-queue-count">{visibleInboxInquiries.length}건</small></strong>
                           <div className="board-queue-list-actions">
-                            <small>{inboxLoading ? '불러오는 중…' : `${visibleInboxInquiries.length}건`}</small>
-                            <button type="button" disabled={inboxLoading} onClick={refreshInbox}>새로고침</button>
+                            <button type="button" disabled={inboxLoading} onClick={refreshInbox}>{inboxLoading ? (inboxLastUpdatedAt ? '갱신 중…' : '불러오는 중…') : '새로고침'}</button>
                             <button type="button" onClick={() => { setInboxSortOrder((order) => order === 'oldest' ? 'latest' : 'oldest'); setInboxPage(1); }}>
                               {inboxSortOrder === 'oldest' ? '오래된순 ↑' : '최신순 ↓'}
                             </button>
@@ -900,7 +653,7 @@ const parseMentForComments = (text, originalConditions) => {
                               <p>{inquiry.query}</p>
                             </button>
                           ))}
-                          {inboxLoading && <div className="board-queue-empty" role="status">미답변 문의를 불러오는 중입니다…</div>}
+                          {inboxLoading && !inboxLastUpdatedAt && <div className="board-queue-empty" role="status">미답변 문의를 불러오는 중입니다…</div>}
                           {inboxError && <div className="board-queue-empty" role="alert">{inboxError}</div>}
                           {!inboxLoading && !inboxError && visibleInboxInquiries.length === 0 && <div className="board-queue-empty">조건에 맞는 문의가 없습니다.</div>}
                         </div>

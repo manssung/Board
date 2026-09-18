@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'; // useRef�
 import '../css/SelectedConditions.css';
 import { getConditionLabel } from '../util/conditionEditor';
 import WorkspaceEmptyState from './WorkspaceEmptyState';
+import SourceInquiry from './SourceInquiry';
 
 const getConditionDisplay = (condition) => {
   const parts = [condition.type, ...(condition.path || '').split('>')]
@@ -29,8 +30,6 @@ const SelectedConditions = ({
   onClearAllGroups,
 }) => {
   const [editingIndex, setEditingIndex] = useState(null);
-  const [isSourceExpanded, setIsSourceExpanded] = useState(true);
-  const sourceDialogRef = useRef(null);
   const previousLengthRef = useRef(selectedConditions.length);
 
   useEffect(() => {
@@ -64,32 +63,11 @@ const SelectedConditions = ({
       return map;
     }, new Map());
   }, [selectedConditions]);
-  const sourceMeta = sourceInquiry
-    ? [sourceInquiry.broker, sourceInquiry.author, sourceInquiry.receivedAt, sourceInquiry.isFollowUp ? '재문의' : ''].filter(Boolean).join(' · ')
-    : '';
+
 
   return (
     <div className="selected-conditions-workspace">
-      {sourceInquiry && (
-        <section className={`source-inquiry-context ${isSourceExpanded ? 'expanded' : ''}`} aria-label="기준 문의">
-          <div className="source-inquiry-context-head">
-            <span className="source-inquiry-label">기준 문의</span>
-            <span className="source-inquiry-meta">{sourceMeta}</span>
-            <button type="button" onClick={() => sourceDialogRef.current?.showModal()}>크게 보기</button>
-            <button type="button" aria-expanded={isSourceExpanded} aria-controls="source-inquiry-body" onClick={() => setIsSourceExpanded((expanded) => !expanded)}>{isSourceExpanded ? '접기' : '원문 보기'}</button>
-          </div>
-          <strong>{sourceInquiry.title}</strong>
-          {isSourceExpanded && <p id="source-inquiry-body">{sourceInquiry.query}</p>}
-          <dialog className="source-inquiry-dialog" ref={sourceDialogRef} aria-labelledby="source-dialog-title" onClick={(event) => { if (event.target === event.currentTarget) event.currentTarget.close(); }}>
-            <div className="source-inquiry-dialog-header">
-              <div><span>기준 문의 · 원문</span><h3 id="source-dialog-title">{sourceInquiry.title || '고객 문의'}</h3></div>
-              <button type="button" autoFocus onClick={() => sourceDialogRef.current?.close()} aria-label="문의 크게 보기 닫기">닫기 ×</button>
-            </div>
-            <div className="source-inquiry-dialog-meta">{sourceMeta}</div>
-            <div className="source-inquiry-dialog-body" tabIndex={0}>{sourceInquiry.query || '문의 내용이 없습니다.'}</div>
-          </dialog>
-        </section>
-      )}
+      <SourceInquiry sourceInquiry={sourceInquiry} />
       <div className="selected-conditions-list">
         {selectedConditions.length === 0 && <WorkspaceEmptyState className="manual-empty-state" icon="＋" title="적용된 조건이 없습니다." description="위 문의를 참고하여 왼쪽 조건 목록에서 필요한 조건을 추가해 주세요." />}
         {selectedConditions.map((cond, index) => {
@@ -147,10 +125,13 @@ const ConditionFormulaBar = ({ selectedConditions, onToggleOperator, isGrouping,
         const opens = ids.filter((id) => !(previous?.groupIds || []).includes(id));
         const closes = ids.filter((id) => !(next?.groupIds || []).includes(id));
         return <React.Fragment key={`${condition.id || condition.path}-${index}`}>
+          {index > 0 && index % 8 === 0 && <span className="condition-formula-break" aria-hidden="true" />}
+          <span className="condition-formula-item">
           {opens.map((id) => <span className="condition-formula-paren" key={`open-${id}`}>(</span>)}
           <button type="button" className={`condition-formula-letter ${isGrouping ? 'grouping' : ''} ${checkedLetters?.has(letter) ? 'checked' : ''}`} onClick={() => isGrouping && onLetterCheck(letter)}>{letter}</button>
           {closes.map((id) => <span className="condition-formula-paren" key={`close-${id}`}>)</span>)}
           {index < selectedConditions.length - 1 && <button type="button" className="condition-formula-operator" onClick={() => onToggleOperator(index)}>{condition.operator || 'and'}</button>}
+          </span>
         </React.Fragment>;
       })}
     </div>

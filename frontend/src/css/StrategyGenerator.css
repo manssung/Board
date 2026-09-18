@@ -114,10 +114,22 @@ body {
 
 #right-panel .manual-panel-content {
   display: flex;
-  min-height: 0;
+  min-height: auto;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
+
+/* Source inquiry and formula grow independently of the editing viewport. */
+.top-panel.manual-editor-layout { height: auto; flex: 0 0 auto; align-items: stretch; }
+.top-panel.manual-editor-layout > #right-panel { height: auto; }
+.top-panel.manual-editor-layout > #left-panel { height: auto; min-height: 480px; }
+.manual-editor-layout #left-panel > .panel-content { flex: 1; }
+.manual-editor-layout .manual-condition-workspace { height: auto; }
+@media screen and (min-width: 1025px) {
+  .manual-editor-layout #left-panel > .panel-content { contain: size; }
+}
+.manual-panel-content .selected-conditions-workspace { height: auto; min-height: auto; }
+.manual-panel-content .selected-conditions-list { flex: 0 0 auto; height: max(40vh, 320px); min-height: 320px; overflow-y: auto; }
 
 /*증권사 문의사항*/
 .broker-actions-container {
@@ -597,8 +609,8 @@ body {
 .ai-primary-button { width: 100%; margin-top: 0; box-shadow: 0 5px 12px rgba(0, 123, 255, .18); }
 .ai-keyboard-hint { margin: 9px 0 0; color: #8792a5; text-align: center; font-size: 11px; }
 
-.ai-results-header,
-.manual-results-header { align-items: flex-start; min-height: 52px; }
+.ai-results-header { align-items: flex-start; min-height: 52px; }
+#right-panel .manual-results-header { align-items: flex-start; min-height: 0; margin-bottom: 8px; padding-bottom: 8px; }
 .ai-results-header > h3,
 .ai-results-header > .reset-button,
 .manual-results-header > .reset-button { margin-left: auto; }
@@ -1377,6 +1389,7 @@ body {
 .board-queue-list { display: flex; min-width: 0; flex-direction: column; }
 .board-queue-list-head { display: flex; min-height: 39px; align-items: center; justify-content: space-between; gap: 10px; padding: 0 12px; border-bottom: 1px solid #e8edf3; }
 .board-queue-list-head > strong { color: #455973; font-size: 11px; }
+.board-queue-count { display: inline-block; margin-left: 6px; color: #dc3545; font-size: 11px; font-weight: 700; white-space: nowrap; }
 .board-queue-list-head > small { color: #8796a8; font-size: 10px; font-weight: 700; }
 .board-queue-list-actions { display: flex; align-items: center; gap: 7px; }
 .board-queue-list-head button { border: 1px solid #dce5f0; border-radius: 4px; padding: 4px 6px; color: #62758d; background: #fff; cursor: pointer; font-size: 9px; font-weight: 700; }
