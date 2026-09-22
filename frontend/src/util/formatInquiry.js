@@ -1,3 +1,5 @@
+import { decodeInquiryText } from './decodeInquiryText';
+
 // Presentation only: keep the source query untouched for recommendation/copying.
 export function formatInquiry(value) {
   let text = String(value || '').replace(/\r\n?/g, '\n');
@@ -8,11 +10,7 @@ export function formatInquiry(value) {
     .replace(/<\/(?:p|div|li|ul|ol|tr|h[1-6])\s*>/gi, '\n')
     .replace(/<\/?(?:p|div|span|strong|b|em|i|u|font|a|ul|ol|table|tbody|tr|td|th|h[1-6])\b[^>]*>/gi, '');
   // Decode entities only, never insert untrusted markup into the live DOM.
-  const decoder = document.createElement('textarea');
-  text = text.replace(/&(?:#\d+|#x[\da-f]+|[a-z][a-z\d]+);/gi, (entity) => {
-    decoder.innerHTML = entity;
-    return decoder.value;
-  });
+  text = decodeInquiryText(text);
   // Split prose, not decimal points, indicator parameters, or comparison signs.
   // Korean sentence endings also cover pasted text with no space after a period.
   text = text

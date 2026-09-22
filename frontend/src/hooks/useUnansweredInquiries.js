@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { decodeInquiryText } from '../util/decodeInquiryText';
 
 // Local CRA development calls the board directly; production always uses Vercel.
 const API_URL = process.env.NODE_ENV === 'development'
@@ -11,10 +12,10 @@ export function normalizeInquiry(row) {
   return {
     id: String(row.uid),
     broker: BROKER_NAMES[company] || company,
-    title: String(row.subject || ''),
+    title: decodeInquiryText(row.subject),
     author: String(row.name || ''),
     receivedAt: String(row.s_datetime || ''),
-    query: String(row.comment || ''),
+    query: decodeInquiryText(row.comment),
     hasImageAttachment: Number(row.file) > 0,
     isFollowUp: row.isFollowUp === true || String(row.isFollowUp) === '1',
   };
