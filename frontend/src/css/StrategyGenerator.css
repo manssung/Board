@@ -1251,6 +1251,33 @@ body {
   background: transparent;
 }
 .ai-draft-actions button { border-radius: 7px; box-shadow: none; }
+.ai-draft-actions > span { display: flex; flex-direction: column; gap: 2px; }
+.ai-draft-actions > span b { color: #3f536e; font-size: 11px; }
+.ai-draft-actions > span small { color: #8996a7; font-size: 9px; font-weight: 500; }
+.ai-draft-review-row {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  min-height: 86px;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 10px;
+  border-bottom: 1px solid #e7edf4;
+  background: #fff;
+}
+.ai-draft-review-row:hover { background: #f8fbff; }
+.ai-draft-review-row.needs-confirmation { background: #fffdf8; }
+.ai-draft-review-row.is-applied { background: #f7fbf8; }
+.ai-draft-review-row.is-applied .ai-draft-review-status { color: #26734d; background: #e8f6ee; }
+.ai-draft-review-row.is-applied.needs-confirmation .ai-draft-review-status { color: #96611d; background: #fff0d7; }
+.ai-draft-review-status { padding: 4px 6px; border-radius: 999px; color: #2864c4; background: #eaf2ff; font-size: 9px; font-weight: 800; text-align: center; }
+.ai-draft-review-row.needs-confirmation .ai-draft-review-status { color: #96611d; background: #fff0d7; }
+.ai-draft-review-copy { min-width: 0; }
+.ai-draft-review-copy strong { display: block; overflow: hidden; color: #315172; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.ai-draft-review-copy p { margin: 5px 0 0; color: #53677f; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.ai-draft-review-copy small { display: block; margin-top: 4px; color: #8795a7; font-size: 10px; line-height: 1.4; }
+.ai-draft-review-copy em { display: block; margin-top: 4px; color: #96611d; font-size: 10px; font-style: normal; font-weight: 650; }
+.ai-draft-review-row .ai-draft-card-actions { flex-direction: row; align-self: center; }
+.ai-draft-review-row .ai-draft-card-actions button { min-width: 44px; }
 .ai-draft-card,
 #right-panel .ai-draft-card {
   padding: 16px 4px 16px 12px;
@@ -1287,6 +1314,8 @@ body {
   .app-intro { padding: 22px; }
   .ai-draft-card,
   #right-panel .ai-draft-card { padding-right: 0; }
+  .ai-draft-review-row { grid-template-columns: 52px minmax(0, 1fr); }
+  .ai-draft-review-row .ai-draft-card-actions { grid-column: 2; }
 }
 
 /* Automatic recommendation workspace only */

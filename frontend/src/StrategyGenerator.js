@@ -21,6 +21,8 @@ import AppToast, { showToast } from './components/AppToast';
 import AiDraftList from './components/AiDraftList';
 import WorkspaceEmptyState from './components/WorkspaceEmptyState';
 import { useUnansweredInquiries } from './hooks/useUnansweredInquiries';
+import { searchConditions } from './util/searchConditions';
+import './css/WorkspacePolish.css';
 
 
 const MAX_ATTACHMENT_BYTES = 2 * 1024 * 1024;
@@ -277,13 +279,7 @@ export default function StrategyGenerator() {
   }, [selectedConditions, fixedType, selectedBroker]); 
 
 
-  const filteredConditions = allConditions?.filter(
-    c => (
-      c?.path?.toLowerCase().includes(search.toLowerCase()) ||
-      c?.detail?.toLowerCase().includes(search.toLowerCase()) ||
-      c?.type?.toLowerCase().includes(search.toLowerCase())
-    )
-  ) || [];
+  const filteredConditions = searchConditions(allConditions || [], search);
 
 const runAiGeneration = async () => {
     // ✨ 중요: 함수 호출 시 3번째 인자로 'selectedBroker'를 전달합니다!
@@ -683,7 +679,7 @@ const runAiGeneration = async () => {
                       <button type="button" onClick={() => setIsInboxPickerOpen(true)}>미응답 문의 선택 </button>
                     </div>
                     <button type="button" className="ai-clear-query-button" onClick={() => { setCustomerQuery(''); setInboxAttachmentNotice(false); setInboxSourceInquiry(null); }} disabled={!customerQuery}>문의 지우기</button>
-                    {inboxAttachmentNotice && <div className="inbox-attachment-notice"><b>첨부파일가 있는 문의입니다.</b> 첨부파일 내용은 자동 추천에 포함되지 않으므로, 답변 전 게시판 원글의 첨부파일을 확인해 주세요.</div>}
+                    {inboxAttachmentNotice && <div className="inbox-attachment-notice"><b>첨부파일이 있는 문의입니다.</b> <br/>첨부파일 내용은 자동 추천에 포함되지 않으므로, 답변 전 게시판 원글의 첨부파일을 확인해 주세요.</div>}
                     {ENABLE_IMAGE_ATTACHMENT && (
                       <>
                         <div className="ai-attachment-row">
@@ -775,7 +771,7 @@ const runAiGeneration = async () => {
                 {activeTab === 'ai' && ['review', 'partial_review'].includes(aiWorkflowPhase) && (
                   <AiDraftList
                     drafts={aiDraftConditions}
-                    coverage={lastAiResult?.coverage}
+                    appliedConditions={selectedConditions.filter((condition) => condition.aiReason !== undefined || condition.aiConfidence !== undefined)}
                     brokerName={selectedBroker}
                     isPartial={aiWorkflowPhase === 'partial_review'}
                     onApplyAll={handleApplyAllAiDrafts}
@@ -790,6 +786,8 @@ const runAiGeneration = async () => {
                     <SelectedConditions
                       selectedConditions={selectedConditions}
                       sourceInquiry={inboxSourceInquiry}
+                      aiRecommendationCount={lastAiResult?.count || 0}
+                      remainingAiDraftCount={aiDraftConditions.length}
                       onRemove={handleRemoveCondition}
                       onCommentChange={handleCommentChange}
                       onMove={handleMoveCondition}

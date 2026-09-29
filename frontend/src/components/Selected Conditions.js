@@ -3,6 +3,7 @@ import '../css/SelectedConditions.css';
 import { getConditionLabel } from '../util/conditionEditor';
 import WorkspaceEmptyState from './WorkspaceEmptyState';
 import SourceInquiry from './SourceInquiry';
+import StrategyQualityPanel from './StrategyQualityPanel';
 
 const getConditionDisplay = (condition) => {
   const parts = [condition.type, ...(condition.path || '').split('>')]
@@ -16,6 +17,8 @@ const getConditionDisplay = (condition) => {
 const SelectedConditions = ({
   selectedConditions,
   sourceInquiry,
+  aiRecommendationCount = 0,
+  remainingAiDraftCount = 0,
   onRemove,
   onCommentChange,
   onToggleParen,
@@ -31,6 +34,14 @@ const SelectedConditions = ({
 }) => {
   const [editingIndex, setEditingIndex] = useState(null);
   const previousLengthRef = useRef(selectedConditions.length);
+  const workspaceRef = useRef(null);
+
+  const focusCondition = (index) => {
+    setEditingIndex(index);
+    window.requestAnimationFrame(() => {
+      workspaceRef.current?.querySelector(`[data-condition-index="${index}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  };
 
   useEffect(() => {
     const previousLength = previousLengthRef.current;
@@ -63,18 +74,25 @@ const SelectedConditions = ({
       return map;
     }, new Map());
   }, [selectedConditions]);
+  const hasAiCondition = selectedConditions.some((condition) => condition.aiReason !== undefined || condition.aiConfidence !== undefined);
 
 
   return (
-    <div className="selected-conditions-workspace">
+    <div className="selected-conditions-workspace" ref={workspaceRef}>
       <SourceInquiry sourceInquiry={sourceInquiry} />
+      {hasAiCondition && <StrategyQualityPanel
+        conditions={selectedConditions}
+        aiRecommendationCount={aiRecommendationCount}
+        remainingAiDraftCount={remainingAiDraftCount}
+        onFocusCondition={focusCondition}
+      />}
       <div className="selected-conditions-list">
         {selectedConditions.length === 0 && <WorkspaceEmptyState className="manual-empty-state" icon="＋" title="적용된 조건이 없습니다." description="위 문의를 참고하여 왼쪽 조건 목록에서 필요한 조건을 추가해 주세요." />}
         {selectedConditions.map((cond, index) => {
           const groupId = (cond.groupIds || [])[0];
           const group = groupId ? groups.get(groupId) : null;
           const groupPosition = group ? (index === group.start ? 'start' : index === group.end ? 'end' : 'middle') : '';
-          return <div className={`condition-grouped-entry ${group ? `is-grouped ${groupPosition}` : ''}`} key={index}>
+          return <div data-condition-index={index} className={`condition-grouped-entry ${group ? `is-grouped ${groupPosition}` : ''}`} key={index}>
             {group && index === group.start && <span className="condition-group-label">{group.label}</span>}
             <SelectedItem
               cond={cond}

@@ -1,0 +1,59 @@
+/* Visual-only trial. Remove this import to restore the previous appearance. */
+.card {
+  --primary-color: #3266c7;
+  --medium-gray: #e3e7ed;
+  --text-color: #283344;
+  font-family: var(--font-ui);
+  color: #283344;
+}
+.card .panel, .card .bottom-panel {
+  border-color: #dfe4eb;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(28, 40, 57, .025);
+  background: #fff;
+}
+.card .panel-header { border-bottom-color: #edf0f3; }
+.card .ai-results-title h3, .card .ai-workflow-heading h3 { color: #263244; font-weight: 750; letter-spacing: -.3px; }
+.card .ai-results-title p, .card .ai-workflow-heading p { color: #778291; }
+.card .ai-workflow-icon { color: #42679f; background: #edf2f8; box-shadow: none; border-radius: 8px; }
+.card .tabs-container { background: #f1f3f6; border-color: #e6e9ee; box-shadow: none; }
+.card .condition-list { border-color: transparent; border-radius: 8px; background: #fafbfc; }
+.card .condition-folder { border-bottom-color: #e9edf1; }
+.card .condition-folder-button strong { color: #354254; font-size: 12px; }
+.card .condition-folder.open > .condition-folder-button { background: #eef3fa; border-radius: 6px; }
+.card .condition-folder-items { border-left-color: #e0e5ec; }
+.card .condition-name { font-weight: 600; color: #3e4b5e; }
+.card .condition-category, .card .compact-condition-path { color: #788393; font-weight: 400; }
+.card .condition-item:hover { background: #eaf1fc; border-radius: 5px; }
+.card .add-icon { opacity: .8; border-color: #dbe2eb; color: #607a9d; }
+.card .source-inquiry-context { background: #f7f8fa; border-color: #e5e8ed; border-left: 3px solid #b7c5db; border-radius: 7px; }
+.card .source-inquiry-label { color: #506581; }
+.card .source-inquiry-context > p { color: #354254; }
+.card .source-inquiry-context > strong { color: #778291; }
+.card #right-panel .inline-condition-row { border-bottom-color: #edf0f4; border-radius: 6px; }
+.card #right-panel .inline-condition-row .compact-condition-name { color: #344258; font-weight: 650; }
+.card #right-panel .inline-condition-row:hover { background: #f8fafc; }
+.card #right-panel .inline-condition-row:focus-within { background: #f2f6fd; box-shadow: inset 3px 0 #477bd1; }
+.card #right-panel .inline-condition-value, .card #right-panel .comment-input {
+  color: #29384d; background: #f1f4f8; border-color: #dce3ec;
+  border-radius: 6px; font-size: 13px; line-height: 1.65; box-shadow: none;
+}
+.card #right-panel .inline-condition-value:focus, .card #right-panel .comment-input:focus {
+  background: #fff; border-color: #7297d1; outline: 2px solid #dce8fa; outline-offset: 1px;
+}
+.card #right-panel .inline-condition-actions button {
+  border-color: #dfe5ed; border-radius: 5px; color: #64748b; background: #fff; box-shadow: none;
+}
+.card #right-panel .inline-condition-actions button:hover:not(:disabled) { color: #285fb9; border-color: #a9bfdc; background: #f3f7fd; }
+.card #right-panel .inline-condition-actions .delete-button:hover:not(:disabled) { color: #c34048; border-color: #e7bac0; background: #fff5f5; }
+.card button:disabled { cursor: default; }
+.card .condition-formula-bar { background: #f8fafc; border-color: #e0e6ef; border-radius: 8px; box-shadow: none; }
+.card .condition-formula-letter { color: #3568b8; background: #eaf0fa; border-radius: 5px; }
+.card .condition-formula-letter.checked { color: #fff; background: #3266c7; }
+.card .condition-formula-operator { color: #69788c; border-color: #dce3ec; background: #fff; }
+.card .board-queue-layout { border-color: #e2e7ee; }
+.card .board-inquiry-browser-list > button:hover { background: #f4f7fc; }
+.card .board-inquiry-browser-list strong { color: #344258; }
+.card .ai-query-input { background: #fbfcfe; color: #29384d; border-color: #d7e0ed; }
+.card .ai-primary-button { background: #3266c7; border-color: #3266c7; box-shadow: 0 3px 8px #3266c71c; border-radius: 8px; }
+.card :is(button, select, textarea, input):focus-visible { outline: 2px solid #6992ce; outline-offset: 2px; }

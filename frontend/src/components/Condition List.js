@@ -60,7 +60,7 @@ export default function ConditionList({ conditions, onConditionClick, searchComp
                 onClick={() => toggleCategory(category)}
                 aria-expanded={isOpen}
               >
-                <span className="condition-folder-arrow" aria-hidden="true">{isOpen ? '⌄' : '›'}</span>
+                <span className="condition-folder-arrow" aria-hidden="true" />
                 <strong>{category}</strong>
                 <span>{categoryConditions.length}</span>
               </button>

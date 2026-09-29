@@ -4,5 +4,5 @@ export function decodeInquiryText(value) {
   return String(value ?? '').replace(/&(?:#\d+|#x[\da-f]+|[a-z][a-z\d]+);/gi, (entity) => {
     decoder.innerHTML = entity;
     return decoder.value;
-  });
+  }).replace(/\u00ad/g, ''); // Invisible copy/paste hyphen; preserve real minus signs.
 }
