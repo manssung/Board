@@ -464,7 +464,9 @@ const runAiGeneration = async () => {
 
   const mentButtons = selectedBroker?.includes('신한')
   ? ['조건선물', '기능불가', '작성불가', '전략외문의', '오류답변']
-  : ['조건선물', '작성불가', '고객센터']; // 기존에 쓰시던 기본 버튼 목록
+  : selectedBroker === 'NH증권'
+    ? ['조건선물', '작성불가', '작성불가(MTS)', '고객센터']
+    : ['조건선물', '작성불가', '고객센터']; // 기존에 쓰시던 기본 버튼 목록
 
 
   return (
