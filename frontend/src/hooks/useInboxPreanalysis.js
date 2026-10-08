@@ -32,8 +32,8 @@ export function useInboxPreanalysis({ enabled, hasLoaded, inquiries, selectedBro
 
   useEffect(() => {
     if (!hasLoaded) return;
+    let active = true;
     cleanupInboxAnalyses(inquiries);
-    if (enabled) cacheRequest({ action: 'sync' }).catch((error) => console.warn(error.message));
     const next = {};
     inquiries.forEach((inquiry) => {
       if (inquiry.hasImageAttachment) {
@@ -44,6 +44,35 @@ export function useInboxPreanalysis({ enabled, hasLoaded, inquiries, selectedBro
       if (cached) next[inquiry.id] = getResultStatus(cached.result);
     });
     setStatuses((previous) => ({ ...previous, ...next }));
+    if (enabled) {
+      const hydrateSharedResults = async () => {
+        try {
+          await cacheRequest({ action: 'sync' });
+          const analyzableInquiries = inquiries.filter((inquiry) => !inquiry.hasImageAttachment);
+          const shared = await cacheRequest({
+            action: 'get_many',
+            inquiries: analyzableInquiries.map((inquiry) => ({
+              id: inquiry.id,
+              fingerprint: inquiryFingerprint(inquiry),
+            })),
+          });
+          if (!active) return;
+          const hydratedStatuses = {};
+          analyzableInquiries.forEach((inquiry) => {
+            const result = shared.results?.[String(inquiry.id)];
+            if (!result) return;
+            writeInboxAnalysis(inquiry, result);
+            remoteVerifiedRef.current.add(`${inquiry.id}:${inquiryFingerprint(inquiry)}`);
+            hydratedStatuses[inquiry.id] = getResultStatus(result);
+          });
+          setStatuses((previous) => ({ ...previous, ...hydratedStatuses }));
+        } catch (error) {
+          console.warn(error.message);
+        }
+      };
+      hydrateSharedResults();
+    }
+    return () => { active = false; };
   }, [enabled, hasLoaded, inquiries]);
 
   useEffect(() => {

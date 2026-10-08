@@ -13,7 +13,7 @@ module.exports = async function handler(request, response) {
   }
   const redis = getRedis();
   if (!redis) return response.status(503).json({ error: '공용 분석 저장소가 연결되지 않았습니다.' });
-  const { action, inquiryId: rawId, fingerprint, result, claimToken } = request.body || {};
+  const { action, inquiryId: rawId, fingerprint, result, claimToken, inquiries: lookupInquiries } = request.body || {};
   const inquiryId = rawId !== undefined ? String(rawId).trim() : '';
 
   try {
@@ -46,6 +46,23 @@ module.exports = async function handler(request, response) {
       }
       await redis.persist(INDEX_KEY);
       return response.status(200).json({ status: 'synced', removed: staleIds.length });
+    }
+
+    if (action === 'get_many') {
+      if (!Array.isArray(lookupInquiries) || lookupInquiries.length > 100) {
+        return response.status(400).json({ error: '조회할 문의 목록이 올바르지 않습니다.' });
+      }
+      const lookups = lookupInquiries
+        .map((item) => ({ id: String(item?.id || '').trim(), fingerprint: String(item?.fingerprint || '') }))
+        .filter((item) => item.id && item.fingerprint);
+      if (!lookups.length) return response.status(200).json({ status: 'ready', results: {} });
+      const cachedItems = await redis.mget(...lookups.map((item) => resultKey(item.id)));
+      const results = {};
+      lookups.forEach((item, index) => {
+        const cached = cachedItems[index];
+        if (cached?.fingerprint === item.fingerprint && cached?.result) results[item.id] = cached.result;
+      });
+      return response.status(200).json({ status: 'ready', results });
     }
 
     if (!inquiryId || typeof fingerprint !== 'string' || !fingerprint) {
