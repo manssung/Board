@@ -1434,6 +1434,17 @@ body {
 .board-inquiry-browser-list strong { display: block; overflow: hidden; margin: 5px 0 3px; color: #435872; font-size: 12px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
 .board-inquiry-browser-list strong mark { display: inline-block; margin-right: 5px; border-radius: 3px; padding: 2px 4px; color: #9b6312; background: #fff1d9; font-size: 9px; font-weight: 800; line-height: 1.1; vertical-align: 1px; }
 .board-inquiry-browser-list strong mark.attachment { color: #5f6f85; background: #edf1f5; }
+.board-inquiry-browser-list strong mark.attachment.present { color: #8a5a19; background: #fff3d9; }
+.board-inquiry-browser-list strong mark.attachment.absent { color: #778397; background: #f1f3f6; }
+.board-inquiry-browser-list strong mark.analysis-status { color: #6d7d91; background: #eef2f6; }
+.board-inquiry-browser-list strong mark.analysis-status.queued { color: #6a7482; background: #f0f2f5; }
+.board-inquiry-browser-list strong mark.analysis-status.analyzing { color: #2b67bd; background: #e8f1ff; }
+.board-inquiry-browser-list strong mark.analysis-status.ready,
+.board-inquiry-browser-list strong mark.analysis-status.needs_confirmation { color: #24704a; background: #e8f7ef; }
+.board-inquiry-browser-list strong mark.analysis-status.no_result,
+.board-inquiry-browser-list strong mark.analysis-status.limit_reached,
+.board-inquiry-browser-list strong mark.analysis-status.failed,
+.board-inquiry-browser-list strong mark.analysis-status.attachment { color: #96525a; background: #f8e9ed; }
 .board-inquiry-browser-list p { display: -webkit-box; overflow: hidden; margin: 0; color: #74849a; font-size: 11px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .board-queue-empty { padding: 32px 10px; color: #95a2b2; font-size: 11px; text-align: center; }
 .board-queue-pagination { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 9px; border-top: 1px solid #e8edf3; background: #fbfcfe; }

@@ -21,7 +21,9 @@ import AppToast, { showToast } from './components/AppToast';
 import AiDraftList from './components/AiDraftList';
 import WorkspaceEmptyState from './components/WorkspaceEmptyState';
 import { useUnansweredInquiries } from './hooks/useUnansweredInquiries';
+import { useInboxPreanalysis } from './hooks/useInboxPreanalysis';
 import { searchConditions } from './util/searchConditions';
+import InboxInquiryBrowser from './components/InboxInquiryBrowser';
 import './css/WorkspacePolish.css';
 
 
@@ -29,8 +31,13 @@ const MAX_ATTACHMENT_BYTES = 2 * 1024 * 1024;
 const ALLOWED_ATTACHMENT_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 // 이미지 첨부 기능은 검토 후 다시 공개할 수 있도록 코드만 보관합니다.
 const ENABLE_IMAGE_ATTACHMENT = false;
-const INBOX_PAGE_SIZE = 5;
 
+const prepareAiDrafts = (conditions = []) => groupOrConditions(conditions.map((condition, index) => ({
+  ...condition,
+  id: Date.now() + index,
+  operator: condition.nextOperator === 'or' ? 'or' : 'and',
+  comment: condition.detail,
+})));
 
 const readImageAsBase64 = (file) => new Promise((resolve, reject) => {
   const reader = new FileReader();
@@ -74,25 +81,10 @@ export default function StrategyGenerator() {
   const [confirmDialog, setConfirmDialog] = useState(null);
   const [isInboxPickerOpen, setIsInboxPickerOpen] = useState(false);
   const { inquiries: inboxInquiries, loading: inboxLoading, error: inboxError, refresh: refreshInbox, lastUpdatedAt: inboxLastUpdatedAt } = useUnansweredInquiries(isInboxPickerOpen && activeTab === 'ai');
-  const [inboxBrokerFilter, setInboxBrokerFilter] = useState('전체');
-  const [inboxSortOrder, setInboxSortOrder] = useState('oldest');
-  const [inboxPage, setInboxPage] = useState(1);
   const [inboxAttachmentNotice, setInboxAttachmentNotice] = useState(false);
   const [inboxSourceInquiry, setInboxSourceInquiry] = useState(null);
   const { savedStrategies, saveStrategy, deleteSavedStrategy } = useSavedStrategies();
 
-  const inboxBrokers = [...new Set(inboxInquiries.map((inquiry) => inquiry.broker))];
-  const visibleInboxInquiries = inboxInquiries
-    .filter((inquiry) => inboxBrokerFilter === '전체' || inquiry.broker === inboxBrokerFilter)
-    .sort((left, right) => (inboxSortOrder === 'oldest' ? left.receivedAt.localeCompare(right.receivedAt) : right.receivedAt.localeCompare(left.receivedAt)));
-  const inboxPageCount = Math.max(1, Math.ceil(visibleInboxInquiries.length / INBOX_PAGE_SIZE));
-  const currentInboxPage = Math.min(inboxPage, inboxPageCount);
-  const pagedInboxInquiries = visibleInboxInquiries.slice(
-    (currentInboxPage - 1) * INBOX_PAGE_SIZE,
-    currentInboxPage * INBOX_PAGE_SIZE,
-  );
-  const inboxPageNumbers = Array.from({ length: inboxPageCount }, (_, index) => index + 1)
-    .filter((page) => page === 1 || page === inboxPageCount || Math.abs(page - currentInboxPage) <= 1);
   const usageGuide = activeTab === 'manual'
     ? {
         title: '사용 방법 · 조건식 편집',
@@ -167,6 +159,14 @@ export default function StrategyGenerator() {
 
 // ✨ 1. 괄호로 묶을 항목(A, B, C...)을 저장할 상태
   const { allConditions, isLoading, error } = useBrokerData(selectedBroker);
+  const { getStatus: getInboxAnalysisStatus, getCachedAnalysis } = useInboxPreanalysis({
+    enabled: isInboxPickerOpen && activeTab === 'ai' && !inboxLoading,
+    hasLoaded: Boolean(inboxLastUpdatedAt),
+    inquiries: inboxInquiries,
+    selectedBroker,
+    allConditions,
+    generateStrategy,
+  });
 
   useEffect(() => { //증권사 데이터 불러오기
   if (isRestoringSavedStrategy) {
@@ -177,8 +177,8 @@ export default function StrategyGenerator() {
   isImportingInboxInquiryRef.current = false;
   resetStrategies();
   setSearch("");
-  resetAiWorkflow();
   if (!shouldKeepImportedInquiry) {
+    resetAiWorkflow();
     setCustomerQuery('');
     setInboxSourceInquiry(null);
   }
@@ -306,12 +306,7 @@ const runAiGeneration = async () => {
 
     // 2. 결과 처리 (여러 개의 매칭 결과를 모두 반영)
     if (matchedConditions && matchedConditions.length > 0) {
-      const newConditionItems = groupOrConditions(matchedConditions.map((cond, i) => ({
-        ...cond,
-        id: Date.now() + i, // ✨ 여러 개를 한 번에 추가해도 id가 겹치지 않도록
-        operator: cond.nextOperator === 'or' ? 'or' : 'and',
-        comment: cond.detail,
-      })));
+      const newConditionItems = prepareAiDrafts(matchedConditions);
 
       setAiRecommendations(newConditionItems, { request: customerQuery, count: newConditionItems.length, coverage: aiResult.coverage });
       showToast(`조건 ${newConditionItems.length}개를 추천했습니다. 오른쪽에서 검토 후 적용해 주세요.`, 'success');
@@ -347,7 +342,8 @@ const runAiGeneration = async () => {
     runAiGeneration();
   };
 
-  const handleUseInboxInquiry = ({ id, broker, query, title, author, receivedAt, isFollowUp, hasImageAttachment }) => {
+  const handleUseInboxInquiry = (inquiry) => {
+    const { id, broker, query, title, author, receivedAt, isFollowUp, hasImageAttachment } = inquiry;
     if (!brokerMap[broker]) {
       showToast(`${broker}은 지원하지 않는 증권사입니다.`, 'error');
       return;
@@ -357,6 +353,7 @@ const runAiGeneration = async () => {
       return;
     }
     const applyInquiry = () => {
+    const cached = getCachedAnalysis(inquiry);
     resetStrategies();
     setSearch('');
     setImageAttachment(null);
@@ -367,9 +364,18 @@ const runAiGeneration = async () => {
     setCustomerQuery(query);
     setInboxSourceInquiry({ id, broker, title, author, receivedAt, query, isFollowUp });
     setInboxAttachmentNotice(Boolean(hasImageAttachment));
-    resetAiWorkflow();
+    if (cached?.result) {
+      const cachedDrafts = prepareAiDrafts(cached.result.conditions || []);
+      if (cachedDrafts.length) {
+        setAiRecommendations(cachedDrafts, { request: query, count: cachedDrafts.length, coverage: cached.result.coverage || [] });
+      } else {
+        setNoAiResults();
+      }
+    } else {
+      resetAiWorkflow();
+    }
     setIsInboxPickerOpen(false);
-    showToast(`${title} 내용을 자동 추천에 불러왔습니다.`, 'success');
+    showToast(cached?.result ? `${title}의 사전 분석 결과를 불러왔습니다.` : `${title} 내용을 자동 추천에 불러왔습니다.`, 'success');
     };
     const hasWork = strategies.some((strategy) => strategy.conditions?.length > 0 || strategy.kind === 'template') || aiDraftConditions.length > 0 || Boolean(customerQuery.trim());
     if (hasWork) {
@@ -611,56 +617,16 @@ const runAiGeneration = async () => {
                   </div>
                 )}
                 {activeTab === 'ai' && isInboxPickerOpen && (
-                  <div className="board-inquiry-browser" aria-label="미응답 문의 선택">
-                    <div className="board-inquiry-browser-head">
-                      <div><span>BOARD INBOX</span><h3>증권사별 업무 큐</h3><p>처리할 문의를 고르면 원글을 자동 추천 입력창으로 가져옵니다.</p></div>
-                      <button type="button" onClick={() => setIsInboxPickerOpen(false)}>입력으로 돌아가기</button>
-                    </div>
-                    <div className="board-queue-summary" aria-label="문의 현황">
-                      <span><b>{inboxInquiries.length}</b> 전체 문의</span>
-                      <span><b>{inboxBrokers.length}</b> 증권사</span>
-                      <span>원문을 선택하면 자동 추천 입력창으로 가져옵니다.</span>
-                    </div>
-                    <div className="board-queue-layout">
-                      <aside className="board-queue-brokers" aria-label="증권사 필터">
-                        <button type="button" className={inboxBrokerFilter === '전체' ? 'active' : ''} onClick={() => { setInboxBrokerFilter('전체'); setInboxPage(1); }}><span>전체 문의</span><b>{inboxInquiries.length}</b></button>
-                        {inboxBrokers.map((broker) => {
-                          const count = inboxInquiries.filter((inquiry) => inquiry.broker === broker).length;
-                          return <button type="button" key={broker} className={inboxBrokerFilter === broker ? 'active' : ''} onClick={() => { setInboxBrokerFilter(broker); setInboxPage(1); }}><span>{broker}</span><b>{count}</b></button>;
-                        })}
-                      </aside>
-                      <section className="board-queue-list">
-                        <div className="board-queue-list-head">
-                          <strong>{inboxBrokerFilter === '전체' ? '전체 미응답 문의' : `${inboxBrokerFilter} 문의`} <small className="board-queue-count">{visibleInboxInquiries.length}건</small></strong>
-                          <div className="board-queue-list-actions">
-                            <button type="button" disabled={inboxLoading} onClick={refreshInbox}>{inboxLoading ? (inboxLastUpdatedAt ? '갱신 중…' : '불러오는 중…') : '새로고침'}</button>
-                            <button type="button" onClick={() => { setInboxSortOrder((order) => order === 'oldest' ? 'latest' : 'oldest'); setInboxPage(1); }}>
-                              {inboxSortOrder === 'oldest' ? '오래된순 ↑' : '최신순 ↓'}
-                            </button>
-                          </div>
-                        </div>
-                        <div className="board-inquiry-browser-list">
-                          {pagedInboxInquiries.map((inquiry) => (
-                            <button type="button" key={inquiry.id} onClick={() => handleUseInboxInquiry(inquiry)}>
-                              <span><em>{inquiry.broker}</em><small>게시글 #{inquiry.id} · {inquiry.author} · {inquiry.receivedAt}</small></span>
-                              <strong>{inquiry.isFollowUp && <mark>재문의</mark>}{inquiry.hasImageAttachment && <mark className="attachment">첨부파일</mark>}{inquiry.title}</strong>
-                              <p>{inquiry.query}</p>
-                            </button>
-                          ))}
-                          {inboxLoading && !inboxLastUpdatedAt && <div className="board-queue-empty" role="status">미답변 문의를 불러오는 중입니다…</div>}
-                          {inboxError && <div className="board-queue-empty" role="alert">{inboxError}</div>}
-                          {!inboxLoading && !inboxError && visibleInboxInquiries.length === 0 && <div className="board-queue-empty">조건에 맞는 문의가 없습니다.</div>}
-                        </div>
-                        {inboxPageCount > 1 && (
-                          <nav className="board-queue-pagination" aria-label="문의 페이지">
-                            <button type="button" disabled={currentInboxPage === 1} onClick={() => setInboxPage((page) => Math.max(1, page - 1))}>이전</button>
-                            {inboxPageNumbers.map((page, index) => <React.Fragment key={page}>{index > 0 && inboxPageNumbers[index - 1] !== page - 1 && <i>…</i>}<button type="button" className={page === currentInboxPage ? 'active' : ''} onClick={() => setInboxPage(page)}>{page}</button></React.Fragment>)}
-                            <button type="button" disabled={currentInboxPage === inboxPageCount} onClick={() => setInboxPage((page) => Math.min(inboxPageCount, page + 1))}>다음</button>
-                          </nav>
-                        )}
-                      </section>
-                    </div>
-                  </div>
+                  <InboxInquiryBrowser
+                    inquiries={inboxInquiries}
+                    loading={inboxLoading}
+                    error={inboxError}
+                    lastUpdatedAt={inboxLastUpdatedAt}
+                    refresh={refreshInbox}
+                    getAnalysisStatus={getInboxAnalysisStatus}
+                    onSelect={handleUseInboxInquiry}
+                    onClose={() => setIsInboxPickerOpen(false)}
+                  />
                 )}
                 {activeTab === 'ai' && !isInboxPickerOpen && (
                   <div className="ai-workflow">

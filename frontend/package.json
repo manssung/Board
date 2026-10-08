@@ -4,7 +4,10 @@
   "main": "electron.js",
   "private": true,
   "scripts": {
-    "start": "react-scripts start",
+    "dev": "react-scripts start",
+    "dev:full": "node scripts/vercel-dev.js",
+    "start": "node scripts/vercel-dev.js",
+    "start:ui": "react-scripts start",
     "test": "react-scripts test",
     "build": "react-scripts build",
     "electron": "electron .",
@@ -12,6 +15,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@upstash/redis": "^1.39.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-scripts": "5.0.1"
@@ -19,7 +23,8 @@
   "devDependencies": {
     "@types/react": "^19.2.7",
     "electron": "^37.2.0",
-    "electron-builder": "^26.0.12"
+    "electron-builder": "^26.0.12",
+    "vercel": "^63.0.0"
   },
   "build": {
     "appId": "com.example.strategy",
