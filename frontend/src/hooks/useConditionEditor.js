@@ -85,22 +85,6 @@ export function useConditionEditor({ onEdit, onConditionsEmpty, onRequestConfirm
     resetSelection();
   }, [resetSelection]);
 
-  const restoreStrategies = useCallback((savedStrategies, legacyConditions = []) => {
-    const restored = Array.isArray(savedStrategies) && savedStrategies.length
-      ? savedStrategies.map((strategy, index) => ({
-        id: strategy.id || createStrategy(index + 1).id,
-        name: strategy.name || `${index + 1}번 조건식`,
-        kind: strategy.kind || 'condition',
-        fixedType: strategy.fixedType || '',
-        conditions: Array.isArray(strategy.conditions) ? strategy.conditions : [],
-      }))
-      : [{ ...createStrategy(1), conditions: Array.isArray(legacyConditions) ? legacyConditions : [] }];
-    setStrategies(restored);
-    setActiveStrategyId(restored[0].id);
-    setHistory([]);
-    resetSelection();
-  }, [resetSelection]);
-
   const addStrategy = useCallback((kind = 'condition') => {
     saveHistory();
     const next = createStrategy(strategies.length + 1, kind);
@@ -260,7 +244,7 @@ export function useConditionEditor({ onEdit, onConditionsEmpty, onRequestConfirm
   }, [clearAllGroups, onRequestConfirmation, selectedConditions]);
 
   return {
-    strategies, activeStrategy, activeStrategyId: activeStrategy?.id, activeStrategyKind: activeStrategy?.kind || 'condition', activeTemplateType: activeStrategy?.fixedType || '', setActiveTemplateType, addStrategy, selectStrategy, removeStrategy, resetStrategies, restoreStrategies,
+    strategies, activeStrategy, activeStrategyId: activeStrategy?.id, activeStrategyKind: activeStrategy?.kind || 'condition', activeTemplateType: activeStrategy?.fixedType || '', setActiveTemplateType, addStrategy, selectStrategy, removeStrategy, resetStrategies,
     selectedConditions, setSelectedConditions, checkedLetters, isGrouping, clearConditions, replaceConditions, resetSelection, canUndo: history.length > 0, undoLastEdit,
     handleConditionClick, handleCommentChange, handleToggleOperator, handleMoveCondition, handleRemoveCondition, handleDuplicateCondition,
     handleLetterCheck, handleGroupConditions, handleToggleGroupMode, handleClearAllGroups,

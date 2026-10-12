@@ -87,7 +87,6 @@ export default function GeneratedMent({
   onLetterCheck,
   onGroup,
   onClearAllGroups,
-  onSaveDraft,
   showLogicControls = true,
 }) {
   const [isCopied, setIsCopied] = useState(false);
@@ -182,7 +181,6 @@ export default function GeneratedMent({
     <div className="ment-header">
       <div className="ment-title-group"><span className="ment-section-icon">✎</span><div><h3>답변 멘트</h3><p>확정한 조건식이 안내 문구에 반영됩니다.</p></div></div>
       <div className="ment-buttons">
-        {onSaveDraft && <button type="button" className="save-draft-button" onClick={onSaveDraft}>임시저장</button>}
         <button type="button" className={`copy-button ${isCopied ? 'copied' : ''}`} onClick={handleCopy}>{isCopied ? '✓ 복사 완료!' : '복사'}</button>
       </div>
     </div>

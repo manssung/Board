@@ -15,8 +15,6 @@ import {
   groupOrConditions,
 } from './util/conditionEditor';
 import { getRecommendationCandidates } from './util/conditionCandidateFilter';
-import { useSavedStrategies } from './hooks/useSavedStrategies';
-import SavedStrategies from './components/SavedStrategies';
 import AppToast, { showToast } from './components/AppToast';
 import AiDraftList from './components/AiDraftList';
 import WorkspaceEmptyState from './components/WorkspaceEmptyState';
@@ -60,7 +58,6 @@ export default function StrategyGenerator() {
     aiDraftConditions,
     lastAiResult,
     resetAiWorkflow,
-    restoreAiWorkflow,
     startAiWorkflow,
     failAiWorkflow,
     setNoAiResults,
@@ -72,18 +69,14 @@ export default function StrategyGenerator() {
     discardDraft,
   } = useAiWorkflow();
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const [isSavedStrategiesOpen, setIsSavedStrategiesOpen] = useState(false);
-  const savedStrategiesRef = useRef(null);
   const isImportingInboxInquiryRef = useRef(false);
   const [imageAttachment, setImageAttachment] = useState(null);
   const [attachmentInputKey, setAttachmentInputKey] = useState(0);
-  const [isRestoringSavedStrategy, setIsRestoringSavedStrategy] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState(null);
-  const [isInboxPickerOpen, setIsInboxPickerOpen] = useState(false);
+  const [isInboxPickerOpen, setIsInboxPickerOpen] = useState(true);
   const { inquiries: inboxInquiries, loading: inboxLoading, error: inboxError, refresh: refreshInbox, lastUpdatedAt: inboxLastUpdatedAt } = useUnansweredInquiries(isInboxPickerOpen && activeTab === 'ai');
   const [inboxAttachmentNotice, setInboxAttachmentNotice] = useState(false);
   const [inboxSourceInquiry, setInboxSourceInquiry] = useState(null);
-  const { savedStrategies, saveStrategy, deleteSavedStrategy } = useSavedStrategies();
 
   const usageGuide = activeTab === 'manual'
     ? {
@@ -95,24 +88,26 @@ export default function StrategyGenerator() {
           { screenTitle: '조건식', visual: ['A  AND  B', '( A  OR  B )  AND  C'], cta: '그룹 설정', title: '논리 구조 편집', description: '연결 방식과 괄호 그룹을 설정해 의도한 조건식을 만듭니다.' },
           { screenTitle: '답변 멘트', visual: ['확정 조건식 확인', '고객 안내 문구 확인'], cta: '복사', title: '검토 · 답변', description: '최종 조건식과 안내 문구를 확인한 뒤 답변에 사용합니다.' },
         ],
-        noteTitle: '작업 보관',
-        note: '<b>답변 멘트에서 임시저장</b>을 누르면 현재 작업이 저장됩니다. 상단 <b>최근 작업</b>에서 다시 불러올 수 있으며, 저장본은 24시간 동안 유지됩니다.',
       }
       : {
-        title: '사용 방법 · 자동 추천',
-        description: '문의에서 조건 초안을 만들고, 작업자가 검토·수정한 뒤 조건식을 확정합니다.',
+        title: '사용 방법 · AI 추천',
+        description: '기본 화면에서 전체 증권사의 미답변 문의와 자동 분석 현황을 확인하고, 문의를 선택하거나 직접 입력해 답변을 준비합니다.',
         steps: [
-          { screenTitle: '고객 문의 입력', visual: ['거래량이 많고 시가총액이 큰 종목을 찾아줘'], cta: '조건 추천 받기', title: '문의 입력', description: '고객 문의를 자연스럽게 입력하거나 미응답 문의에서 원글을 불러옵니다.' },
-          { screenTitle: '추천 결과', visual: ['거래량 증가', '시가총액 1,000억 이상'], cta: '추천 조건 적용', title: '추천 조건 검토', description: '추천 이유를 확인하고 필요한 조건만 적용합니다.' },
-          { screenTitle: '조건식 편집', visual: ['부족한 조건 직접 추가', '상세 조건값 · 괄호 그룹 설정'], cta: '수정 내용 반영', title: '조건식 편집', description: '부족한 조건을 추가하고 상세값·연결 방식을 수정합니다.' },
-          { screenTitle: '답변 멘트 확인', visual: ['조건식 ( A OR B ) AND C', '고객 안내 문구 확인'], cta: '답변 멘트 복사', title: '조건식 확정 · 답변 복사', description: '완성된 조건식과 고객 안내 문구를 확인한 뒤 복사합니다.' },
+          { screenTitle: '전체 증권사 · 미답변 현황', visual: ['완료 · 분석 중 · 대기 · 작업불가', '전체 문의를 오래된 순서대로 처리'], cta: '일시정지 / 분석 재개', title: '미답변 현황 확인', description: '처음 열리는 미답변 목록에서 전체 증권사의 현황을 확인합니다. 증권사를 선택하지 않아도 한 건씩 자동 분석합니다. 서버 예약 실행을 설정하면 웹을 닫아도 매일 밤 8시에 미분석 문의를 처리합니다. 증권사 필터는 목록만 좁히고 현황판은 전체 기준으로 유지됩니다.' },
+          { screenTitle: '문의 선택 또는 직접 입력', visual: ['게시글 선택 → 증권사 · 원글 가져오기', '입력으로 돌아가기 → 직접 문의 작성'], cta: '조건 추천 받기', title: '처리할 문의 준비', description: '문의글을 선택하면 해당 증권사와 원글이 채워지고, 저장된 추천이 있으면 함께 불러옵니다. 직접 문의를 작성하려면 ‘입력으로 돌아가기’를 누르고 증권사를 선택한 뒤 내용을 입력합니다. 추천이 필요하면 ‘조건 추천 받기’를 누릅니다.' },
+          { screenTitle: '추천 조건 검토 · 편집', visual: ['추천 이유 · 확인 필요 항목 검토', '상세 수치 · 기간 · AND / OR 조정'], cta: '적용하고 편집하기', title: '추천 검토와 조건식 편집', description: '추천 이유와 확인이 필요한 수치·기간을 문의와 비교합니다. 필요한 조건을 ‘적용’하거나 ‘적용하고 편집하기’를 누른 뒤, 조건식 편집 탭에서 상세값과 연결 방식을 조정합니다.' },
+          { screenTitle: '답변 멘트', visual: ['최종 조건식 · 고객 안내 문구 확인', '답변에 사용할 문구 복사'], cta: '복사', title: '최종 확인과 답변 복사', description: '완성한 조건식과 답변 멘트를 확인하고 ‘복사’를 눌러 답변에 사용합니다. 현황판의 완료는 분석·저장이 끝났다는 뜻이므로, 답변 전 추천 내용은 직접 검토합니다.' },
         ],
-        noteTitle: '작업 보관',
-        note: '<b>답변 멘트에서 임시저장</b>을 누르면 현재 작업이 저장됩니다. 상단 <b>최근 작업</b>에서 다시 불러올 수 있으며, 저장본은 24시간 동안 유지됩니다.',
+        statuses: [
+          { label: '완료', description: '추천 결과를 만들고 공용 저장까지 마친 문의' },
+          { label: '분석 중', description: '조건을 준비하거나 현재 분석 중인 문의' },
+          { label: '대기', description: '분석 차례, 요청 한도, 재시도 또는 저장을 기다리는 문의' },
+          { label: '작업불가', description: '추천 조건이 없거나 파일 첨부·미지원 증권사로 자동 분석에서 제외된 문의' },
+        ],
       };
   const usageFlow = activeTab === 'manual'
     ? ['조건 카탈로그', '조건 추가', '상세값 설정', 'AND · OR · 괄호', '답변 복사']
-    : ['증권사 선택', '문의 입력', '조건 추천 받기', '추천 검토', '조건식 · 답변 복사'];
+    : ['미답변 현황', '문의 선택 · 직접 입력', '추천 검토 · 편집', '답변 복사'];
 
   const handleConditionEditorEdit = useCallback((kind) => {
     if (kind === 'add' || kind === 'duplicate') {
@@ -133,7 +128,6 @@ export default function StrategyGenerator() {
     selectStrategy,
     removeStrategy,
     resetStrategies,
-    restoreStrategies,
     checkedLetters,
     isGrouping,
     resetSelection,
@@ -159,20 +153,14 @@ export default function StrategyGenerator() {
 
 // ✨ 1. 괄호로 묶을 항목(A, B, C...)을 저장할 상태
   const { allConditions, isLoading, error } = useBrokerData(selectedBroker);
-  const { getStatus: getInboxAnalysisStatus, getCachedAnalysis } = useInboxPreanalysis({
-    enabled: isInboxPickerOpen && activeTab === 'ai' && !inboxLoading,
+  const { getStatus: getInboxAnalysisStatus, getCachedAnalysis, getAnalysisDetail, progress: inboxAnalysisProgress, togglePaused: toggleInboxAnalysisPaused, retryFailed: retryInboxAnalysis } = useInboxPreanalysis({
+    enabled: isInboxPickerOpen && activeTab === 'ai',
     hasLoaded: Boolean(inboxLastUpdatedAt),
     inquiries: inboxInquiries,
-    selectedBroker,
-    allConditions,
     generateStrategy,
   });
 
   useEffect(() => { //증권사 데이터 불러오기
-  if (isRestoringSavedStrategy) {
-    setIsRestoringSavedStrategy(false);
-    return;
-  }
   const shouldKeepImportedInquiry = isImportingInboxInquiryRef.current;
   isImportingInboxInquiryRef.current = false;
   resetStrategies();
@@ -185,20 +173,6 @@ export default function StrategyGenerator() {
   setImageAttachment(null);
   setAttachmentInputKey(key => key + 1);
 }, [selectedBroker]);
-
-  useEffect(() => {
-    if (!isSavedStrategiesOpen) return undefined;
-
-    const handleOutsideClick = (event) => {
-      if (!savedStrategiesRef.current?.contains(event.target)) {
-        setIsSavedStrategiesOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, [isSavedStrategiesOpen]);
-
 
   const insertMent = (type) => { //멘트 삽입 함수
     if (!selectedBroker) {
@@ -218,59 +192,6 @@ export default function StrategyGenerator() {
   setAttachmentInputKey(key => key + 1);
   resetSelection();
   };
-
-  const handleSaveStrategy = () => {
-    if (!customerQuery.trim() && !strategies.some((strategy) => strategy.conditions.length > 0 || strategy.fixedType) && aiDraftConditions.length === 0) {
-      showToast('저장할 고객 문의 또는 조건식을 먼저 작성해 주세요.', 'error');
-      return;
-    }
-
-    const saved = saveStrategy({
-      title: customerQuery.trim().slice(0, 44) || `${selectedBroker || '미선택'} 조건식`,
-      selectedBroker,
-      customerQuery,
-      selectedConditions,
-      strategies,
-      aiDraftConditions,
-      activeTab,
-    });
-
-    if (saved) {
-      setIsSavedStrategiesOpen(true);
-      showToast('현재 전략을 임시저장했습니다. 24시간 동안 보관됩니다.', 'success');
-    } else {
-      showToast('임시저장 공간이 부족합니다. 오래된 저장 항목을 삭제해 주세요.', 'error');
-    }
-  };
-
-  const handleLoadStrategy = (item) => {
-    setIsSavedStrategiesOpen(false);
-    setConfirmDialog({
-      title: '저장한 전략을 불러오시겠습니까?',
-      description: '현재 작업 내용은 불러온 전략으로 변경됩니다.',
-      confirmLabel: '불러오기',
-      onConfirm: () => restoreSavedStrategy(item),
-    });
-  };
-
-  const restoreSavedStrategy = (item) => {
-    setIsRestoringSavedStrategy(item.selectedBroker !== selectedBroker);
-    setSelectedBroker(item.selectedBroker || '');
-    setCustomerQuery(item.customerQuery || '');
-    restoreStrategies(item.strategies, item.selectedConditions);
-    restoreAiWorkflow(item.aiDraftConditions, item.selectedConditions);
-    setActiveTab('manual');
-    resetSelection();
-  };
-
-  const handleDeleteSavedStrategy = (id) => {
-    if (!deleteSavedStrategy(id)) {
-      showToast('저장 목록을 정리하지 못했습니다.', 'error');
-    }
-  };
-
-  
-  
 
   useEffect(() => { //멘트 바로 수정
     if (fixedType && selectedConditions.length === 0) {
@@ -381,7 +302,7 @@ const runAiGeneration = async () => {
     if (hasWork) {
       setConfirmDialog({
         title: '다른 문의로 전환할까요?',
-        description: '현재 입력한 문의와 모든 전략·추천 초안이 초기화됩니다. 보관이 필요하면 취소 후 임시저장해 주세요.',
+        description: '현재 입력한 문의와 모든 전략·추천 초안이 초기화됩니다.',
         confirmLabel: '초기화 후 문의 가져오기',
         onConfirm: applyInquiry,
       });
@@ -484,33 +405,13 @@ const runAiGeneration = async () => {
             <button
               type="button"
               className="usage-help-button"
-              onClick={() => { setIsHelpOpen(open => !open); setIsSavedStrategiesOpen(false); }}
+              onClick={() => setIsHelpOpen(open => !open)}
               aria-expanded={isHelpOpen}
               aria-controls="usage-help-popover"
             >
               사용 방법
             </button>
-            <div className="saved-strategies-anchor" ref={savedStrategiesRef}>
-              <button
-                type="button"
-                className="usage-help-button"
-                onClick={() => { setIsSavedStrategiesOpen(open => !open); setIsHelpOpen(false); }}
-                aria-expanded={isSavedStrategiesOpen}
-                aria-controls="saved-strategies-popover"
-              >
-                최근 작업
-              </button>
-              {isSavedStrategiesOpen && (
-                <section id="saved-strategies-popover" className="saved-strategies-popover" aria-label="최근 임시저장">
-                  <div className="saved-strategies-popover-title">
-                    <strong>최근 작업</strong>
-                    <button type="button" onClick={() => setIsSavedStrategiesOpen(false)} aria-label="최근 작업 닫기">×</button>
-                  </div>
-                  <SavedStrategies items={savedStrategies} onLoad={handleLoadStrategy} onDelete={handleDeleteSavedStrategy} />
-                </section>
-              )}
-            </div>
-            <div className={`app-status ${selectedBroker ? 'ready' : 'pending'}`}>{selectedBroker ? `${selectedBroker} 조건 데이터 준비됨` : '증권사를 선택해 주세요'}</div>
+            <div className={`app-status ${selectedBroker || (activeTab === 'ai' && isInboxPickerOpen) ? 'ready' : 'pending'}`}>{activeTab === 'ai' && isInboxPickerOpen ? '전체 증권사 미답변 현황' : selectedBroker ? `${selectedBroker} 조건 데이터 준비됨` : '증권사를 선택해 주세요'}</div>
             {isHelpOpen && (
               <div className="usage-help-modal-backdrop" onMouseDown={() => setIsHelpOpen(false)}>
                 <section id="usage-help-popover" className="usage-help-modal" role="dialog" aria-modal="true" aria-label="사용 방법" onMouseDown={(event) => event.stopPropagation()}>
@@ -540,10 +441,17 @@ const runAiGeneration = async () => {
                       </article>
                     ))}
                   </div>
-                  <section className="usage-help-save-note">
-                    <strong>{usageGuide.noteTitle}</strong>
-                    <p dangerouslySetInnerHTML={{ __html: usageGuide.note }} />
-                  </section>
+                  {usageGuide.statuses && (
+                    <section className="usage-help-status-guide" aria-label="자동 분석 현황 읽는 방법">
+                      <h4>현황판 읽는 방법</h4>
+                      <dl>
+                        {usageGuide.statuses.map(({ label, description }) => (
+                          <div key={label}><dt>{label}</dt><dd>{description}</dd></div>
+                        ))}
+                      </dl>
+                      <p>대기 중인 문의는 자동으로 다시 시도합니다. 저장 대기인 문의는 기존 분석 결과로 저장만 재시도합니다.</p>
+                    </section>
+                  )}
                 </section>
               </div>
             )}
@@ -557,6 +465,7 @@ const runAiGeneration = async () => {
                 <button className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`} onClick={() => setActiveTab('ai')}>AI 추천</button>
               </div>
               
+              {!(activeTab === 'ai' && isInboxPickerOpen) && (
               <div className="broker-actions-container">
                <BrokerSelector brokers={brokers} selectedBroker={selectedBroker} onChange={setSelectedBroker} />
                {/*} <div className="fixed-ment-buttons">
@@ -579,6 +488,7 @@ const runAiGeneration = async () => {
                  </div>
                )}
                 </div>
+              )}
 
               {activeTab === 'manual' && (
                 <div className="strategy-switcher" aria-label="조건식 전략 선택">
@@ -624,6 +534,10 @@ const runAiGeneration = async () => {
                     lastUpdatedAt={inboxLastUpdatedAt}
                     refresh={refreshInbox}
                     getAnalysisStatus={getInboxAnalysisStatus}
+                    getAnalysisDetail={getAnalysisDetail}
+                    analysisProgress={inboxAnalysisProgress}
+                    onToggleAnalysisPaused={toggleInboxAnalysisPaused}
+                    onRetryAnalysis={retryInboxAnalysis}
                     onSelect={handleUseInboxInquiry}
                     onClose={() => setIsInboxPickerOpen(false)}
                   />
@@ -787,7 +701,6 @@ const runAiGeneration = async () => {
               onLetterCheck={handleLetterCheck}
               onGroup={handleGroupConditions}
               onClearAllGroups={handleClearAllGroups}
-              onSaveDraft={handleSaveStrategy}
               showLogicControls={false}
               // onMentUpdate={handleMentUpdate}
             />

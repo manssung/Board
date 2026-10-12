@@ -1,12 +1,8 @@
+import { inquiryFingerprint } from './inquiryData';
 const STORAGE_PREFIX = 'strategy-qna-preanalysis:v1:';
 const CACHE_TTL = 3 * 24 * 60 * 60 * 1000;
 
-export const inquiryFingerprint = (inquiry = {}) => {
-  const source = `${inquiry.id || ''}|${inquiry.broker || ''}|${inquiry.query || ''}`;
-  let hash = 5381;
-  for (let index = 0; index < source.length; index += 1) hash = ((hash << 5) + hash) ^ source.charCodeAt(index);
-  return (hash >>> 0).toString(36);
-};
+export { inquiryFingerprint } from './inquiryData';
 
 const storageKey = (id) => `${STORAGE_PREFIX}${id}`;
 

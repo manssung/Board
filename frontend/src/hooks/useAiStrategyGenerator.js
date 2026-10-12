@@ -1,3 +1,4 @@
+import { normalizeAiResult } from '../util/normalizeAiResult';
 import { useState } from 'react';
 import { showAppAlert, showToast } from '../components/AppToast';
 
@@ -24,6 +25,7 @@ const getAiErrorMessage = (error) => {
   const details = getQuotaDetails(error?.message || '', error?.retryInSeconds);
 
   if (error?.status === 429) {
+    if (!error?.isDailyLimit && !details.isDailyLimit) return 'AI 요청이 잠시 대기 중입니다. 잠시 후 다시 시도해 주세요.';
     const limit = error?.quotaLimit || details.quotaLimit;
     const limitText = Number.isFinite(limit) ? `무료 등급 하루 ${limit}회` : '오늘의 AI 요청 한도';
     return `오늘 사용 가능한 ${limitText}를 모두 사용했습니다.\n할당량이 갱신된 후 다시 시도해 주세요.`;
@@ -49,7 +51,6 @@ const getAiErrorAlert = (error) => {
   return null;
 };
 
-const wait = (milliseconds) => new Promise(resolve => setTimeout(resolve, milliseconds));
 
 function buildLocalPrompt(customerQuery, conditionList, selectedBroker) {
   const conditions = conditionList
@@ -130,8 +131,10 @@ const responseSchema = {
 export function useAiStrategyGenerator() {
   const [isAiLoading, setIsAiLoading] = useState(false);
 
-  const generateStrategy = async (customerQuery, conditionList, selectedBroker, imageAttachment = null) => {
-    setIsAiLoading(true);
+  const generateStrategy = async (customerQuery, conditionList, selectedBroker, imageAttachment = null, options = {}) => {
+    if (!options.background) setIsAiLoading(true);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90000);
 
     try {
       const imagePart = imageAttachment?.data && imageAttachment?.mimeType
@@ -141,6 +144,7 @@ export function useAiStrategyGenerator() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ customerQuery, conditionList, selectedBroker, imageAttachment }),
+        signal: controller.signal,
       };
 
       let response;
@@ -152,6 +156,7 @@ export function useAiStrategyGenerator() {
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
             body: JSON.stringify({
               contents: [{ parts: [{ text: `${buildLocalPrompt(customerQuery, conditionList, selectedBroker)}${imagePart ? '\n\n# 첨부 이미지 안내\n첨부 이미지는 고객 문의를 파악하는 보조 자료입니다. 이미지에서 확인할 수 있는 내용만 참고하고, 목록에 없는 조건은 만들지 마세요.' : ''}` }, ...(imagePart ? [imagePart] : [])] }],
               generationConfig: { temperature: 0, responseMimeType: 'application/json', responseSchema },
@@ -180,15 +185,6 @@ export function useAiStrategyGenerator() {
         throw quotaError;
       }
 
-      if (response.status === 429 && data.retryInSeconds) {
-        await wait(Math.min(Math.max(data.retryInSeconds * 1000, 1000), 10000));
-        if (LOCAL_GEMINI_API_KEY) {
-          throw new Error('Gemini 요청 한도에 도달했습니다. 잠시 후 다시 시도해 주세요.');
-        }
-        response = await fetch(API_ENDPOINT, requestOptions);
-        data = await response.json().catch(() => ({}));
-      }
-
       if (!response.ok) {
         const requestError = new Error(data.error || `서버 요청 실패: ${response.status}`);
         requestError.status = response.status;
@@ -198,50 +194,17 @@ export function useAiStrategyGenerator() {
         throw requestError;
       }
 
-      const rawList = Array.isArray(data.matches) ? data.matches : [];
-      const seenIndex = new Set();
-      const matchedItems = [];
-
-      rawList.forEach((result) => {
-        const matchedIndex = Number(result?.originalIndex);
-        if (
-          !Number.isNaN(matchedIndex) &&
-          matchedIndex !== -1 &&
-          conditionList[matchedIndex] &&
-          !seenIndex.has(matchedIndex)
-        ) {
-          seenIndex.add(matchedIndex);
-          matchedItems.push({
-            ...conditionList[matchedIndex],
-            detail: result.detail,
-            aiReason: typeof result.reason === 'string' ? result.reason.trim() : '',
-            aiConfidence: ['high', 'medium', 'low'].includes(String(result.confidence).toLowerCase())
-              ? String(result.confidence).toLowerCase()
-              : 'medium',
-            nextOperator: result.nextOperator === 'or' ? 'or' : 'and',
-            requiresConfirmation: result.requiresConfirmation === true,
-            confirmationNote: typeof result.confirmationNote === 'string' ? result.confirmationNote.trim() : '',
-          });
-        }
-      });
-
-      const coverage = Array.isArray(data.coverage)
-        ? data.coverage.filter((item) => item && typeof item.request === 'string').map((item) => ({
-          request: item.request.trim(),
-          status: item.status === 'covered' ? 'covered' : 'needs_confirmation',
-          reason: typeof item.reason === 'string' ? item.reason.trim() : '',
-        })).filter((item) => item.request)
-        : [];
-
-      return { conditions: matchedItems, coverage };
+      return normalizeAiResult(data, conditionList);
     } catch (error) {
+      if (options.background) throw error;
       console.error('AI 전략 생성 중 오류 발생:', error);
       const alert = getAiErrorAlert(error);
       if (alert) showAppAlert(alert.title, alert.message);
       else showToast(getAiErrorMessage(error), 'error');
       return null;
     } finally {
-      setIsAiLoading(false);
+      clearTimeout(timeout);
+      if (!options.background) setIsAiLoading(false);
     }
   };
 

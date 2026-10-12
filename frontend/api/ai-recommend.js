@@ -1,3 +1,5 @@
+const { getRedis } = require('../lib/upstashRedis');
+const { withAiSlot } = require('../lib/aiRateLimit');
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const MAX_IMAGE_BASE64_LENGTH = Math.ceil((2 * 1024 * 1024 * 4) / 3) + 1024;
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
@@ -134,17 +136,18 @@ module.exports = async function handler(request, response) {
 
   try {
     const prompt = `${buildPrompt(customerQuery.trim(), conditionList, selectedBroker.trim())}${imagePart ? '\n\n# 첨부 이미지 안내\n첨부 이미지는 고객 문의를 파악하는 보조 자료입니다. 이미지에서 확인할 수 있는 내용만 참고하고, 목록에 없는 조건은 만들지 마세요.' : ''}`;
-    const geminiResponse = await fetch(
+    const geminiResponse = await withAiSlot(getRedis(), () => fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL)}:generateContent`,
       {
         method: 'POST',
+        signal: AbortSignal.timeout(35000),
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }, ...(imagePart ? [imagePart] : [])] }],
           generationConfig: { temperature: 0, responseMimeType: 'application/json', responseSchema },
         }),
       },
-    );
+    ));
 
     const payload = await geminiResponse.json().catch(() => ({}));
     if (!geminiResponse.ok) {
@@ -167,6 +170,6 @@ module.exports = async function handler(request, response) {
     });
   } catch (error) {
     console.error('AI recommendation failed:', error.message);
-    return response.status(502).json({ error: '조건 추천을 처리하는 중 오류가 발생했습니다.' });
+    return response.status(error.status || 502).json({ error: '조건 추천을 처리하는 중 오류가 발생했습니다.', retryInSeconds: error.retryInSeconds });
   }
 };

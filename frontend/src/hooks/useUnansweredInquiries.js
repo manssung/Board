@@ -1,25 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { decodeInquiryText } from '../util/decodeInquiryText';
+import { normalizeInquiry } from '../util/inquiryData';
 
 // Local CRA development calls the board directly; production always uses Vercel.
 const API_URL = process.env.NODE_ENV === 'development'
   ? (process.env.REACT_APP_QNA_API_URL || '/api/unanswered')
   : '/api/unanswered';
-const BROKER_NAMES = { 신한: '신한증권', 카이로스: '미래에셋증권', '카이로스(W)': '미래에셋증권(해외)', NH: 'NH증권' , 교보 : '교보증권', KB : 'KB증권'  };
-
-export function normalizeInquiry(row) {
-  const company = String(row.company || '').trim();
-  return {
-    id: String(row.uid),
-    broker: BROKER_NAMES[company] || company,
-    title: decodeInquiryText(row.subject),
-    author: String(row.name || ''),
-    receivedAt: String(row.s_datetime || ''),
-    query: decodeInquiryText(row.comment),
-    hasImageAttachment: Number(row.file) > 0,
-    isFollowUp: row.isFollowUp === true || String(row.isFollowUp) === '1',
-  };
-}
+export { normalizeInquiry } from '../util/inquiryData';
 
 export function useUnansweredInquiries(isOpen) {
   const [inquiries, setInquiries] = useState([]);
@@ -49,7 +35,8 @@ export function useUnansweredInquiries(isOpen) {
         const rows = await response.json();
         if (!Array.isArray(rows)) throw new Error('API 형식 오류');
         if (active) {
-          setInquiries(rows.map(normalizeInquiry));
+          const normalized = rows.map(normalizeInquiry);
+          setInquiries((previous) => JSON.stringify(previous) === JSON.stringify(normalized) ? previous : normalized);
           setLastUpdatedAt(new Date());
         }
       } catch (err) {

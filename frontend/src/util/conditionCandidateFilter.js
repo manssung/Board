@@ -27,7 +27,7 @@ const getQueryTokens = (query) => String(query || '')
 
 // 전체 XML은 브라우저에 유지하고, 모델 호출 직전에만 넓은 후보군으로 압축합니다.
 // 매칭 근거가 부족하면 원본을 그대로 반환해 조건 누락보다 정확도를 우선합니다.
-export function getRecommendationCandidates(query, conditions = []) {
+function getRecommendationCandidates(query, conditions = []) {
   if (!Array.isArray(conditions) || conditions.length <= MAX_CANDIDATES + 60) return conditions;
 
   const normalizedQuery = normalize(query);
@@ -69,3 +69,5 @@ export function getRecommendationCandidates(query, conditions = []) {
     .sort((a, b) => a.index - b.index)
     .map((item) => item.condition);
 }
+
+module.exports = { getRecommendationCandidates };

@@ -1,5 +1,14 @@
 {
   "framework": "create-react-app",
   "devCommand": "npm run dev",
-  "buildCommand": "npm run build"
+  "buildCommand": "npm run build",
+  "functions": {
+    "api/background-analysis.js": {
+      "maxDuration": 60,
+      "includeFiles": "lib/generated/**"
+    },
+    "api/ai-recommend.js": {
+      "maxDuration": 60
+    }
+  }
 }

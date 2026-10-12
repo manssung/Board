@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { PREANALYSIS_LABELS } from '../util/inboxPreanalysis';
+import InboxAnalysisProgress, { formatAnalysisTime } from './InboxAnalysisProgress';
 
 const PAGE_SIZE = 5;
 
@@ -10,6 +11,10 @@ export default function InboxInquiryBrowser({
   lastUpdatedAt,
   refresh,
   getAnalysisStatus,
+  getAnalysisDetail,
+  analysisProgress,
+  onToggleAnalysisPaused,
+  onRetryAnalysis,
   onSelect,
   onClose,
 }) {
@@ -35,7 +40,7 @@ export default function InboxInquiryBrowser({
   return (
     <div className="board-inquiry-browser" aria-label="미응답 문의 선택">
       <div className="board-inquiry-browser-head">
-        <div><span>BOARD INBOX</span><h3>증권사별 업무 큐</h3><p>처리할 문의를 고르면 원글을 자동 추천 입력창으로 가져옵니다.</p></div>
+        <div><span>BOARD INBOX</span><h3>미답변 문의 현황</h3><p>전체 증권사의 문의를 확인하고, 처리할 문의를 골라 답변을 준비합니다.</p></div>
         <button type="button" onClick={onClose}>입력으로 돌아가기</button>
       </div>
       <div className="board-queue-summary" aria-label="문의 현황">
@@ -43,6 +48,7 @@ export default function InboxInquiryBrowser({
         <span><b>{brokers.length}</b> 증권사</span>
         <span>원문을 선택하면 자동 추천 입력창으로 가져옵니다.</span>
       </div>
+      <InboxAnalysisProgress progress={analysisProgress} onTogglePaused={onToggleAnalysisPaused} onRetryFailed={onRetryAnalysis} />
       <div className="board-queue-layout">
         <aside className="board-queue-brokers" aria-label="증권사 필터">
           <button type="button" className={brokerFilter === '전체' ? 'active' : ''} onClick={() => selectBroker('전체')}><span>전체 문의</span><b>{inquiries.length}</b></button>
@@ -64,6 +70,7 @@ export default function InboxInquiryBrowser({
           <div className="board-inquiry-browser-list">
             {pagedInquiries.map((inquiry) => {
               const analysisStatus = getAnalysisStatus(inquiry);
+              const detail = ['failed', 'limit_reached', 'save_pending'].includes(analysisStatus) ? getAnalysisDetail?.(inquiry) : null;
               return (
                 <button type="button" key={inquiry.id} onClick={() => onSelect(inquiry)}>
                   <span><em>{inquiry.broker}</em><small>게시글 #{inquiry.id} · {inquiry.author} · {inquiry.receivedAt}</small></span>
@@ -76,6 +83,7 @@ export default function InboxInquiryBrowser({
                     {inquiry.title}
                   </strong>
                   <p>{inquiry.query}</p>
+                  {detail && <small className="board-analysis-issue">{detail.reason} {detail.retryAt ? formatAnalysisTime(detail.retryAt) + ' 이후 순차 재시도' : '설정 확인 후 실패 건 재시도를 눌러 주세요.'}</small>}
                 </button>
               );
             })}

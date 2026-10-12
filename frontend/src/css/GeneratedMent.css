@@ -81,8 +81,7 @@
 
 .copy-button,
 .edit-button,
-.group-toggle-button,
-.save-draft-button {
+.group-toggle-button {
   border-radius: 6px;
   cursor: pointer;
   font-size: 12px;
@@ -106,14 +105,6 @@
 .copy-button.copied { border-color: #badbcc; color: #0f5132; background: #d1e7dd; }
 .copy-icon { width: 14px; height: 14px; }
 
-.save-draft-button {
-  border: 1px solid #bfd2f1;
-  padding: 6px 10px;
-  color: #2d63bd;
-  background: #f6faff;
-}
-.save-draft-button { font-weight: 700; }
-.save-draft-button:hover { border-color: #8eafe4; background: #edf5ff; }
 
 .group-toggle-button { display: flex; align-items: center; justify-content: center; background: #fff; }
 .group-toggle-button.active { border-color: var(--primary-color); color: #fff; background: var(--primary-color); }

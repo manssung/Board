@@ -1,4 +1,4 @@
-import { buildPreanalysisQueue, getResultStatus, MAX_PREANALYSIS_BATCH_SIZE } from './inboxPreanalysis';
+import { buildPreanalysisQueue, getResultStatus } from './inboxPreanalysis';
 import { inquiryFingerprint } from './inboxAnalysisCache';
 
 const inquiry = (id, receivedAt, overrides = {}) => ({
@@ -10,11 +10,11 @@ const inquiry = (id, receivedAt, overrides = {}) => ({
   ...overrides,
 });
 
-test('오래된 문의부터 최대 10건만 자동 분석한다', () => {
+test('10건을 초과해도 오래된 문의부터 모두 자동 분석한다', () => {
   const inquiries = Array.from({ length: 12 }, (_, index) => inquiry(index + 1, `2026-01-${String(12 - index).padStart(2, '0')}`));
   const queue = buildPreanalysisQueue({ inquiries, selectedBroker: '신한증권', verifiedKeys: new Set() });
 
-  expect(queue).toHaveLength(MAX_PREANALYSIS_BATCH_SIZE);
+  expect(queue).toHaveLength(12);
   expect(queue.map((item) => item.receivedAt)).toEqual([...queue.map((item) => item.receivedAt)].sort());
 });
 

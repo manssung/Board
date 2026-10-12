@@ -1,0 +1,26 @@
+name: Background inquiry analysis
+on:
+  schedule:
+    # GitHub schedules use UTC: 11:00 UTC = 20:00 Asia/Seoul.
+    - cron: '0 11 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: background-inquiry-analysis
+  cancel-in-progress: false
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Analyze up to 40 inquiries
+        working-directory: frontend
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: node scripts/run-background-analysis.js
