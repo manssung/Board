@@ -34,3 +34,28 @@ test('조건 파일 다운로드는 한 번에 최대 네 개이고 파일 순�
   expect(await fetchBrokerXmls(urls)).toEqual(urls);
   expect(peak).toBe(4);
 });
+
+test.each([
+  ['신한증권', '증거금률', '증거금 20%'],
+  ['KB증권', '액면가', '현재가가 액면가 미만 대상'],
+  ['KB증권', '증거금율', '증거금 20%'],
+  ['미래에셋증권', '대상지정>증거금율', '증거금 100%'],
+  ['NH증권', '증거금률', '증거금 30%'],
+])('%s의 %s는 XML에서 선택된 라디오 문구를 사용한다', async (broker, conditionPath, expected) => {
+  const conditions = await loadBrokerConditions(broker);
+  expect(conditions.find(item => item.path === conditionPath)?.detail).toBe(expected);
+});
+
+test.each(Object.keys(brokerMap))('%s에서 상세 템플릿 누락을 복구하고 원본이 없는 항목만 남긴다', async (broker) => {
+  const conditions = await loadBrokerConditions(broker);
+  const missing = conditions.filter(item => !item.detail.trim());
+  expect(missing).toHaveLength(0);
+
+});
+
+test('KB Price Oscillator 순위에 다른 지표의 상세 설명을 연결하지 않는다', async () => {
+  const conditions = await loadBrokerConditions('KB증권');
+  const detail = conditions.find(item => item.path === '추세지표>Price Oscillator>Price Oscillator 순위')?.detail;
+  expect(detail).toContain('Price Osc');
+  expect(detail).not.toContain('Band');
+});

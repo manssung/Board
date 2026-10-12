@@ -76,17 +76,29 @@ const fillTemplate = (templateNode) => {
     const placeholders = template.match(/\(([^)]+)\)/g) || [];
     placeholders.forEach(placeholder => {
         const packetId = placeholder.substring(1, placeholder.length - 1);
-        const control = controls.find(c => 
+        const matchingControls = controls.filter(c =>
             c.getAttribute('PACKET_ID') === packetId ||
             c.getAttribute('NAME') === packetId ||
             c.getAttribute('ID') === packetId ||
             c.getAttribute('PARAM_NAME') === packetId
         );
+        // Standalone radio templates have no numeric default; read the selected caption.
+        // Keep existing numeric substitutions in compound templates unchanged.
+        const checkedRadio = matchingControls.find(c =>
+            c.getAttribute('TYPE') === 'Radio' && c.getAttribute('CHECKED') === '1'
+        );
+        const useRadioCaption = template.trim() === placeholder && checkedRadio;
+        const control = useRadioCaption ? checkedRadio : matchingControls[0];
         if (control) {
             let value = control.getAttribute('DEFAULT_VALUE') || 
                         control.getAttribute('DEFAULT') || 
                         control.getAttribute('VALUE') || 
                         control.getAttribute('TEXT') || '';
+
+            if (useRadioCaption) {
+                value = checkedRadio.getAttribute('STATIC_CAPTION') ||
+                        checkedRadio.getAttribute('RADIO_VALUE') || value;
+            }
 
             const comboItems = control.getAttribute('COMBO_ITEM');
             const comboIndexes = control.getAttribute('COMBO_INDEX');
@@ -115,7 +127,7 @@ const buildDetailMap = (mapUrls, mapXmls) => {
         const fileName = mapUrl.substring(mapUrl.lastIndexOf('/') + 1).replace(/\.xml$/i, '');
         const fileKey = fileName.replace(/^map/i, '').toUpperCase();
 
-        mapXml.querySelectorAll('*[MAP_NAME]').forEach(node => {
+        mapXml.querySelectorAll('[MAP_NAME], [COMPLETE_INDEX_NAME], [COMPLETE_INDEX_NAME2]').forEach(node => {
             const detail = fillTemplate(node);
             const tagKey = node.tagName;
             const mapName = node.getAttribute('MAP_NAME');
@@ -221,7 +233,7 @@ async function parseBrokerConditions(selectedBroker) {
                 const fileNameOnly = mapUrl.substring(mapUrl.lastIndexOf('/') + 1).replace(/\.xml$/i, '');
                 const fileKey = fileNameOnly.replace(/^map/i, '').toUpperCase();
                 
-                mapXml.querySelectorAll('*[MAP_NAME]').forEach(node => {
+                mapXml.querySelectorAll('[MAP_NAME], [COMPLETE_INDEX_NAME], [COMPLETE_INDEX_NAME2]').forEach(node => {
                     const mapName = node.getAttribute('MAP_NAME');
                     const completeIndexName = node.getAttribute('COMPLETE_INDEX_NAME');
                     const tagKey = node.tagName;
@@ -362,7 +374,7 @@ async function parseBrokerConditions(selectedBroker) {
             const detailMap = new Map();
             for (const mapXml of mapXmls) {
                 if (!mapXml) continue;
-                mapXml.querySelectorAll('*[MAP_NAME]').forEach(node => {
+                mapXml.querySelectorAll('[MAP_NAME], [COMPLETE_INDEX_NAME], [COMPLETE_INDEX_NAME2]').forEach(node => {
                     const detailData = fillTemplate(node);
                     const mapName = node.getAttribute('MAP_NAME');
                     const completeIndexName = node.getAttribute('COMPLETE_INDEX_NAME');
@@ -430,7 +442,7 @@ async function parseBrokerConditions(selectedBroker) {
             const detailMap = new Map();
             for (const mapXml of mapXmls) {
                 if (!mapXml) continue;
-                mapXml.querySelectorAll('*[MAP_NAME]').forEach(node => {
+                mapXml.querySelectorAll('[MAP_NAME], [COMPLETE_INDEX_NAME], [COMPLETE_INDEX_NAME2]').forEach(node => {
                     const detailData = fillTemplate(node);
                     const mapName = node.getAttribute('MAP_NAME');
                     const completeIndexName = node.getAttribute('COMPLETE_INDEX_NAME');

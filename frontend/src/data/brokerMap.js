@@ -83,6 +83,7 @@ const brokerMap = {
         ],
          maps : [
            "/kairos_xml/mapa-b.xml",
+           "/kairos_xml/mapc1-c3.xml",
            "/kairos_xml/mapc2_1-19.xml",
            "/kairos_xml/mapc2_20-29.xml",
            "/kairos_xml/mapc2_30-39.xml",

@@ -185,3 +185,22 @@ test('서버에 남은 분석 결과는 웹에서 AI를 다시 호출하지 않�
   expect(requests('store')).toHaveLength(2);
   expect(latest.progress.completed).toBe(2);
 });
+
+test('공용 캐시가 안내한 60초 대기 후 자동 분석을 재개한다', async () => {
+  let limited = true;
+  cacheHandler = (body) => {
+    if (body.action === 'claim' && limited) return {httpStatus: 429, retryInSeconds: 60, isDailyLimit: false};
+    if (body.action === 'claim') return {status: 'claimed', claimToken: 'token'};
+    return {};
+  };
+  await render();
+  expect(props.generateStrategy).not.toHaveBeenCalled();
+  limited = false;
+  await act(async () => jest.advanceTimersByTime(59999));
+  await flush();
+  expect(props.generateStrategy).not.toHaveBeenCalled();
+  await act(async () => jest.advanceTimersByTime(1));
+  await flush();
+  expect(requests('store')).toHaveLength(2);
+  expect(latest.getStatus(inquiries[0])).toBe('ready');
+});

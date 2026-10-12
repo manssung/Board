@@ -1,3 +1,4 @@
+import { cacheRequest } from '../util/cacheRequest';
 import { retryPolicy } from '../util/inquiryData';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getRecommendationCandidates } from '../util/conditionCandidateFilter';
@@ -6,28 +7,7 @@ import { buildPreanalysisQueue, getResultStatus } from '../util/inboxPreanalysis
 import { summarizePreanalysis } from '../util/preanalysisProgress';
 import { loadBrokerConditions, supportsBroker } from '../util/brokerConditions';
 
-const CACHE_ENDPOINT = '/api/analysis-cache';
 const RETRY_DELAY = 30000;
-const cacheRequest = async (body) => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 20000);
-  try {
-    const response = await fetch(CACHE_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      signal: controller.signal,
-    });
-    if (!response.ok) {
-      const error = new Error(`공용 캐시 요청 실패: ${response.status}`);
-      error.status = response.status;
-      throw error;
-    }
-    return await response.json();
-  } finally {
-    clearTimeout(timeout);
-  }
-};
 
 export function useInboxPreanalysis({ enabled, hasLoaded, inquiries, generateStrategy, getConditions = loadBrokerConditions }) {
   const [statuses, setStatuses] = useState({});
