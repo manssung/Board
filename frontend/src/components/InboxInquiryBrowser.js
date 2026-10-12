@@ -41,7 +41,7 @@ export default function InboxInquiryBrowser({
     <div className="board-inquiry-browser" aria-label="미응답 문의 선택">
       <div className="board-inquiry-browser-head">
         <div><span>BOARD INBOX</span><h3>미답변 문의 현황</h3><p>전체 증권사의 문의를 확인하고, 처리할 문의를 골라 답변을 준비합니다.</p></div>
-        <button type="button" onClick={onClose}>입력으로 돌아가기</button>
+        <button type="button" onClick={onClose}>AI에게 물어보기</button>
       </div>
       <div className="board-queue-summary" aria-label="문의 현황">
         <span><b>{inquiries.length}</b> 전체 문의</span>

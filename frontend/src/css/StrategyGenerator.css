@@ -1381,7 +1381,7 @@ body {
 .board-inquiry-browser-head > div > span { display: block; color: #8795a7; font-size: 10px; font-weight: 800; letter-spacing: .08em; }
 .board-inquiry-browser-head h3 { margin: 5px 0 3px; color: #263853; font-size: 16px; letter-spacing: -.25px; }
 .board-inquiry-browser-head p { margin: 0; color: #8592a4; font-size: 11px; line-height: 1.45; }
-.board-inquiry-browser-head button { flex: 0 0 auto; border: 1px solid #dbe4ef; border-radius: 6px; padding: 6px 8px; color: #596b83; background: #fff; cursor: pointer; font-size: 10px; font-weight: 700; }
+.board-inquiry-browser-head button { flex: 0 0 auto; min-height: 32px; margin-top: 14px; border: 1px solid #dbe4ef; border-radius: 6px; padding: 6px 14px; color: #596b83; background: #fff; cursor: pointer; font-size: 12px; font-weight: 700; line-height: 18px; }
 .board-queue-summary { display: flex; gap: 18px; padding: 10px 1px; color: #8795a7; font-size: 10px; }
 .board-queue-summary span { display: flex; align-items: baseline; gap: 4px; }
 .board-queue-summary b { color: #2765ca; font-size: 15px; letter-spacing: -.3px; }
