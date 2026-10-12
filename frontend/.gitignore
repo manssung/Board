@@ -10,3 +10,6 @@ __pycache__/
 venv/
 
 lib/generated/
+
+# Local challenge documents, slides, and build assets.
+/artifacts/ai-challenge/
