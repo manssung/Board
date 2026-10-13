@@ -1,3 +1,4 @@
+import { formatConditionDetail } from '../util/formatConditionDetail';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import '../css/GeneratedMent.css';
 import useAutoSizeTextArea from '../hooks/useAutoSizeTextArea';
@@ -23,7 +24,7 @@ const blobToDataUrl = (blob) => new Promise((resolve, reject) => {
 const conditionLine = (item, index) => {
   const type = item.type?.trim() ? `${item.type}>` : '';
   const path = item.path ? item.path.replace(/^[\s>]+/, '').trim() : '';
-  const detail = item.comment !== undefined ? item.comment : (item.detail || '');
+  const detail = formatConditionDetail(item.comment !== undefined ? item.comment : (item.detail || ''));
   return `${getConditionLabel(index)} : ${type}${path} : ${detail}`;
 };
 

@@ -1,3 +1,4 @@
+import { formatConditionDetail } from '../util/formatConditionDetail';
 import React, { useEffect, useMemo, useRef, useState } from 'react'; // useRef를 import 합니다.
 import '../css/SelectedConditions.css';
 import { getConditionLabel } from '../util/conditionEditor';
@@ -183,7 +184,7 @@ const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange,
             {display.context && <span className="compact-condition-path">{display.context}</span>}
           </span>
         </span>
-        {!isEditing && <span className="compact-condition-value">{cond.comment !== undefined ? cond.comment : cond.detail || '세부값 없음'}</span>}
+        {!isEditing && <span className="compact-condition-value">{formatConditionDetail(cond.comment !== undefined ? cond.comment : cond.detail || '세부값 없음')}</span>}
       </button>
       <div className="inline-condition-actions">
         <button
@@ -206,6 +207,7 @@ const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange,
           className="inline-condition-value"
           value={cond.comment !== undefined ? cond.comment : cond.detail || ""}
           onChange={(e) => onCommentChange(index, e.target.value)}
+          onBlur={(e) => onCommentChange(index, formatConditionDetail(e.target.value))}
           placeholder="세부 설정값 입력"
         />}
     </div>

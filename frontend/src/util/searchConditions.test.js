@@ -17,3 +17,9 @@ test('empty search preserves input and null fields are safe', () => {
   expect(searchConditions(rows, ' ')).toBe(rows);
   expect(searchConditions(rows, '알에스아이')).toEqual([rows[1]]);
 });
+
+test('천 단위 쉼표 유무에 관계없이 금액으로 조건을 검색한다', () => {
+  const conditions = [{path: '거래대금', detail: '1,000,000원 이상'}, {path: '현재가', detail: '2000원'}];
+  expect(searchConditions(conditions, '1000000')).toEqual([conditions[0]]);
+  expect(searchConditions(conditions, '1,000,000')).toEqual([conditions[0]]);
+});

@@ -1,3 +1,4 @@
+import { formatConditionDetail } from './formatConditionDetail';
 // src/util/generateMent.js
 
 export const generateMent = ({
@@ -19,7 +20,7 @@ export const generateMent = ({
     let ment = header;
     selectedConditions.forEach((c, i) => {
       // comment가 undefined가 아니라면(빈칸 '' 포함), 그 값을 사용합니다.
-      const description = c.comment !== undefined ? c.comment : (c.detail || '');
+      const description = formatConditionDetail(c.comment !== undefined ? c.comment : (c.detail || ''));
       
       ment += `${String.fromCharCode(65 + i)} : ${c.type}>${c.path} : ${description}\n`;
     });

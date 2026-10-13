@@ -1,3 +1,4 @@
+import { formatConditionDetail } from './formatConditionDetail';
 import brokerMap from '../data/brokerMap.js';
 
 // XML 파싱 함수
@@ -111,7 +112,8 @@ const fillTemplate = (templateNode) => {
             template = template.replace(placeholder, value);
         }
     });
-    return template.replace(/봉전기준|봉이내|,|회 발생/g, '').replace(/\s+/g, ' ').trim();
+    return formatConditionDetail(template.replace(/봉전기준|봉이내|회 발생/g, '')
+        .replace(/^(?:\s*,)+\s*|\s*,\s*$/g, '').replace(/\s+/g, ' ').trim());
 };
 
 // FILE_NAME + tag matching prevents identically named conditions in separate

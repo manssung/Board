@@ -10,6 +10,7 @@ vm.runInNewContext(brokerSource, brokerContext);
 const brokerMap = brokerContext.module.exports;
 const window = new JSDOM('').window;
 const context = {
+  formatConditionDetail: require('../src/util/formatConditionDetail').formatConditionDetail,
   brokerMap, DOMParser: window.DOMParser, TextDecoder, AbortController, Map, Promise, setTimeout, clearTimeout,
   process: { env: { PUBLIC_URL: '' } }, console: { ...console, warn: () => {} },
   fetch: async (url) => {

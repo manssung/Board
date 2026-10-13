@@ -1,3 +1,4 @@
+import { formatConditionDetail } from './formatConditionDetail';
 // Same-indicator spellings only. Do not expand to related trading concepts.
 export const CONDITION_ALIASES = [
   ['이동평균', '이평선', '이평'],
@@ -12,7 +13,7 @@ export const CONDITION_ALIASES = [
   ['envelope', '엔벨로프'],
 ];
 
-const normalize = (value) => String(value || '').toLowerCase().replace(/\s+/g, '');
+const normalize = (value) => formatConditionDetail(value).toLowerCase().replace(/\s+/g, '');
 
 export function searchConditions(conditions = [], query = '') {
   const needle = normalize(query);

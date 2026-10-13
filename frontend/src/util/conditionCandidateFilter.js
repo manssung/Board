@@ -21,17 +21,36 @@ const normalize = (value) => String(value || '').toLowerCase().replace(/\s+/g, '
 
 const getQueryTokens = (query) => String(query || '')
   .toLowerCase()
-  .match(/[가-힣a-z]+|\d+(?:[,.]\d+)?/g)
+  .match(/[가-힣a-z]+|\d+(?:,\d{3})*(?:\.\d+)?/g)
   ?.map((token) => token.replace(/[,.]/g, ''))
   .filter((token) => token.length > 1 && !STOP_WORDS.has(token)) || [];
 
 // 전체 XML은 브라우저에 유지하고, 모델 호출 직전에만 넓은 후보군으로 압축합니다.
 // 매칭 근거가 부족하면 원본을 그대로 반환해 조건 누락보다 정확도를 우선합니다.
+function prefersBaseBarPriceChange(query) {
+  const text = normalize(query);
+  const hasRate = /등락[률율]/.test(text);
+  const previousDay = /(전일|전날|어제)대비/.test(text);
+  if (!hasRate && !previousDay) return false;
+  // These comparisons need their own candidates, rather than a default daily change.
+  if (!previousDay && /이동평균|이평|연초|전년|전월|신고가|신저가|최고가|최저가|시가대비|\d+(?:일|봉|주|개월)전/.test(text)) return false;
+  if (!hasRate && /거래량|거래대금|체결량/.test(text)) return false;
+  return !/순위|상위\d|하위\d/.test(text);
+}
+
+function isBaseBarPriceChange(condition) {
+  const detail = normalize(condition?.detail);
+  return /1봉전(?:종가|시가|고가|저가|현재가)대비0봉전(?:종가|시가|고가|저가|현재가)/.test(detail)
+    && /등락[률율]/.test((condition?.path || '') + detail)
+    && detail.includes('%') && !/순위/.test(condition?.path || '');
+}
+
 function getRecommendationCandidates(query, conditions = []) {
   if (!Array.isArray(conditions) || conditions.length <= MAX_CANDIDATES + 60) return conditions;
 
   const normalizedQuery = normalize(query);
   const tokens = getQueryTokens(query);
+  const preferBaseBar = prefersBaseBarPriceChange(query);
   const activeConcepts = CONCEPTS.filter(({ query: triggers }) => triggers.some((trigger) => normalizedQuery.includes(trigger)));
 
   if (tokens.length === 0 && activeConcepts.length === 0) return conditions;
@@ -41,20 +60,21 @@ function getRecommendationCandidates(query, conditions = []) {
     let score = 0;
 
     tokens.forEach((token) => {
-      if (text.includes(token)) score += /^\d+$/.test(token) ? 3 : 8;
+      const numeric = /^\d+$/.test(token);
+      if ((numeric ? text.replace(/,/g, '') : text).includes(token)) score += numeric ? 3 : 8;
     });
     activeConcepts.forEach(({ terms }) => {
       const hits = terms.filter((term) => text.includes(term)).length;
       score += hits * 14;
     });
 
-    return { condition, index, score };
+    return { condition, index, score, preferred: preferBaseBar && isBaseBarPriceChange(condition) };
   });
 
-  const matched = ranked.filter((item) => item.score > 0);
+  const matched = ranked.filter((item) => item.preferred || item.score > 0);
   if (matched.length === 0) return conditions;
 
-  matched.sort((a, b) => b.score - a.score || a.index - b.index);
+  matched.sort((a, b) => Number(b.preferred) - Number(a.preferred) || b.score - a.score || a.index - b.index);
   const selected = matched.slice(0, MAX_CANDIDATES);
   const selectedIndexes = new Set(selected.map((item) => item.index));
 

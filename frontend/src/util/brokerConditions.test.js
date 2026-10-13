@@ -59,3 +59,18 @@ test('KB Price Oscillator 순위에 다른 지표의 상세 설명을 연결하�
   expect(detail).toContain('Price Osc');
   expect(detail).not.toContain('Band');
 });
+
+test.each(Object.keys(brokerMap))('%s의 전일 대비 등락률 요청에 기준봉 범위 조건을 전달한다', async (broker) => {
+  const {getRecommendationCandidates} = require('./conditionCandidateFilter');
+  const all = await loadBrokerConditions(broker);
+  const query = '전일 대비 등락률이 5% 이상인 종목';
+  const candidates = getRecommendationCandidates(query, all);
+  expect(candidates.some(item => /1봉전.*대비\s*0봉전/.test(item.detail) && /등락[률율]/.test(item.path + item.detail) && item.detail.includes('%') && !item.path.includes('순위'))).toBe(true);
+});
+
+test('실제 KB XML의 RSI 기간과 Signal 기간을 쉼표로 구분한다', async () => {
+  const conditions = await loadBrokerConditions('KB증권');
+  const rsi = conditions.filter(item => item.detail.includes('RSI['));
+  expect(rsi.length).toBeGreaterThan(0);
+  expect(rsi.some(item => /RSI\[14,9\]/.test(item.detail))).toBe(true);
+});

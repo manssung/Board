@@ -1,3 +1,4 @@
+import { formatConditionDetail } from '../util/formatConditionDetail';
 import React from 'react';
 
 const AppliedRow = ({ condition }) => (
@@ -5,7 +6,7 @@ const AppliedRow = ({ condition }) => (
     <span className="ai-draft-review-status">{condition.requiresConfirmation ? '확인 필요' : '적용됨'}</span>
     <div className="ai-draft-review-copy">
       <strong>{condition.type ? `${condition.type} › ` : ''}{condition.path}</strong>
-      <p>{condition.comment ?? condition.detail}</p>
+      <p>{formatConditionDetail(condition.comment ?? condition.detail)}</p>
       {condition.requiresConfirmation && condition.confirmationNote && <em>{condition.confirmationNote}</em>}
     </div>
   </article>
@@ -24,7 +25,7 @@ export default function AiDraftList({ drafts, appliedConditions = [], brokerName
           <span className="ai-draft-review-status">{condition.requiresConfirmation ? '확인 필요' : '추천'}</span>
           <div className="ai-draft-review-copy">
             <strong>{condition.type ? `${condition.type} › ` : ''}{condition.path}</strong>
-            <p>{condition.detail}</p>
+            <p>{formatConditionDetail(condition.detail)}</p>
             <small>{condition.aiReason || `${brokerName || '선택 증권사'} 조건 목록에서 매칭했습니다.`}</small>
             {condition.requiresConfirmation && condition.confirmationNote && <em>{condition.confirmationNote}</em>}
           </div>

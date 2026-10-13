@@ -1,3 +1,4 @@
+const { formatConditionDetail } = require('./formatConditionDetail');
 function normalizeAiResult(data, conditionList) {
   const rawList = Array.isArray(data.matches) ? data.matches : [];
   const seenIndex = new Set();
@@ -14,7 +15,7 @@ function normalizeAiResult(data, conditionList) {
       seenIndex.add(matchedIndex);
       matchedItems.push({
         ...conditionList[matchedIndex],
-        detail: typeof result.detail === 'string' ? result.detail : conditionList[matchedIndex].detail,
+        detail: formatConditionDetail(typeof result.detail === 'string' ? result.detail : conditionList[matchedIndex].detail),
         aiReason: typeof result.reason === 'string' ? result.reason.trim() : '',
         aiConfidence: ['high', 'medium', 'low'].includes(String(result.confidence).toLowerCase())
           ? String(result.confidence).toLowerCase()

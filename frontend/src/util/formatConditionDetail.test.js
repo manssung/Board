@@ -1,0 +1,32 @@
+import { formatConditionDetail } from './formatConditionDetail';
+import { normalizeAiResult } from './normalizeAiResult';
+import { generateMent } from './generateMent';
+
+test.each([
+  ['RSI[14,6]', 'RSI[14,6]'],
+  ['MACD[12,26,9] RSI[14,6] 30 이하', 'MACD[12,26,9] RSI[14,6] 30 이하'],
+  ['RSI[1000,6] 거래대금 1000000원 이상', 'RSI[1000,6] 거래대금 1,000,000원 이상'],
+  ['거래대금 1000만원 ~ 1000000만원', '거래대금 1,000만원 ~ 1,000,000만원'],
+  ['거래량 1000000주, 현재가 12345.50원', '거래량 1,000,000주, 현재가 12,345.50원'],
+  ['등락률 -3.00% 금액 -1000000원', '등락률 -3.00% 금액 -1,000,000원'],
+  ['거래대금 1,000,000원', '거래대금 1,000,000원'],
+  ['종목코드 [005940], 종목코드 123456, 2026-10-13 09:30', '종목코드 [005940], 종목코드 123456, 2026-10-13 09:30'],
+  ['RSI[146]', 'RSI[146]'],
+])('%s의 의미와 지표 인자를 유지한다', (input, expected) => {
+  expect(formatConditionDetail(input)).toBe(expected);
+  expect(formatConditionDetail(expected)).toBe(expected);
+});
+
+test('AI 상세값과 답변에 같은 금액 표기를 적용한다', () => {
+  const result = normalizeAiResult({matches: [{originalIndex: 0, detail: 'RSI[14,6] 거래대금 1000000원'}]}, [{type: '조건', path: '거래대금'}]);
+  expect(result.conditions[0].detail).toBe('RSI[14,6] 거래대금 1,000,000원');
+  const text = generateMent({selectedConditions: result.conditions});
+  expect(text).toContain('RSI[14,6] 거래대금 1,000,000원');
+});
+
+test('수동 수정 답변도 정리하되 빈 문자열은 유지한다', () => {
+  const condition = {type: '조건', path: '거래대금', detail: '5000원', comment: '1000000원'};
+  expect(generateMent({selectedConditions: [condition]})).toContain('1,000,000원');
+  condition.comment = '';
+  expect(generateMent({selectedConditions: [condition]})).not.toContain('5,000원');
+});
