@@ -48,7 +48,7 @@ export default function InboxAnalysisProgress({ progress, onTogglePaused, onRetr
                   : total > 0 ? <span>오래된 문의부터 한 건씩 처리합니다.</span> : null}
         {lastCompletedAt && <span className="inbox-analysis-last-completed">최근 저장 완료 {formatAnalysisTime(lastCompletedAt)}</span>}
       </div>
-      <p className="inbox-analysis-scope">완료는 공용 저장까지 끝난 건수입니다. 작업불가는 추천 조건 없음과 자동 분석 제외를 포함합니다. 재시도·저장 대기는 대기에 포함합니다. 화면에서는 한 건씩 분석합니다. 서버 예약 실행을 설정하면 웹을 닫아도 매일 밤 8시에 미분석 문의를 처리합니다.</p>
+      <p className="inbox-analysis-scope">완료는 공용 저장까지 끝난 건수입니다. 작업불가는 추천 조건 없음과 자동 분석 제외를 포함합니다. 재시도·저장 대기는 대기에 포함합니다. 화면에서는 한 건씩 분석합니다. 서버 예약 실행을 설정하면 웹을 닫아도 매일 오전 6시에 미분석 문의를 처리합니다.</p>
     </section>
   );
 }

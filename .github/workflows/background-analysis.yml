@@ -1,8 +1,8 @@
 name: Background inquiry analysis
 on:
   schedule:
-    # GitHub schedules use UTC: 11:00 UTC = 20:00 Asia/Seoul.
-    - cron: '0 11 * * *'
+    # GitHub schedules use UTC: 21:00 UTC = 06:00 Asia/Seoul (next day).
+    - cron: '0 21 * * *'
   workflow_dispatch:
 permissions:
   contents: read

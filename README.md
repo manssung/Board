@@ -35,12 +35,12 @@ AI 결과는 담당자가 검토하는 초안입니다. 고객 요구와 실제 
 | 실행 방식 | 동작 |
 | --- | --- |
 | 웹이 열려 있을 때 | 화면에서 미답변 문의 자동 분석을 진행합니다. |
-| 웹 접속 여부와 관계없이 | GitHub Actions가 매일 한국 시간 밤 8시를 기준으로 예약 실행합니다. |
+| 웹 접속 여부와 관계없이 | GitHub Actions가 매일 한국 시간 오전 6시를 기준으로 예약 실행합니다. |
 | 수동 점검 | GitHub Actions의 `Run workflow`로 예약 작업을 직접 실행할 수 있습니다. |
 
-예약 설정은 `.github/workflows/background-analysis.yml`의 `0 11 * * *`입니다. GitHub의 예약 시간대는 UTC이므로 한국 시간 20:00에 해당합니다. 예약 실행은 GitHub 상황에 따라 늦어질 수 있으며, workflow가 기본 브랜치에 있어야 합니다.
+예약 설정은 `.github/workflows/background-analysis.yml`의 `0 21 * * *`입니다. GitHub의 예약 시간대는 UTC이므로 한국 시간 다음 날 06:00에 해당합니다. 예약 실행은 GitHub 상황에 따라 늦어질 수 있으며, workflow가 기본 브랜치에 있어야 합니다.
 
-밤 8시 이후에 올라온 글은 **웹을 열면 화면 자동 분석에서 처리하고, 웹을 열지 않으면 다음 날 예약 작업에서 처리**합니다. 웹을 닫은 동안 계속 감시하는 구조는 아닙니다.
+오전 6시 이후에 올라온 글은 **웹을 열면 화면 자동 분석에서 처리하고, 웹을 열지 않으면 다음 날 예약 작업에서 처리**합니다. 웹을 닫은 동안 계속 감시하는 구조는 아닙니다.
 
 ### 현황판 상태
 
@@ -72,7 +72,7 @@ AI 결과는 담당자가 검토하는 초안입니다. 고객 요구와 실제 
 | 증권사 XML 조건 목록 | 화면 조건 검색과 서버 분석에 사용하는 조건 데이터 |
 | Vercel Serverless Functions | 게시판 조회, AI 추천, 분석 결과 저장 및 예약 요청 처리 |
 | Upstash Redis | 분석 결과 공유, 작업 잠금 및 처리 상태 보관 |
-| GitHub Actions | 매일 밤 8시 예약 실행 및 수동 실행 |
+| GitHub Actions | 매일 오전 6시 예약 실행 및 수동 실행 |
 | Vercel | 웹 서비스와 API 호스팅 |
 
 서버 분석용 조건 목록은 `prebuild`에서 XML을 읽어 생성합니다. 화면과 서버가 같은 원본 조건 데이터를 사용합니다.
@@ -112,7 +112,7 @@ npm start
 
 `npm start` 또는 `npm run dev:full`은 Vercel CLI를 통해 화면과 `/api`를 함께 실행합니다. 최초 실행 시 Vercel 로그인과 프로젝트 연결이 필요할 수 있습니다. 화면만 확인하려면 `npm run start:ui`를 사용합니다. 화면만 실행하면 로컬 서버 API는 함께 제공되지 않습니다.
 
-## 밤 8시 예약 작업 설정
+## 오전 6시 예약 작업 설정
 
 1. Vercel 프로젝트의 Root Directory를 `frontend`, Build Command를 `npm run build`로 설정합니다.
 2. Vercel의 Production 환경변수에 게시판·Gemini·Upstash 설정과 `CRON_SECRET`을 등록합니다. 환경변수를 추가하거나 변경하면 다시 배포하여 적용합니다.
