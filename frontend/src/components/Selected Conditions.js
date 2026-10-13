@@ -1,5 +1,5 @@
 import { formatConditionDetail } from '../util/formatConditionDetail';
-import React, { useEffect, useMemo, useRef, useState } from 'react'; // useRef를 import 합니다.
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'; // useRef를 import 합니다.
 import '../css/SelectedConditions.css';
 import { getConditionLabel } from '../util/conditionEditor';
 import WorkspaceEmptyState from './WorkspaceEmptyState';
@@ -168,6 +168,41 @@ const ConditionFormulaBar = ({ selectedConditions, onToggleOperator, isGrouping,
 const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange, onMove, onDuplicate, isEditing, onStartEditing }) => {
   const inputRef = useRef(null);
   const display = getConditionDisplay(cond);
+  const pendingSelectionRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const selection = pendingSelectionRef.current;
+    if (!selection || !inputRef.current) return;
+    inputRef.current.setSelectionRange(selection.start, selection.end, selection.direction);
+    pendingSelectionRef.current = null;
+  });
+
+  const handleDetailChange = (event) => {
+    const input = event.currentTarget;
+    const raw = input.value;
+    const formatted = formatConditionDetail(raw);
+    const mapPosition = (position) => {
+      if (raw === formatted) return position;
+      const prefix = raw.slice(0, position);
+      const length = prefix.replace(/,/g, '').length;
+      let cursor = 0, consumed = 0;
+      while (cursor < formatted.length && consumed < length) {
+        if (formatted[cursor] !== ',') consumed += 1;
+        cursor += 1;
+      }
+      // A comma typed between indicator arguments is part of the user's edit.
+      if (prefix.endsWith(',') || event.nativeEvent?.inputType === 'deleteContentForward') {
+        while (formatted[cursor] === ',') cursor += 1;
+      }
+      return cursor;
+    };
+    pendingSelectionRef.current = {
+      start: mapPosition(input.selectionStart ?? raw.length),
+      end: mapPosition(input.selectionEnd ?? raw.length),
+      direction: input.selectionDirection || 'none',
+    };
+    onCommentChange(index, formatted);
+  };
 
   useEffect(() => {
     if (!isEditing) return;
@@ -205,8 +240,8 @@ const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange,
       {isEditing && <input
           ref={inputRef}
           className="inline-condition-value"
-          value={cond.comment !== undefined ? cond.comment : cond.detail || ""}
-          onChange={(e) => onCommentChange(index, e.target.value)}
+          value={formatConditionDetail(cond.comment !== undefined ? cond.comment : cond.detail || "")}
+          onChange={handleDetailChange}
           onBlur={(e) => onCommentChange(index, formatConditionDetail(e.target.value))}
           placeholder="세부 설정값 입력"
         />}
