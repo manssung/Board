@@ -43,7 +43,7 @@ module.exports = async function handler(request, response) {
 
   try {
     const prompt = `${buildPrompt(customerQuery.trim(), conditionList, selectedBroker.trim())}${imagePart ? '\n\n# 첨부 이미지 안내\n첨부 이미지는 고객 문의를 파악하는 보조 자료입니다. 이미지에서 확인할 수 있는 내용만 참고하고, 목록에 없는 조건은 만들지 마세요.' : ''}`;
-    const geminiResponse = await withAiSlot(getRedis(), () => fetch(
+    const geminiResponse = await withAiSlot(getRedis(), () => { request.onProviderAttempt?.(); return fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL)}:generateContent`,
       {
         method: 'POST',
@@ -54,7 +54,7 @@ module.exports = async function handler(request, response) {
           generationConfig: { temperature: 0, responseMimeType: 'application/json', responseSchema },
         }),
       },
-    ));
+    ); }, {scheduledProbe: request.scheduledProbe === true});
 
     const payload = await geminiResponse.json().catch(() => ({}));
     if (!geminiResponse.ok) {

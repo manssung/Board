@@ -5,7 +5,7 @@ const { resultKey, stateKey, lockKey, claimAnalysis, storeAnalysis, releaseAnaly
 const SAVE_STATE = `if redis.call('GET', KEYS[1]) ~= ARGV[1] then return 0 end
 redis.call('SET', KEYS[2], ARGV[2], 'EX', 3024000)
 return 1`;
-async function processNext({ redis, rows, catalog, recommend, now = Date.now() }) {
+async function processNext({ redis, rows, catalog, recommend, now = Date.now(), retryProbe = false }) {
   const inquiries = rows.map(normalizeInquiry).filter(item => item.id && item.id !== 'undefined' && item.query.trim() && !item.hasImageAttachment && catalog[item.broker]?.length)
     .sort((a,b) => a.receivedAt.localeCompare(b.receivedAt) || a.id.localeCompare(b.id, undefined, {numeric:true}));
   if (!inquiries.length) return { status: 'no_work' };
@@ -17,8 +17,8 @@ async function processNext({ redis, rows, catalog, recommend, now = Date.now() }
     const cached = values[index*2];
     const state = values[index*2+1]?.fingerprint === fingerprint ? values[index*2+1] : null;
     if (cached?.fingerprint === fingerprint && cached.result) continue;
-    if (state?.permanent || state?.retryAt > now) { waiting = true; continue; }
-    const claim = await claimAnalysis(redis, inquiry.id, fingerprint);
+    if (state?.permanent || (!retryProbe && state?.retryAt > now)) { waiting = true; continue; }
+    const claim = await claimAnalysis(redis, inquiry.id, fingerprint, retryProbe);
     if (claim.status === 'ready') continue;
     if (!claim.claimToken) { waiting = true; continue; }
     let result = claim.pendingResult || state?.pendingResult;

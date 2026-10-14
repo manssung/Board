@@ -1,8 +1,8 @@
 name: Background inquiry analysis
 on:
   schedule:
-    # GitHub schedules use UTC: 21:00 UTC = 06:00 Asia/Seoul (next day).
-    - cron: '0 21 * * *'
+    # 06:00 KST with fallback runs at 06:20 and 06:40; quota probe is once per Korean day.
+    - cron: '0,20,40 21 * * *'
   workflow_dispatch:
 permissions:
   contents: read
@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Analyze up to 20 inquiries
+      - name: Analyze up to 30 inquiries
         working-directory: frontend
         env:
           SITE_URL: ${{ secrets.SITE_URL }}

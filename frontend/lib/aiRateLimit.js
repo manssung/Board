@@ -7,7 +7,8 @@ const KEY = 'qna-analysis:v1:ai-lock';
 const NEXT = 'qna-analysis:v1:ai-next';
 const ACQUIRE = `
 -- A shared daily budget covers browser, cron and direct questions atomically.
-if tonumber(redis.call('GET', KEYS[4]) or '0') >= tonumber(ARGV[4]) then
+local probe = ARGV[6] == '1' and redis.call('EXISTS', KEYS[5]) == 0
+if not probe and tonumber(redis.call('GET', KEYS[4]) or '0') >= tonumber(ARGV[4]) then
   return -math.max(1, tonumber(ARGV[5]) - tonumber(ARGV[2]))
 end
 if redis.call('EXISTS', KEYS[1]) == 1 then return 2000 end
@@ -17,20 +18,23 @@ if next > tonumber(ARGV[2]) + 60000 and redis.call('EXISTS', KEYS[3]) == 0 then
   next = tonumber(ARGV[2]) + 30000
   redis.call('SET', KEYS[2], next, 'PX', 90000)
 end
-if next > tonumber(ARGV[2]) then return next - tonumber(ARGV[2]) end
+if next > tonumber(ARGV[2]) and not probe then return next - tonumber(ARGV[2]) end
+if probe then redis.call('SET', KEYS[5], '1', 'EX', 172800) end
 redis.call('INCR', KEYS[4])
 redis.call('PEXPIRE', KEYS[4], math.max(1, tonumber(ARGV[5]) - tonumber(ARGV[2])))
 redis.call('SET', KEYS[1], ARGV[1], 'EX', 90)
 redis.call('SET', KEYS[2], tonumber(ARGV[2]) + tonumber(ARGV[3]), 'PX', 3600000)
 return 0`;
-async function withAiSlot(redis, run) {
+async function withAiSlot(redis, run, { scheduledProbe = false } = {}) {
   // API calls require the shared limiter; the local browser development path is separate.
   if (!redis) throw Object.assign(new Error('공용 분석 저장소가 연결되지 않았습니다.'), { status: 503 });
   const token = crypto.randomUUID();
   const now = Date.now();
   const window = getAiQuotaWindow(now);
   const budgetKey = 'qna-analysis:v1:ai-daily:' + (process.env.GEMINI_MODEL || 'gemini-2.5-flash') + ':' + window.day;
-  const delay = Number(await redis.eval(ACQUIRE, [KEY, NEXT, REASON, budgetKey], [token, now, Math.max(2000, Number(process.env.AI_REQUEST_INTERVAL_MS) || 3000), DAILY_AI_REQUEST_LIMIT, window.resetAt]));
+  const seoulDay = new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(now));
+  const probeKey = budgetKey.split(':ai-daily:')[0] + ':scheduled-probe:' + (process.env.GEMINI_MODEL || 'gemini-2.5-flash') + ':' + seoulDay;
+  const delay = Number(await redis.eval(ACQUIRE, [KEY, NEXT, REASON, budgetKey, probeKey], [token, now, Math.max(2000, Number(process.env.AI_REQUEST_INTERVAL_MS) || 3000), DAILY_AI_REQUEST_LIMIT, window.resetAt, scheduledProbe ? '1' : '0']));
   if (delay < 0) throw Object.assign(new Error('앱의 하루 AI 분석 시도 상한(30회)에 도달했습니다. 남은 문의는 한도 갱신 후 분석합니다.'), {status:429, isDailyLimit:true, limitSource:'application', quotaLimit:DAILY_AI_REQUEST_LIMIT, retryInSeconds:Math.ceil(-delay/1000)});
   if (delay > 0) {
     const saved = typeof redis.get === 'function' ? await redis.get(REASON) : null;

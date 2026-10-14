@@ -15,7 +15,7 @@ class MemoryRedis {
   this.calls.push({script,keys,args});
   if(script.includes('cjson.decode(cached)')){
    const cached=this.data.get(keys[0]);if(cached?.fingerprint===args[0])return ['ready',JSON.stringify(cached)];
-   const state=this.data.get(keys[2]);if(state?.fingerprint===args[0]&&(state.permanent||state.retryAt>args[2]))return ['deferred',JSON.stringify(state)];
+   const state=this.data.get(keys[2]);if(state?.fingerprint===args[0]&&(state.permanent||(state.retryAt>args[2]&&args[3]!=='1')))return ['deferred',JSON.stringify(state)];
    if(this.data.has(keys[1]))return ['analyzing',''];this.data.set(keys[1],args[1]);return ['claimed',args[1],state?.fingerprint===args[0] && state.pendingResult ? JSON.stringify(state.pendingResult) : ''];
   }
   if(script.includes("'SADD'")){
@@ -23,7 +23,7 @@ class MemoryRedis {
    if(this.data.get(keys[1])!==args[0])return 0;
    this.data.set(keys[0],JSON.parse(args[1]));this.data.delete(keys[1]);this.data.delete(keys[3]);return 1;
   }
-  if(script.includes('local next') && keys.length===4)return 0;
+  if(script.includes('local next') && keys.length===5)return 0;
   if(script.includes("'INCR'"))return 1;
   if(script.includes("'PX'"))return 0;
   if(script.includes('3024000')){
@@ -175,7 +175,7 @@ test('application contention retries promptly and provider timing is respected',
 test('legacy cooldown migration uses the same atomic acquire and metadata key', async () => {
  const {withAiSlot}=require('../lib/aiRateLimit');let inspected=false;
  const redis={eval:async(script,keys)=>{
-  if(script.includes('local next')){assert.equal(keys.length,4);assert.ok(script.includes("redis.call('EXISTS', KEYS[3]) == 0"));assert.ok(script.includes('next = tonumber(ARGV[2]) + 30000'));inspected=true;}
+  if(script.includes('local next')){assert.equal(keys.length,5);assert.ok(script.includes("redis.call('EXISTS', KEYS[3]) == 0"));assert.ok(script.includes('next = tonumber(ARGV[2]) + 30000'));inspected=true;}
   return 0;
  }};
  await withAiSlot(redis,async()=>({status:200}));assert.equal(inspected,true);
@@ -214,4 +214,36 @@ test('failed provider requests consume budget and contention never invokes provi
  const redis={eval:async(script)=>{if(script.includes('local next')){reserved++;return reserved<=30?0:-60000;}return 1;}};
  for(let i=0;i<30;i++)await assert.rejects(withAiSlot(redis,async()=>{calls++;throw new Error('Network failure');}),/Network failure/);
  await assert.rejects(withAiSlot(redis,async()=>{calls++;}),e=>e.isDailyLimit);assert.equal(calls,30);
+});
+
+test('scheduled probe retries deferred inquiry once and stops on provider quota',async()=>{
+ const redis=new MemoryRedis();const inquiry=normalizeInquiry(row(1));let calls=0;
+ redis.data.set(stateKey('1'),{fingerprint:inquiryFingerprint(inquiry),retryAt:Date.now()+3600000});
+ const options={redis,rows:[row(1)],catalog,recommend:async()=>{calls++;throw Object.assign(new Error('quota'),{status:429,retryInSeconds:60});}};
+ assert.equal((await processNext(options)).status,'waiting');assert.equal(calls,0);
+ assert.equal((await processNext({...options,retryProbe:true})).status,'quota_wait');assert.equal(calls,1);
+});
+test('scheduled probe never retries permanent failures or cached successes',async()=>{
+ const redis=new MemoryRedis();const inquiry=normalizeInquiry(row(1));let calls=0;
+ redis.data.set(stateKey('1'),{fingerprint:inquiryFingerprint(inquiry),permanent:true});
+ assert.equal((await processNext({redis,rows:[row(1)],catalog,retryProbe:true,recommend:async()=>{calls++;}})).status,'waiting');assert.equal(calls,0);
+});
+test('scheduler sends probe on first request only and logs quota stop',async()=>{
+ const logs=[];let calls=0;
+ await run({siteUrl:'https://example.com',secret:'test',sleep:async()=>{},log:value=>logs.push(value),fetchImpl:async(url,options)=>{
+  calls++;assert.equal(options.headers['x-scheduled-probe'],calls===1?'1':undefined);
+  return {ok:true,json:async()=>({status:calls===1?'stored':'quota_wait',apiAttempted:true})};
+ }});assert.equal(calls,2);assert.ok(logs.some(value=>value.includes('Scheduled analysis started')));assert.ok(logs.some(value=>value.includes('quota_wait')));
+});
+test('only one scheduled quota probe per Korean day can exceed local budget',async()=>{
+ const {withAiSlot}=require('../lib/aiRateLimit');const probes=new Set();let calls=0;
+ const redis={eval:async(script,keys,args)=>{
+  if(!script.includes('local next'))return 1;
+  const probe=args[5]==='1'&&!probes.has(keys[4]);
+  if(probe){assert.ok(script.includes("redis.call('SET', KEYS[5], '1'"));probes.add(keys[4]);return 0;}
+  return -60000;
+ }};
+ await withAiSlot(redis,async()=>{calls++;return {status:200};},{scheduledProbe:true});
+ await assert.rejects(withAiSlot(redis,async()=>{calls++;},{scheduledProbe:true}),e=>e.status===429);
+ await assert.rejects(withAiSlot(redis,async()=>{calls++;}),e=>e.status===429);assert.equal(calls,1);
 });

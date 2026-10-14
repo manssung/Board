@@ -14,7 +14,7 @@ local saved = redis.call('GET', KEYS[3])
 if saved then
   local state = cjson.decode(saved)
   if state.fingerprint == ARGV[1] then
-    if state.permanent or (state.retryAt or 0) > tonumber(ARGV[3]) then return {'deferred', saved} end
+    if state.permanent or ((state.retryAt or 0) > tonumber(ARGV[3]) and ARGV[4] ~= '1') then return {'deferred', saved} end
     if state.pendingResult then pending = cjson.encode(state.pendingResult) end
   end
 end
@@ -30,8 +30,8 @@ return 1`;
 const RELEASE = `
 if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) end
 return 0`;
-async function claimAnalysis(redis, id, fingerprint) {
-  const [status, value, pending] = await redis.eval(CLAIM, [resultKey(id), lockKey(id), stateKey(id)], [fingerprint, crypto.randomUUID(), Date.now()]);
+async function claimAnalysis(redis, id, fingerprint, retryProbe = false) {
+  const [status, value, pending] = await redis.eval(CLAIM, [resultKey(id), lockKey(id), stateKey(id)], [fingerprint, crypto.randomUUID(), Date.now(), retryProbe ? '1' : '0']);
   return status === 'ready' ? { status, result: (typeof value === 'string' ? JSON.parse(value) : value).result }
     : status === 'deferred' ? { status, ...(typeof value === 'string' ? JSON.parse(value) : value) } : status === 'claimed' ? { status, claimToken: value, ...(pending ? {pendingResult: typeof pending === 'string' ? JSON.parse(pending) : pending} : {}) } : { status };
 }

@@ -1,15 +1,17 @@
 // Runs in GitHub Actions. Only the endpoint URL and its authorization secret leave the runner.
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function run({ siteUrl, secret, fetchImpl = fetch, sleep = delay, max = 30 }) {
+async function run({ siteUrl, secret, fetchImpl = fetch, sleep = delay, max = 30, log = console.log }) {
   if (!siteUrl || !secret) throw new Error('SITE_URL and CRON_SECRET are required');
   const origin = new URL(siteUrl);
   if (origin.protocol !== 'https:') throw new Error('SITE_URL must use HTTPS');
   const endpoint = new URL('/api/background-analysis', origin);
   let stored = 0, deferred = 0;
+  log('Scheduled analysis started at ' + new Date().toISOString());
   for (let attempt = 0; attempt < max; attempt++) {
-    const response = await fetchImpl(endpoint, {method:'POST', headers:{Authorization:'Bearer '+secret}, redirect:'error', signal:AbortSignal.timeout(65000)});
+    const response = await fetchImpl(endpoint, {method:'POST', headers:{Authorization:'Bearer '+secret, ...(attempt === 0 ? {'x-scheduled-probe':'1'} : {})}, redirect:'error', signal:AbortSignal.timeout(65000)});
     if (!response.ok) throw new Error('Background endpoint failed ('+response.status+')');
     const data = await response.json();
+    log(JSON.stringify({attempt:attempt+1,status:data.status,apiAttempted:data.apiAttempted === true,retryInSeconds:data.retryInSeconds}));
     if (data.status === 'stored') stored++;
     else if (data.status === 'deferred') deferred++;
     else if (['no_work','waiting','quota_wait'].includes(data.status)) break;

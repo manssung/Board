@@ -22,15 +22,18 @@ module.exports = async function handler(req, res) {
     const rows = await upstream.json();
     if (!Array.isArray(rows)) throw new Error('Invalid response');
     const catalog = require('../lib/generated/brokerConditions.json');
+    const retryProbe = req.headers['x-scheduled-probe'] === '1';
+    let apiAttempted = false;
     const recommend = async (customerQuery, conditionList, selectedBroker) => {
       let status = 200, data;
-      await aiHandler({method:'POST', body:{customerQuery, conditionList, selectedBroker}}, {
+      await aiHandler({method:'POST', body:{customerQuery, conditionList, selectedBroker}, scheduledProbe:retryProbe, onProviderAttempt:()=>{apiAttempted=true;}}, {
         setHeader() {}, status(value) {status=value; return this;}, json(value) {data=value; return this;}
       });
       if (status !== 200) throw Object.assign(new Error('AI request failed'), {status, retryInSeconds:data?.retryInSeconds, isDailyLimit:data?.isDailyLimit});
       return data;
     };
-    return res.status(200).json(await processNext({redis, rows, catalog, recommend}));
+    const result = await processNext({redis, rows, catalog, recommend, retryProbe});
+    return res.status(200).json({...result, apiAttempted});
   } catch {
     return res.status(502).json({error:'Background analysis could not complete'});
   }
