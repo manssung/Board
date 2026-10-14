@@ -163,7 +163,7 @@ export function useInboxPreanalysis({ enabled, hasLoaded, inquiries, generateStr
             retryAfterRef.current.set(key, permanent ? Infinity : Date.now() + delay);
             if (error.status === 429) quotaRetryAtRef.current = Date.now() + delay;
             if (active) {
-              const reason = permanent ? '요청 또는 서버 설정 확인이 필요합니다.' : error.status === 429 ? '요청 한도에 도달해 잠시 대기합니다.'
+              const reason = permanent ? '요청 또는 서버 설정 확인이 필요합니다.' : error.status === 429 ? error.limitSource === 'application' ? '다른 분석을 기다리고 있습니다. 잠시 후 자동 재시도합니다.' : error.isDailyLimit ? 'AI 제공업체의 하루 할당량에 도달했습니다. 할당량 갱신 후 재시도합니다.' : 'AI 요청 제한으로 대기 중입니다. 잠시 후 자동 재시도합니다.'
                 : pendingResultsRef.current.has(key) ? '분석은 끝났지만 공용 저장소에 저장하지 못했습니다.'
                   : error.name === 'AbortError' ? '요청 시간이 초과되었습니다.' : '분석 요청에 실패했습니다.';
               setIssues((previous) => ({ ...previous, [key]: { reason, retryAt: permanent ? null : Date.now() + delay } }));

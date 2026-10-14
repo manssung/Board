@@ -108,6 +108,7 @@ export function useAiStrategyGenerator() {
         quotaError.retryInSeconds = quotaDetails.retryInSeconds;
         quotaError.quotaLimit = data.quotaLimit || quotaDetails.quotaLimit;
         quotaError.isDailyLimit = data.isDailyLimit || quotaDetails.isDailyLimit;
+        quotaError.limitSource = data.limitSource;
         throw quotaError;
       }
 

@@ -1,19 +1,12 @@
 const { buildPrompt, responseSchema } = require('../src/util/aiRecommendationRequest');
 const { getRedis } = require('../lib/upstashRedis');
 const { withAiSlot } = require('../lib/aiRateLimit');
+const { getQuotaDetails } = require('../lib/aiQuota');
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const MAX_IMAGE_BASE64_LENGTH = Math.ceil((2 * 1024 * 1024 * 4) / 3) + 1024;
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
-const getQuotaDetails = (message = '') => {
-  const retryInSeconds = Number(message.match(/retry in\s+([\d.]+)s/i)?.[1]);
-  const quotaLimit = Number(message.match(/limit:\s*(\d+)/i)?.[1]);
-  return {
-    retryInSeconds: Number.isFinite(retryInSeconds) ? retryInSeconds : undefined,
-    quotaLimit: Number.isFinite(quotaLimit) ? quotaLimit : undefined,
-    isDailyLimit: /per_day|daily|day_limit/i.test(message),
-  };
-};
+
 
 module.exports = async function handler(request, response) {
   if (request.method !== 'POST') {
@@ -65,9 +58,9 @@ module.exports = async function handler(request, response) {
     const payload = await geminiResponse.json().catch(() => ({}));
     if (!geminiResponse.ok) {
       const retryInSeconds = Number(payload?.error?.message?.match(/retry in\s+([\d.]+)s/i)?.[1]);
-      const quotaDetails = getQuotaDetails(payload?.error?.message || '');
+      const quotaDetails = getQuotaDetails(payload);
       return response.status(geminiResponse.status).json({
-        error: geminiResponse.status === 429 ? '요청이 잠시 많습니다. 잠시 후 다시 시도해 주세요.' : '조건 추천을 생성하지 못했습니다.',
+        error: geminiResponse.status === 429 ? quotaDetails.isDailyLimit ? 'AI 제공업체의 하루 할당량에 도달했습니다.' : 'AI 제공업체의 요청 제한으로 잠시 대기합니다.' : '조건 추천을 생성하지 못했습니다.',
         retryInSeconds: Number.isFinite(retryInSeconds) ? retryInSeconds : undefined,
         ...quotaDetails,
       });
@@ -83,6 +76,6 @@ module.exports = async function handler(request, response) {
     });
   } catch (error) {
     console.error('AI recommendation failed:', error.message);
-    return response.status(error.status || 502).json({ error: '조건 추천을 처리하는 중 오류가 발생했습니다.', retryInSeconds: error.retryInSeconds });
+    return response.status(error.status || 502).json({ error: error.status === 429 ? error.message : '조건 추천을 처리하는 중 오류가 발생했습니다.', retryInSeconds: error.retryInSeconds, isDailyLimit: error.isDailyLimit === true, limitSource: error.limitSource, quotaLimit: error.quotaLimit });
   }
 };

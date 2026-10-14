@@ -100,7 +100,7 @@ test('global AI limiter rejects concurrent callers and releases its slot after f
 });
 test('provider quota responses create a shared cooldown',async()=>{
  const {withAiSlot}=require('../lib/aiRateLimit');let cooldown;
- const redis={eval:async()=>0,set:async(key,value,options)=>{cooldown={value,options};}};
+ const redis={eval:async()=>0,set:async(key,value,options)=>{if(key.endsWith('ai-next'))cooldown={value,options};}};
  const response={status:429,clone:()=>({json:async()=>({error:{message:'retry in 60s'}})})};
  const now=Date.now();assert.equal(await withAiSlot(redis,async()=>response),response);
  assert.ok(cooldown.value>=now+60000);assert.equal(cooldown.options.px,120000);
@@ -144,4 +144,22 @@ test('authenticated background endpoint stores a result readable by the screen c
   names.forEach(name=>{if(originalEnv[name]===undefined)delete process.env[name];else process.env[name]=originalEnv[name];});
   modules.forEach(name=>delete require.cache[require.resolve(name)]);
  }
+});
+
+test('quota parser reads structured daily quota and RetryInfo', () => {
+ const {getQuotaDetails}=require('../lib/aiQuota');
+ const quota=getQuotaDetails({error:{message:'Quota exceeded',details:[{violations:[{quotaId:'GenerateRequestsPerDayPerProject',quotaValue:'20'}]},{retryDelay:'42s'}]}});
+ assert.equal(quota.isDailyLimit,true);assert.equal(quota.retryInSeconds,42);assert.equal(quota.quotaLimit,20);
+});
+test('unclassified provider 429 waits one minute rather than one hour', async () => {
+ const {withAiSlot}=require('../lib/aiRateLimit');const writes=[];
+ const redis={eval:async()=>0,set:async(...args)=>writes.push(args)};
+ await withAiSlot(redis,async()=>({status:429,clone:()=>({json:async()=>({error:{message:'Resource exhausted'}})})}));
+ assert.equal(writes[0][2].px,120000);assert.equal(writes[1][1].isDailyLimit,false);
+});
+test('shared cooldown preserves the provider daily classification', async () => {
+ const {withAiSlot}=require('../lib/aiRateLimit');let calls=0;
+ const redis={eval:async()=>60000,get:async()=>({limitSource:'provider',isDailyLimit:true,retryAt:Date.now()+60000})};
+ await assert.rejects(withAiSlot(redis,async()=>{calls++;}),error=>error.status===429&&error.isDailyLimit&&error.limitSource==='provider');
+ assert.equal(calls,0);
 });
