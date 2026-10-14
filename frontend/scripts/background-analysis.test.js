@@ -125,7 +125,12 @@ test('authenticated background endpoint stores a result readable by the screen c
   modules.forEach(name=>delete require.cache[require.resolve(name)]);
   global.fetch=async(url)=>{
    if(new URL(url).hostname==='board.example.test')return new Response(JSON.stringify([row(1)]),{status:200});
-   aiCalls++;return new Response(JSON.stringify({candidates:[{content:{parts:[{text:JSON.stringify(recommendation)}]}}]}),{status:200});
+   // This endpoint uses the real catalog; the fake model must preserve its template.
+   const candidates = require('../src/util/conditionCandidateFilter').getRecommendationCandidates(row(1).comment, require('../lib/generated/brokerConditions.json')['KB증권']);
+   const originalIndex = candidates.findIndex(item => item.path.includes('거래량') && item.detail);
+   const original = candidates[originalIndex];
+   const actualRecommendation = { ...recommendation, matches: [{ ...recommendation.matches[0], originalIndex, detail: original.detail }] };
+   aiCalls++;return new Response(JSON.stringify({candidates:[{content:{parts:[{text:JSON.stringify(actualRecommendation)}]}}]}),{status:200});
   };
   const background=require('../api/background-analysis');const cache=require('../api/analysis-cache');
   const request={method:'POST',headers:{authorization:'Bearer test-only-secret'}};

@@ -60,3 +60,19 @@ test('Delete로 천 단위 쉼표를 지운 뒤 다음 숫자를 편집할 수 �
   expect(input.value).toBe('거래대금 1,000원');
   expect(input.selectionStart).toBe('거래대금 1,'.length);
 });
+
+ test('숫자를 한 자리씩 입력해도 기존 쉼표를 다시 묶는다', async () => {
+  let input = await edit('');
+  for (const digit of '999999999') {
+    const cursor = input.selectionStart;
+    input = await edit(input.value.slice(0, cursor) + digit + input.value.slice(cursor), cursor + 1);
+  }
+  expect(input.value).toBe('999,999,999');
+  expect(input.selectionStart).toBe(input.value.length);
+});
+
+test('기존 금액 중간에 숫자를 추가해도 쉼표와 커서를 정리한다', async () => {
+  const input = await edit('거래대금 1,2345,567원', '거래대금 1,2345'.length);
+  expect(input.value).toBe('거래대금 12,345,567원');
+  expect(input.selectionStart).toBe('거래대금 12,345'.length);
+});

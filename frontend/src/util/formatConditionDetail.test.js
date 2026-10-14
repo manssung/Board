@@ -12,13 +12,16 @@ test.each([
   ['거래대금 1,000,000원', '거래대금 1,000,000원'],
   ['종목코드 [005940], 종목코드 123456, 2026-10-13 09:30', '종목코드 [005940], 종목코드 123456, 2026-10-13 09:30'],
   ['RSI[146]', 'RSI[146]'],
+  ['거래량 9,99999999주', '거래량 999,999,999주'],
+  ['금액 -1,0000.50원', '금액 -10,000.50원'],
+  ['1,2', '1,2'],
 ])('%s의 의미와 지표 인자를 유지한다', (input, expected) => {
   expect(formatConditionDetail(input)).toBe(expected);
   expect(formatConditionDetail(expected)).toBe(expected);
 });
 
 test('AI 상세값과 답변에 같은 금액 표기를 적용한다', () => {
-  const result = normalizeAiResult({matches: [{originalIndex: 0, detail: 'RSI[14,6] 거래대금 1000000원'}]}, [{type: '조건', path: '거래대금'}]);
+  const result = normalizeAiResult({matches: [{originalIndex: 0, detail: 'RSI[14,6] 거래대금 1000000원'}]}, [{type: '조건', path: '거래대금', detail: 'RSI[14,6] 거래대금 5000원'}]);
   expect(result.conditions[0].detail).toBe('RSI[14,6] 거래대금 1,000,000원');
   const text = generateMent({selectedConditions: result.conditions});
   expect(text).toContain('RSI[14,6] 거래대금 1,000,000원');

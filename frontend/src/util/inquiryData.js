@@ -13,7 +13,8 @@ function normalizeInquiry(row) {
   };
 }
 function inquiryFingerprint(inquiry = {}) {
-  const source = `${inquiry.id || ''}|${inquiry.broker || ''}|${inquiry.query || ''}`;
+  // Invalidate both browser and shared results made before template validation.
+  const source = `numeric-template-v2|${inquiry.id || ''}|${inquiry.broker || ''}|${inquiry.query || ''}`;
   let hash = 5381;
   for (let index = 0; index < source.length; index += 1) hash = ((hash << 5) + hash) ^ source.charCodeAt(index);
   return (hash >>> 0).toString(36);
