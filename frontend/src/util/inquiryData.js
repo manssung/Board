@@ -1,3 +1,4 @@
+const { getAiQuotaWindow } = require('./aiDailyBudget');
 const { decode } = require('html-entities');
 const BROKER_NAMES = { 신한: '신한증권', 카이로스: '미래에셋증권', '카이로스(W)': '미래에셋증권(해외)', NH: 'NH증권', 교보: '교보증권', KB: 'KB증권' };
 function decodeInquiryText(value) {
@@ -22,7 +23,9 @@ function inquiryFingerprint(inquiry = {}) {
 function retryPolicy(error, failures = 1) {
   const permanent = [400, 401, 403, 404, 422].includes(error.status);
   const delay = error.status === 429
-    ? error.isDailyLimit || !Number.isFinite(error.retryInSeconds) ? 3600000 : Math.max(30000, error.retryInSeconds * 1000)
+    ? error.isDailyLimit ? Math.max(1000, Number.isFinite(error.retryInSeconds) ? error.retryInSeconds * 1000 : getAiQuotaWindow().resetAt - Date.now())
+      : error.limitSource === 'application' ? Math.max(5000, Math.min(30000, (error.retryInSeconds || 5) * 1000))
+        : Math.max(30000, (Number.isFinite(error.retryInSeconds) ? error.retryInSeconds : 60) * 1000)
     : Math.min(900000, 30000 * 2 ** Math.min(5, Math.max(0, failures - 1)));
   return { permanent, delay };
 }

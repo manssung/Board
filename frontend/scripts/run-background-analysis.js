@@ -1,6 +1,6 @@
 // Runs in GitHub Actions. Only the endpoint URL and its authorization secret leave the runner.
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function run({ siteUrl, secret, fetchImpl = fetch, sleep = delay, max = 40 }) {
+async function run({ siteUrl, secret, fetchImpl = fetch, sleep = delay, max = 30 }) {
   if (!siteUrl || !secret) throw new Error('SITE_URL and CRON_SECRET are required');
   const origin = new URL(siteUrl);
   if (origin.protocol !== 'https:') throw new Error('SITE_URL must use HTTPS');

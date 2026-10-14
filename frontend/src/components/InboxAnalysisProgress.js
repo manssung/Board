@@ -39,6 +39,7 @@ export default function InboxAnalysisProgress({ progress, onTogglePaused, onRetr
             <span>확인 {processed}/{total}건 · {percent}%</span>
           </div>
       </>
+      <p className="inbox-analysis-note">무료 AI: 하루 최대 20회 요청(자동 분석·직접 질문·재시도 합산). 한도에 도달하면 남은 문의는 갱신 후 처리합니다.</p>
       <div className="inbox-analysis-note" aria-live="polite">
         {paused ? <span>이 화면의 진행 중인 요청은 마무리한 뒤 멈춥니다. 서버 예약 분석은 별도로 실행됩니다.</span>
           : quotaBlocked ? <span>{formatAnalysisTime(quotaWait.retryAt)} 이후 자동으로 다시 시도합니다.</span>

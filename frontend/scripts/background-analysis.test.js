@@ -23,6 +23,7 @@ class MemoryRedis {
    if(this.data.get(keys[1])!==args[0])return 0;
    this.data.set(keys[0],JSON.parse(args[1]));this.data.delete(keys[1]);this.data.delete(keys[3]);return 1;
   }
+  if(script.includes('local next') && keys.length===4)return 0;
   if(script.includes("'INCR'"))return 1;
   if(script.includes("'PX'"))return 0;
   if(script.includes('3024000')){
@@ -75,9 +76,9 @@ test('expired owners cannot store or release a replacement lease; storage is one
 test('server and browser normalization produces the same HTML decoded fingerprint',()=>{
  const inquiry=normalizeInquiry({...row(1),comment:'거래량 &gt; 10000 &shy;'});assert.equal(inquiry.query,'거래량 > 10000 ');assert.equal(inquiryFingerprint(inquiry),inquiryFingerprint({...inquiry}));
 });
-test('scheduler caps at 40 calls and terminates on quota wait',async()=>{
+test('scheduler caps at 30 calls and terminates on quota wait',async()=>{
  let calls=0;const response=status=>({ok:true,json:async()=>({status})});
- await run({siteUrl:'https://example.com',secret:'test',fetchImpl:async(url,options)=>{assert.equal(options.redirect,'error');calls++;return response('stored');},sleep:async()=>{}});assert.equal(calls,40);
+ await run({siteUrl:'https://example.com',secret:'test',fetchImpl:async(url,options)=>{assert.equal(options.redirect,'error');calls++;return response('stored');},sleep:async()=>{}});assert.equal(calls,30);
  calls=0;await run({siteUrl:'https://example.com',secret:'test',fetchImpl:async()=>{calls++;return response('quota_wait');},sleep:async()=>{}});assert.equal(calls,1);
 });
 test('server endpoint rejects missing and Unicode invalid authorization before fetch',async()=>{
@@ -162,4 +163,55 @@ test('shared cooldown preserves the provider daily classification', async () => 
  const redis={eval:async()=>60000,get:async()=>({limitSource:'provider',isDailyLimit:true,retryAt:Date.now()+60000})};
  await assert.rejects(withAiSlot(redis,async()=>{calls++;}),error=>error.status===429&&error.isDailyLimit&&error.limitSource==='provider');
  assert.equal(calls,0);
+});
+
+test('application contention retries promptly and provider timing is respected', () => {
+ assert.equal(retryPolicy({status:429,limitSource:'application',retryInSeconds:2}).delay,5000);
+ assert.equal(retryPolicy({status:429,limitSource:'application',retryInSeconds:2367}).delay,30000);
+ assert.equal(retryPolicy({status:429,limitSource:'provider',retryInSeconds:120}).delay,120000);
+ assert.equal(retryPolicy({status:429,isDailyLimit:true,retryInSeconds:5}).delay,5000);
+ assert.equal(retryPolicy({status:429}).delay,60000);
+});
+test('legacy cooldown migration uses the same atomic acquire and metadata key', async () => {
+ const {withAiSlot}=require('../lib/aiRateLimit');let inspected=false;
+ const redis={eval:async(script,keys)=>{
+  if(script.includes('local next')){assert.equal(keys.length,4);assert.ok(script.includes("redis.call('EXISTS', KEYS[3]) == 0"));assert.ok(script.includes('next = tonumber(ARGV[2]) + 30000'));inspected=true;}
+  return 0;
+ }};
+ await withAiSlot(redis,async()=>({status:200}));assert.equal(inspected,true);
+});
+
+test('shared daily request budget blocks request 31 across workers and resets in Pacific time', async () => {
+ const {withAiSlot}=require('../lib/aiRateLimit');const {getAiQuotaWindow}=require('../src/util/aiDailyBudget');
+ const counts=new Map();let calls=0;const originalNow=Date.now;let now=Date.parse('2026-10-14T00:00:00Z');Date.now=()=>now;
+ const redis={eval:async(script,keys,args)=>{
+  if(script.includes('local next')){
+   assert.ok(script.includes("redis.call('INCR', KEYS[4])"));
+   const count=counts.get(keys[3])||0;
+   if(count>=args[3])return -(args[4]-args[1]);counts.set(keys[3],count+1);return 0;
+  }return 1;
+ }};
+ try {
+  for(let i=0;i<30;i++)await withAiSlot(redis,async()=>{calls++;return {status:200};});
+  await assert.rejects(withAiSlot(redis,async()=>{calls++;return {status:200};}),e=>e.status===429&&e.isDailyLimit&&e.quotaLimit===30&&e.retryInSeconds===25200);
+  assert.equal(calls,30);now=getAiQuotaWindow(now).resetAt;
+  await withAiSlot(redis,async()=>{calls++;return {status:200};});assert.equal(calls,31);
+ } finally {Date.now=originalNow;}
+});
+test('Pacific quota reset handles winter and DST transition dates',()=>{
+ const {getAiQuotaWindow}=require('../src/util/aiDailyBudget');
+ for(const [input,day,reset] of [
+ ['2026-10-14T00:00:00Z','2026-10-13','2026-10-14T07:00:00Z'],
+ ['2026-12-14T00:00:00Z','2026-12-13','2026-12-14T08:00:00Z'],
+ ['2026-03-08T07:59:59Z','2026-03-07','2026-03-08T08:00:00Z'],
+ ['2026-03-08T10:00:00Z','2026-03-08','2026-03-09T07:00:00Z'],
+ ['2026-11-01T08:59:59Z','2026-11-01','2026-11-02T08:00:00Z']]){
+ const result=getAiQuotaWindow(Date.parse(input));assert.equal(result.day,day);assert.equal(result.resetAt,Date.parse(reset));
+ }
+});
+test('failed provider requests consume budget and contention never invokes provider',async()=>{
+ const {withAiSlot}=require('../lib/aiRateLimit');let reserved=0,calls=0;
+ const redis={eval:async(script)=>{if(script.includes('local next')){reserved++;return reserved<=30?0:-60000;}return 1;}};
+ for(let i=0;i<30;i++)await assert.rejects(withAiSlot(redis,async()=>{calls++;throw new Error('Network failure');}),/Network failure/);
+ await assert.rejects(withAiSlot(redis,async()=>{calls++;}),e=>e.isDailyLimit);assert.equal(calls,30);
 });

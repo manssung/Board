@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Analyze up to 40 inquiries
+      - name: Analyze up to 20 inquiries
         working-directory: frontend
         env:
           SITE_URL: ${{ secrets.SITE_URL }}

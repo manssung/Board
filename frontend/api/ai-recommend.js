@@ -2,6 +2,7 @@ const { buildPrompt, responseSchema } = require('../src/util/aiRecommendationReq
 const { getRedis } = require('../lib/upstashRedis');
 const { withAiSlot } = require('../lib/aiRateLimit');
 const { getQuotaDetails } = require('../lib/aiQuota');
+const { getAiQuotaWindow } = require('../src/util/aiDailyBudget');
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const MAX_IMAGE_BASE64_LENGTH = Math.ceil((2 * 1024 * 1024 * 4) / 3) + 1024;
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
@@ -59,6 +60,7 @@ module.exports = async function handler(request, response) {
     if (!geminiResponse.ok) {
       const retryInSeconds = Number(payload?.error?.message?.match(/retry in\s+([\d.]+)s/i)?.[1]);
       const quotaDetails = getQuotaDetails(payload);
+      if (quotaDetails.isDailyLimit) quotaDetails.retryInSeconds = Math.ceil((getAiQuotaWindow().resetAt - Date.now()) / 1000);
       return response.status(geminiResponse.status).json({
         error: geminiResponse.status === 429 ? quotaDetails.isDailyLimit ? 'AI 제공업체의 하루 할당량에 도달했습니다.' : 'AI 제공업체의 요청 제한으로 잠시 대기합니다.' : '조건 추천을 생성하지 못했습니다.',
         retryInSeconds: Number.isFinite(retryInSeconds) ? retryInSeconds : undefined,
