@@ -225,7 +225,7 @@ const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange,
         </span>
         {!isEditing && <span className="compact-condition-value">{formatConditionDetail(cond.comment !== undefined ? cond.comment : cond.detail || '세부값 없음')}</span>}
       </button>
-      {process.env.NODE_ENV === 'development' && (['tradeAmount','settings'].includes(cond.inputSchema?.kind)) && <button type="button" className="settings-open-button" onClick={() => setSettingsOpen(current => !current)}>상세 설정</button>}
+      {(['tradeAmount','settings'].includes(cond.inputSchema?.kind)) && <button type="button" className="settings-open-button" onClick={() => setSettingsOpen(current => !current)}>상세 설정</button>}
       <div className="inline-condition-actions">
         <button
           className="move-button"
@@ -243,8 +243,8 @@ const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange,
         <button type="button" className="duplicate-button" onClick={() => onDuplicate(index)} title="이 조건을 맨 아래에 복사">복사</button>
       </div>
       {settingsOpen && <div className="inline-settings-slot"><ConditionSettingsPanel condition={cond} onApply={detail => { onCommentChange(index, detail); setSettingsOpen(false); }} onCancel={() => setSettingsOpen(false)} /></div>}
-      {isEditing && !settingsOpen && process.env.NODE_ENV === 'development' && cond.inputSchema?.kind === 'inline' && <KBTemplateSettings compact condition={cond} onApply={detail => onCommentChange(index, detail)} />}
-      {isEditing && !settingsOpen && !(process.env.NODE_ENV === 'development' && cond.inputSchema?.kind === 'inline') && <input
+      {isEditing && !settingsOpen && cond.inputSchema?.kind === 'inline' && <KBTemplateSettings compact condition={cond} onApply={detail => onCommentChange(index, detail)} />}
+      {isEditing && !settingsOpen && !(cond.inputSchema?.kind === 'inline') && <input
           ref={inputRef}
           className="inline-condition-value"
           value={formatConditionDetail(cond.comment !== undefined ? cond.comment : cond.detail || "")}

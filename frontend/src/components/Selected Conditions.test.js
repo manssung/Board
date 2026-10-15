@@ -81,3 +81,8 @@ test('이동평균 인자를 직접 수정해도 금액처럼 합치지 않는�
   const input=await edit('종가 기준 5,20,60 단순 이평이 정배열');
   expect(input.value).toBe('종가 기준 5,20,60 단순 이평이 정배열');
 });
+
+test('개발 환경이 아니어도 지원 조건의 상세설정 버튼을 제공한다',async()=>{
+ await act(async()=>root.render(<SelectedConditions selectedConditions={[{broker:'NH증권',path:'이동평균 배열',detail:'종가 기준 5,20,60 단순 이평이 정배열',inputSchema:{kind:'settings'}}]} onCommentChange={()=>{}}/>));
+ expect([...container.querySelectorAll('button')].some(button=>button.textContent==='상세 설정')).toBe(true);
+});
