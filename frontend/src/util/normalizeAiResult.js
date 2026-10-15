@@ -15,7 +15,9 @@ function normalizeAiResult(data, conditionList) {
       !seenIndex.has(matchedIndex)
     ) {
       const source = conditionList[matchedIndex];
-      const detail = applyTemplate(source.detail, result);
+      let detail = applyTemplate(source.detail, result);
+      const retainDraft = detail === null && result.requiresConfirmation === true && result.confidence !== 'low' && source.detail && !/\([A-Z][A-Z0-9_]*\)/.test(source.detail);
+      if (retainDraft) detail = source.detail;
       if (detail === null || result.confidence === 'low') {
         rejected = true;
         return;
@@ -30,7 +32,7 @@ function normalizeAiResult(data, conditionList) {
           : 'medium',
         nextOperator: result.nextOperator === 'or' ? 'or' : 'and',
         requiresConfirmation: result.requiresConfirmation === true,
-        confirmationNote: typeof result.confirmationNote === 'string' ? result.confirmationNote.trim() : '',
+        confirmationNote: result.requiresConfirmation === true ? [typeof result.confirmationNote === 'string' ? result.confirmationNote.trim() : '', retainDraft ? '요청 설정을 확정하지 못해 원본 기본값을 유지했습니다.' : ''].filter(Boolean).join(' ') || '요청 수치와 비교 방식을 확인해 주세요.' : '',
       });
     } else { rejected = true; }
   });
@@ -44,10 +46,10 @@ function normalizeAiResult(data, conditionList) {
     : [];
 
   // Partial removal can change AND/OR semantics: require rechecking the whole strategy.
-  if (rejected || matchedItems.length === 0) {
+  if (rejected || matchedItems.length === 0 || matchedItems.some(item=>item.requiresConfirmation)) {
     coverage.forEach((item) => {
       item.status = 'needs_confirmation';
-      item.reason = '원본 입력 형식 또는 조건 관련성을 확인해야 합니다. ' + item.reason;
+      item.reason = '추천 조건의 수치·비교 방식 또는 요청 반영 여부를 확인해야 합니다. ' + item.reason;
     });
   }
   if (rejected && coverage.length === 0) coverage.push({ request: '추천 조건 검증', status: 'needs_confirmation', reason: '원본 입력 형식과 맞지 않거나 근거가 부족한 조건이 있어 재확인이 필요합니다.' });

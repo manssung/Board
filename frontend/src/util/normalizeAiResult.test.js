@@ -51,3 +51,21 @@ test('이동평균 기간과 금액 슬롯을 함께 바꿔도 구분자를 보�
  const result=normalizeAiResult({matches:[{originalIndex:0,detail:'이평 5,20,60 거래대금 1,000,000원',numericValues:['5','20','60','1000000']}]},[{detail:'이평 5,20,60 거래대금 5,000원'}]);
  expect(result.conditions[0].detail).toBe('이평 5,20,60 거래대금 1,000,000원');
 });
+
+test('조건 선택을 우선해 KB의 설정 미확정 조건도 확인 필요로 유지한다',()=>{
+ const conditions=[{path:'등락율 범위',detail:'1봉전 종가 대비 0봉전 종가 5% 이상'},{path:'거래대금 범위',detail:'거래대금이 10,000백만원'},{path:'시가총액',detail:'50억원 이상'}];
+ const result=normalizeAiResult({matches:[
+ {originalIndex:0,detail:'1봉전 종가 대비 0봉전 종가 10% 이상',numericValues:['1','0','10'],confidence:'high'},
+ {originalIndex:1,detail:'거래대금이 100,000백만원 이상',confidence:'medium',requiresConfirmation:true,confirmationNote:'요청은 거래대금 1천억원 이상. 이상 선택 확인 필요'},
+ {originalIndex:2,detail:'50,000억원 이하',confidence:'medium',requiresConfirmation:true,confirmationNote:'요청은 시가총액 5조원 이하. 비교 방향 확인 필요'}
+ ],coverage:[{request:'거래대금 1천억 이상',status:'covered'}]},conditions);
+ expect(result.conditions).toHaveLength(3);expect(result.conditions[0].detail).toContain('10% 이상');
+ expect(result.conditions[1].detail).toBe('거래대금이 10,000백만원');expect(result.conditions[2].detail).toBe('50억원 이상');
+ expect(result.conditions[1].requiresConfirmation).toBe(true);expect(result.conditions[2].confirmationNote).toContain('5조원 이하');expect(result.coverage[0].status).toBe('needs_confirmation');
+});
+test('프롬프트는 수치 미확정을 조건 누락으로 처리하지 않는다',()=>{
+ const prompt=buildPrompt('거래대금 1천억 이상, 시가총액 5조 이하',source,'KB증권');
+ expect(prompt).toContain('추천할 조건 종류를 찾는 것을 수치 설정 확정보다 우선');
+ expect(prompt).not.toContain('그 조건은 matches에 넣지 마세요');
+ expect(prompt).not.toContain('필수 수치나 범위 경계가 빠져 구현을 확정할 수 없으면 matches에서 제외');
+});
