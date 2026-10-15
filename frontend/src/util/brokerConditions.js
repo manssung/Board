@@ -1,5 +1,6 @@
 import { formatConditionDetail } from './formatConditionDetail';
 import brokerMap from '../data/brokerMap.js';
+import { createConditionSchemaRegistry } from './conditionInputSchema';
 
 // XML 파싱 함수
 const parseXml = (xmlString) => {
@@ -203,6 +204,7 @@ export function loadBrokerConditions(broker) {
 }
 
 async function parseBrokerConditions(selectedBroker) {
+      const schemaRegistry = createConditionSchemaRegistry(selectedBroker);
       const fileInfo = brokerMap[selectedBroker];
       if (!fileInfo) {
         throw new Error('지원하지 않는 증권사입니다.');
@@ -227,6 +229,7 @@ async function parseBrokerConditions(selectedBroker) {
                 const mapUrl = mapUrls[i];
                 const mapXml = parseXml(xmlString);
                 if (!mapXml) continue;
+                schemaRegistry.add(mapUrl, mapXml);
 
                 // ✨ [핵심] URL에서 파일키를 추출 (예: '.../mapc2_1-19.xml' → 'C2_1-19')
                 // treecommon 쪽 조건 노드의 FILE_NAME 속성과 1:1 대응시키기 위함.
@@ -351,7 +354,8 @@ async function parseBrokerConditions(selectedBroker) {
                                 type: type, 
                                 path: path, 
                                 detail: detail,
-                                broker: selectedBroker 
+                                broker: selectedBroker,
+                                inputSchema: schemaRegistry.resolve(conditionNode, findFileNameAttr(conditionNode)),
                             });
                         }
                     });
@@ -370,7 +374,8 @@ async function parseBrokerConditions(selectedBroker) {
 
             const treecommonXml = parseXml(xmlStrings[0]);
             const mapXmls = xmlStrings.slice(1).map(s => parseXml(s));
-            const exactDetailMap = buildDetailMap(mapUrls, mapXmls);
+            const exactDetailMap = buildDetailMap(mapUrls, mapXmls, selectedBroker);
+            mapXmls.forEach((xml, index) => schemaRegistry.add(mapUrls[index], xml));
             
             // 💡 [핵심 2] Map(사물함) 만들어서 정규화된 이름으로 데이터 쟁여두기!
             const detailMap = new Map();
@@ -421,6 +426,7 @@ async function parseBrokerConditions(selectedBroker) {
                                 path: path, // 💡 원래 path 대신 잘려나간 finalPath
                                 detail: detail,
                                 broker: selectedBroker,
+                                inputSchema: schemaRegistry.resolve(conditionNode, findFileNameAttr(conditionNode)),
                             });
                         }
                     });
@@ -438,7 +444,8 @@ async function parseBrokerConditions(selectedBroker) {
 
             const treecommonXml = parseXml(xmlStrings[0]);
             const mapXmls = xmlStrings.slice(1).map(s => parseXml(s));
-            const exactDetailMap = buildDetailMap(mapUrls, mapXmls);
+            const exactDetailMap = buildDetailMap(mapUrls, mapXmls, selectedBroker);
+            mapXmls.forEach((xml, index) => schemaRegistry.add(mapUrls[index], xml));
             
             // 💡 [핵심 2] Map(사물함) 만들어서 정규화된 이름으로 데이터 쟁여두기!
             const detailMap = new Map();
@@ -489,6 +496,7 @@ async function parseBrokerConditions(selectedBroker) {
                                 path: path,
                                 detail: detail,
                                 broker: selectedBroker,
+                                inputSchema: schemaRegistry.resolve(conditionNode, findFileNameAttr(conditionNode)),
                             });
                         }
                     });

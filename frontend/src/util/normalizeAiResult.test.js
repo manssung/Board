@@ -40,3 +40,14 @@ test('프롬프트와 응답 스키마가 숫자 슬롯 및 보수적인 선택�
   expect(prompt).toContain('low 후보는 반환하지 마세요');
   expect(responseSchema.properties.matches.items.required).toContain('numericValues');
 });
+
+test('괄호 밖 이동평균 기간도 각각의 AI 숫자 슬롯으로 유지한다', () => {
+ const original=[{path:'이동평균 배열',detail:'종가 기준 5,20,60 단순 이평이 정배열'}];
+ const result=normalizeAiResult({matches:[{originalIndex:0,detail:'종가 기준 10,30,120 단순 이평이 정배열',numericValues:['10','30','120']}]},original);
+ expect(result.conditions[0].detail).toBe('종가 기준 10,30,120 단순 이평이 정배열');
+ expect(buildPrompt('이평 배열',original,'신한증권')).toContain('기본 숫자 슬롯:["5","20","60"]');
+});
+test('이동평균 기간과 금액 슬롯을 함께 바꿔도 구분자를 보존한다', () => {
+ const result=normalizeAiResult({matches:[{originalIndex:0,detail:'이평 5,20,60 거래대금 1,000,000원',numericValues:['5','20','60','1000000']}]},[{detail:'이평 5,20,60 거래대금 5,000원'}]);
+ expect(result.conditions[0].detail).toBe('이평 5,20,60 거래대금 1,000,000원');
+});

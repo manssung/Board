@@ -74,3 +74,18 @@ test('실제 KB XML의 RSI 기간과 Signal 기간을 쉼표로 구분한다', a
   expect(rsi.length).toBeGreaterThan(0);
   expect(rsi.some(item => /RSI\[14,9\]/.test(item.detail))).toBe(true);
 });
+
+test.each(Object.keys(brokerMap))('%s 전체 항목에 입력 구조와 출처를 분류한다', async (broker) => {
+ const {buildKBDetail,readKBValues}=require('./kbConditionSettings');
+ const conditions=await loadBrokerConditions(broker);
+ expect(conditions.every(c=>['inline','settings','tradeAmount','review'].includes(c.inputSchema?.kind))).toBe(true);
+ for(const condition of conditions.filter(c=>['inline','settings'].includes(c.inputSchema.kind))) {
+  const schema=condition.inputSchema;
+  const values=Object.fromEntries(schema.fields.map(f=>[f.packet,f.defaultValue|| (f.type==='number'?'0':f.options[0].value)]));
+  const result=buildKBDetail(schema,values);
+  if(result.error)continue;
+  expect(result.detail).not.toMatch(/\([A-Z][A-Z0-9_]*\)/);
+  expect(readKBValues(schema,result.detail)).not.toBeNull();
+ }
+ expect(conditions.every(c=>c.inputSchema.source.broker===broker)).toBe(true);
+});

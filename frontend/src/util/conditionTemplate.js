@@ -1,11 +1,7 @@
+const { normalizeQuantitySeparators } = require('./formatConditionDetail');
 // Commas inside indicator brackets separate parameters, not thousands.
 function splitTemplate(detail) {
-  let inBracket = false;
-  const text = String(detail || '').split('').map((char, index, chars) => {
-    if (char === '[') inBracket = true;
-    if (char === ']') inBracket = false;
-    return char === ',' && !inBracket && /\d/.test(chars[index - 1] || '') && /\d/.test(chars[index + 1] || '') ? '' : char;
-  }).join('');
+  const text = normalizeQuantitySeparators(detail);
   const pattern = /[+-]?\d+(?:\.\d+)?/g;
   return { parts: text.split(pattern), values: text.match(pattern) || [] };
 }

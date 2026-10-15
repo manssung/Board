@@ -1,4 +1,4 @@
-import { formatConditionDetail } from './formatConditionDetail';
+
 // Same-indicator spellings only. Do not expand to related trading concepts.
 export const CONDITION_ALIASES = [
   ['이동평균', '이평선', '이평'],
@@ -13,7 +13,8 @@ export const CONDITION_ALIASES = [
   ['envelope', '엔벨로프'],
 ];
 
-const normalize = (value) => formatConditionDetail(value).toLowerCase().replace(/\s+/g, '');
+// Search normalization is separate from display formatting; bare amount queries have no unit.
+const normalize = (value) => String(value ?? '').toLowerCase().replace(/\b\d{1,3}(?:,\d{3})+(?![\d,])/g, number => number.replace(/,/g, '')).replace(/\s+/g, '');
 
 export function searchConditions(conditions = [], query = '') {
   const needle = normalize(query);

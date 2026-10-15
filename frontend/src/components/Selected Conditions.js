@@ -2,6 +2,9 @@ import { formatConditionDetail } from '../util/formatConditionDetail';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'; // useRef를 import 합니다.
 import '../css/SelectedConditions.css';
 import { getConditionLabel } from '../util/conditionEditor';
+import ConditionSettingsPanel from './ConditionSettingsPanel';
+import KBTemplateSettings from './KBTemplateSettings';
+
 import WorkspaceEmptyState from './WorkspaceEmptyState';
 import SourceInquiry from './SourceInquiry';
 import StrategyQualityPanel from './StrategyQualityPanel';
@@ -166,6 +169,7 @@ const ConditionFormulaBar = ({ selectedConditions, onToggleOperator, isGrouping,
 
 // --- ✨ 각 아이템을 렌더링하는 별도의 컴포넌트 ---
 const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange, onMove, onDuplicate, isEditing, onStartEditing }) => {
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const inputRef = useRef(null);
   const display = getConditionDisplay(cond);
   const pendingSelectionRef = useRef(null);
@@ -221,6 +225,7 @@ const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange,
         </span>
         {!isEditing && <span className="compact-condition-value">{formatConditionDetail(cond.comment !== undefined ? cond.comment : cond.detail || '세부값 없음')}</span>}
       </button>
+      {process.env.NODE_ENV === 'development' && (['tradeAmount','settings'].includes(cond.inputSchema?.kind)) && <button type="button" className="settings-open-button" onClick={() => setSettingsOpen(current => !current)}>상세 설정</button>}
       <div className="inline-condition-actions">
         <button
           className="move-button"
@@ -237,7 +242,9 @@ const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange,
         <button className="delete-button" onClick={() => onRemove(index)} title="삭제">&times;</button>
         <button type="button" className="duplicate-button" onClick={() => onDuplicate(index)} title="이 조건을 맨 아래에 복사">복사</button>
       </div>
-      {isEditing && <input
+      {settingsOpen && <div className="inline-settings-slot"><ConditionSettingsPanel condition={cond} onApply={detail => { onCommentChange(index, detail); setSettingsOpen(false); }} onCancel={() => setSettingsOpen(false)} /></div>}
+      {isEditing && !settingsOpen && process.env.NODE_ENV === 'development' && cond.inputSchema?.kind === 'inline' && <KBTemplateSettings compact condition={cond} onApply={detail => onCommentChange(index, detail)} />}
+      {isEditing && !settingsOpen && !(process.env.NODE_ENV === 'development' && cond.inputSchema?.kind === 'inline') && <input
           ref={inputRef}
           className="inline-condition-value"
           value={formatConditionDetail(cond.comment !== undefined ? cond.comment : cond.detail || "")}

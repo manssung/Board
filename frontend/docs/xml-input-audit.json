@@ -1,0 +1,614 @@
+{
+  "createdAt": "2026-10-15T00:24:06.900Z",
+  "method": "Map templates are assessed with the current conservative KB interpreter. Name-based catalog projections are estimates, not verified HTS compatibility.",
+  "brokers": [
+    {
+      "broker": "신한증권",
+      "files": 7,
+      "catalogConditions": 927,
+      "templates": 938,
+      "types": {
+        "DivideLine": 939,
+        "Static": 5585,
+        "ComboBox": 1807,
+        "Radio": 534,
+        "Edit": 4734,
+        "Calendar": 11,
+        "Check": 19
+      },
+      "rawClasses": {
+        "settings": 551,
+        "review": 358,
+        "inline": 29
+      },
+      "reasons": {
+        "입력 항목의 선택지 또는 중복 정의가 불명확합니다.": 9,
+        "라디오별 입력칸 활성화 규칙 확인이 필요합니다.": 90,
+        "선택지별 문장과 입력칸 연결을 추가 확인해야 합니다.": 164,
+        "체크 항목의 독립 선택 규칙 확인이 필요합니다.": 3,
+        "입력 항목의 원본 연결을 확인해야 합니다.": 4,
+        "수정할 입력 항목이 없는 고정 문장입니다.": 88
+      },
+      "examples": {
+        "입력 항목의 선택지 또는 중복 정의가 불명확합니다.": {
+          "file": "/shin_xml/mapa-b.xml",
+          "tag": "A2",
+          "name": "코스닥"
+        },
+        "라디오별 입력칸 활성화 규칙 확인이 필요합니다.": {
+          "file": "/shin_xml/mapa-b.xml",
+          "tag": "A14",
+          "name": "주가(현재가) 순위"
+        },
+        "선택지별 문장과 입력칸 연결을 추가 확인해야 합니다.": {
+          "file": "/shin_xml/mapa-b.xml",
+          "tag": "A16",
+          "name": "상장일"
+        },
+        "체크 항목의 독립 선택 규칙 확인이 필요합니다.": {
+          "file": "/shin_xml/mapa-b.xml",
+          "tag": "A26",
+          "name": "제외종목 1"
+        },
+        "입력 항목의 원본 연결을 확인해야 합니다.": {
+          "file": "/shin_xml/mapc1_c2.xml",
+          "tag": "C1_9_23",
+          "name": "상세 이동평균간 돌파"
+        },
+        "수정할 입력 항목이 없는 고정 문장입니다.": {
+          "file": "/shin_xml/mapd.xml",
+          "tag": "D1_1",
+          "name": "관통형(피어싱라인)"
+        }
+      },
+      "radio": {
+        "conditions": 256,
+        "withNamedGroups": 256,
+        "withoutCaptions": 158,
+        "withGroupedFields": 254
+      },
+      "multipleTemplates": 165,
+      "dynamicCombos": 2,
+      "otherNodeTypes": {
+        "PARAM": 0,
+        "ITEM": 0,
+        "SUB_ITEM": 0
+      },
+      "nameProjection": {
+        "settings": 536,
+        "review": 362,
+        "inline": 29
+      },
+      "unmatchedNames": 22,
+      "ambiguousNames": 10
+    },
+    {
+      "broker": "KB증권",
+      "files": 12,
+      "catalogConditions": 973,
+      "templates": 1218,
+      "types": {
+        "Radio": 896,
+        "DivideLine": 1362,
+        "Static": 8150,
+        "ComboBox": 2668,
+        "Edit": 7176,
+        "Calendar": 15,
+        "Check": 53
+      },
+      "rawClasses": {
+        "review": 402,
+        "settings": 758,
+        "inline": 56,
+        "tradeAmount": 2
+      },
+      "reasons": {
+        "선택지별 문장과 입력칸 연결을 추가 확인해야 합니다.": 214,
+        "문장에 드러나지 않는 라디오 선택지가 있어 확인이 필요합니다.": 4,
+        "체크 항목의 독립 선택 규칙 확인이 필요합니다.": 7,
+        "라디오별 입력칸 활성화 규칙 확인이 필요합니다.": 118,
+        "입력 항목의 선택지 또는 중복 정의가 불명확합니다.": 10,
+        "입력 항목의 원본 연결을 확인해야 합니다.": 9,
+        "설정 문장 템플릿이 없습니다.": 12,
+        "수정할 입력 항목이 없는 고정 문장입니다.": 28
+      },
+      "examples": {
+        "선택지별 문장과 입력칸 연결을 추가 확인해야 합니다.": {
+          "file": "/kb_xml/mapa-b.xml",
+          "tag": "A1",
+          "name": "코스피/코스닥 구분"
+        },
+        "문장에 드러나지 않는 라디오 선택지가 있어 확인이 필요합니다.": {
+          "file": "/kb_xml/mapa-b.xml",
+          "tag": "A4",
+          "name": "결산월"
+        },
+        "체크 항목의 독립 선택 규칙 확인이 필요합니다.": {
+          "file": "/kb_xml/mapa-b.xml",
+          "tag": "A6",
+          "name": "기타종목구분"
+        },
+        "라디오별 입력칸 활성화 규칙 확인이 필요합니다.": {
+          "file": "/kb_xml/mapa-b.xml",
+          "tag": "B1_1_15",
+          "name": "가격범위 n% 순위"
+        },
+        "입력 항목의 선택지 또는 중복 정의가 불명확합니다.": {
+          "file": "/kb_xml/mapa-b.xml",
+          "tag": "B1_1_16",
+          "name": "등락연속 시작 전영업일 종가"
+        },
+        "입력 항목의 원본 연결을 확인해야 합니다.": {
+          "file": "/kb_xml/mapc1_c2.xml",
+          "tag": "C1_1_28",
+          "name": "가격/이평비교(연속)"
+        },
+        "설정 문장 템플릿이 없습니다.": {
+          "file": "/kb_xml/mape-f_futopt.xml",
+          "tag": "E1_1",
+          "name": "상승반전"
+        },
+        "수정할 입력 항목이 없는 고정 문장입니다.": {
+          "file": "/kb_xml/mapg-h.xml",
+          "tag": "H13",
+          "name": "ADX Grapper 매수"
+        }
+      },
+      "radio": {
+        "conditions": 353,
+        "withNamedGroups": 350,
+        "withoutCaptions": 214,
+        "withGroupedFields": 341
+      },
+      "multipleTemplates": 219,
+      "dynamicCombos": 1,
+      "otherNodeTypes": {
+        "PARAM": 0,
+        "ITEM": 0,
+        "SUB_ITEM": 0
+      },
+      "nameProjection": {
+        "review": 486,
+        "settings": 447,
+        "inline": 39,
+        "tradeAmount": 1
+      },
+      "unmatchedNames": 174,
+      "ambiguousNames": 41
+    },
+    {
+      "broker": "교보증권",
+      "files": 17,
+      "catalogConditions": 655,
+      "templates": 917,
+      "types": {
+        "Static": 5259,
+        "ComboBox": 1118,
+        "Edit": 3954,
+        "Radio": 164,
+        "DivideLine": 56
+      },
+      "rawClasses": {
+        "settings": 544,
+        "inline": 118,
+        "review": 255
+      },
+      "reasons": {
+        "수정할 입력 항목이 없는 고정 문장입니다.": 123,
+        "선택지별 문장과 입력칸 연결을 추가 확인해야 합니다.": 72,
+        "입력 항목의 선택지 또는 중복 정의가 불명확합니다.": 8,
+        "입력 항목의 원본 연결을 확인해야 합니다.": 5,
+        "라디오별 입력칸 활성화 규칙 확인이 필요합니다.": 4,
+        "설정 문장 템플릿이 없습니다.": 42,
+        "문장에 드러나지 않는 라디오 선택지가 있어 확인이 필요합니다.": 1
+      },
+      "examples": {
+        "수정할 입력 항목이 없는 고정 문장입니다.": {
+          "file": "/kyobo_xml/mapa-b.xml",
+          "tag": "A17",
+          "name": "매도5호가내에 상한가 존재"
+        },
+        "선택지별 문장과 입력칸 연결을 추가 확인해야 합니다.": {
+          "file": "/kyobo_xml/mapa-b.xml",
+          "tag": "A25",
+          "name": "상장일"
+        },
+        "입력 항목의 선택지 또는 중복 정의가 불명확합니다.": {
+          "file": "/kyobo_xml/mapa-b.xml",
+          "tag": "A28",
+          "name": "회원사"
+        },
+        "입력 항목의 원본 연결을 확인해야 합니다.": {
+          "file": "/kyobo_xml/mapa-b.xml",
+          "tag": "B2_11",
+          "name": "흑자/적자 전환"
+        },
+        "라디오별 입력칸 활성화 규칙 확인이 필요합니다.": {
+          "file": "/kyobo_xml/mapa-b.xml",
+          "tag": "B2_16",
+          "name": "총자산회전율 순위"
+        },
+        "설정 문장 템플릿이 없습니다.": {
+          "file": "/kyobo_xml/mapc1-c3.xml",
+          "tag": "C1_2",
+          "name": "Bollinger Band"
+        },
+        "문장에 드러나지 않는 라디오 선택지가 있어 확인이 필요합니다.": {
+          "file": "/kyobo_xml/mapd-e.xml",
+          "tag": "D2_28",
+          "name": "거래량급증"
+        }
+      },
+      "radio": {
+        "conditions": 77,
+        "withNamedGroups": 76,
+        "withoutCaptions": 60,
+        "withGroupedFields": 76
+      },
+      "multipleTemplates": 72,
+      "dynamicCombos": 1,
+      "otherNodeTypes": {
+        "PARAM": 0,
+        "ITEM": 0,
+        "SUB_ITEM": 0
+      },
+      "nameProjection": {
+        "review": 305,
+        "settings": 313,
+        "inline": 37
+      },
+      "unmatchedNames": 147,
+      "ambiguousNames": 38
+    },
+    {
+      "broker": "LS증권",
+      "files": 12,
+      "catalogConditions": 1074,
+      "templates": 1049,
+      "types": {
+        "ComboBox": 2485,
+        "Radio": 855,
+        "DivideLine": 1231,
+        "Static": 10921,
+        "Check": 358,
+        "Calendar": 16,
+        "Edit": 5661
+      },
+      "rawClasses": {
+        "settings": 347,
+        "review": 651,
+        "inline": 51
+      },
+      "reasons": {
+        "선택지별 문장과 입력칸 연결을 추가 확인해야 합니다.": 200,
+        "체크 항목의 독립 선택 규칙 확인이 필요합니다.": 261,
+        "라디오별 입력칸 활성화 규칙 확인이 필요합니다.": 148,
+        "입력 항목의 원본 연결을 확인해야 합니다.": 5,
+        "수정할 입력 항목이 없는 고정 문장입니다.": 4,
+        "설정 문장 템플릿이 없습니다.": 25,
+        "입력 항목의 선택지 또는 중복 정의가 불명확합니다.": 8
+      },
+      "examples": {
+        "선택지별 문장과 입력칸 연결을 추가 확인해야 합니다.": {
+          "file": "/ls_xml/mapa-b.xml",
+          "tag": "A2",
+          "name": "코스피/코스닥 구분"
+        },
+        "체크 항목의 독립 선택 규칙 확인이 필요합니다.": {
+          "file": "/ls_xml/mapa-b.xml",
+          "tag": "A3",
+          "name": "제외종목"
+        },
+        "라디오별 입력칸 활성화 규칙 확인이 필요합니다.": {
+          "file": "/ls_xml/mapa-b.xml",
+          "tag": "B1_1_2",
+          "name": "자산총계 순위"
+        },
+        "입력 항목의 원본 연결을 확인해야 합니다.": {
+          "file": "/ls_xml/mapa-b.xml",
+          "tag": "B1_1_34",
+          "name": "자본잠식기업"
+        },
+        "수정할 입력 항목이 없는 고정 문장입니다.": {
+          "file": "/ls_xml/mapc1.xml",
+          "tag": "C1_1_1",
+          "name": "Bollinger Band 상향돌파"
+        },
+        "설정 문장 템플릿이 없습니다.": {
+          "file": "/ls_xml/mapc1.xml",
+          "tag": "C1_2",
+          "name": "CCI"
+        },
+        "입력 항목의 선택지 또는 중복 정의가 불명확합니다.": {
+          "file": "/ls_xml/mapc2_1-11.xml",
+          "tag": "C2_10_1",
+          "name": "LRL 이동평균 돌파"
+        }
+      },
+      "radio": {
+        "conditions": 365,
+        "withNamedGroups": 365,
+        "withoutCaptions": 186,
+        "withGroupedFields": 351
+      },
+      "multipleTemplates": 205,
+      "dynamicCombos": 1,
+      "otherNodeTypes": {
+        "PARAM": 0,
+        "ITEM": 0,
+        "SUB_ITEM": 0
+      },
+      "nameProjection": {
+        "settings": 288,
+        "review": 740,
+        "inline": 46
+      },
+      "unmatchedNames": 232,
+      "ambiguousNames": 16
+    },
+    {
+      "broker": "미래에셋증권(해외)",
+      "files": 7,
+      "catalogConditions": 724,
+      "templates": 713,
+      "types": {
+        "Static": 4850,
+        "ComboBox": 854,
+        "Radio": 279,
+        "DivideLine": 100,
+        "Edit": 3780,
+        "Calendar": 2,
+        "Check": 50
+      },
+      "rawClasses": {
+        "settings": 429,
+        "review": 215,
+        "inline": 69
+      },
+      "reasons": {
+        "라디오별 입력칸 활성화 규칙 확인이 필요합니다.": 10,
+        "선택지별 문장과 입력칸 연결을 추가 확인해야 합니다.": 94,
+        "체크 항목의 독립 선택 규칙 확인이 필요합니다.": 10,
+        "수정할 입력 항목이 없는 고정 문장입니다.": 89,
+        "설정 문장 템플릿이 없습니다.": 2,
+        "입력 항목의 선택지 또는 중복 정의가 불명확합니다.": 5,
+        "입력 항목의 원본 연결을 확인해야 합니다.": 5
+      },
+      "examples": {
+        "라디오별 입력칸 활성화 규칙 확인이 필요합니다.": {
+          "file": "/kairoso_xml/mapa-b.xml",
+          "tag": "A1_5",
+          "name": "결산월"
+        },
+        "선택지별 문장과 입력칸 연결을 추가 확인해야 합니다.": {
+          "file": "/kairoso_xml/mapa-b.xml",
+          "tag": "A1_6",
+          "name": "상장일"
+        },
+        "체크 항목의 독립 선택 규칙 확인이 필요합니다.": {
+          "file": "/kairoso_xml/mapa-b.xml",
+          "tag": "B1_13",
+          "name": "대차대조표 재무비율 비교"
+        },
+        "수정할 입력 항목이 없는 고정 문장입니다.": {
+          "file": "/kairoso_xml/mapc1.xml",
+          "tag": "C1_1_1",
+          "name": "양봉(롱바디)"
+        },
+        "설정 문장 템플릿이 없습니다.": {
+          "file": "/kairoso_xml/mapc1.xml",
+          "tag": "C1_2",
+          "name": "상승반전"
+        },
+        "입력 항목의 선택지 또는 중복 정의가 불명확합니다.": {
+          "file": "/kairoso_xml/mapc2_40-59.xml",
+          "tag": "C2_44_1",
+          "name": "LRL 기준값 돌파"
+        },
+        "입력 항목의 원본 연결을 확인해야 합니다.": {
+          "file": "/kairoso_xml/mapd.xml",
+          "tag": "D1_2",
+          "name": "주가(현재가) 범위"
+        }
+      },
+      "radio": {
+        "conditions": 115,
+        "withNamedGroups": 115,
+        "withoutCaptions": 4,
+        "withGroupedFields": 104
+      },
+      "multipleTemplates": 94,
+      "dynamicCombos": 0,
+      "otherNodeTypes": {
+        "PARAM": 0,
+        "ITEM": 0,
+        "SUB_ITEM": 0
+      },
+      "nameProjection": {
+        "settings": 328,
+        "review": 348,
+        "inline": 48
+      },
+      "unmatchedNames": 174,
+      "ambiguousNames": 4
+    },
+    {
+      "broker": "미래에셋증권",
+      "files": 21,
+      "catalogConditions": 964,
+      "templates": 1327,
+      "types": {
+        "Static": 7586,
+        "ComboBox": 1689,
+        "Radio": 422,
+        "Edit": 5579,
+        "Calendar": 8,
+        "Check": 79,
+        "DivideLine": 134
+      },
+      "rawClasses": {
+        "settings": 764,
+        "review": 418,
+        "inline": 145
+      },
+      "reasons": {
+        "수정할 입력 항목이 없는 고정 문장입니다.": 166,
+        "선택지별 문장과 입력칸 연결을 추가 확인해야 합니다.": 145,
+        "입력 항목의 선택지 또는 중복 정의가 불명확합니다.": 12,
+        "체크 항목의 독립 선택 규칙 확인이 필요합니다.": 15,
+        "설정 문장 템플릿이 없습니다.": 56,
+        "입력 항목의 원본 연결을 확인해야 합니다.": 4,
+        "라디오별 입력칸 활성화 규칙 확인이 필요합니다.": 19,
+        "문장에 드러나지 않는 라디오 선택지가 있어 확인이 필요합니다.": 1
+      },
+      "examples": {
+        "수정할 입력 항목이 없는 고정 문장입니다.": {
+          "file": "/kairos_xml/mapa-b.xml",
+          "tag": "A17",
+          "name": "매도5호가내에 상한가 존재"
+        },
+        "선택지별 문장과 입력칸 연결을 추가 확인해야 합니다.": {
+          "file": "/kairos_xml/mapa-b.xml",
+          "tag": "A1_25",
+          "name": "상장일"
+        },
+        "입력 항목의 선택지 또는 중복 정의가 불명확합니다.": {
+          "file": "/kairos_xml/mapa-b.xml",
+          "tag": "A28",
+          "name": "회원사"
+        },
+        "체크 항목의 독립 선택 규칙 확인이 필요합니다.": {
+          "file": "/kairos_xml/mapa-b.xml",
+          "tag": "A1_29",
+          "name": "기타종목구분"
+        },
+        "설정 문장 템플릿이 없습니다.": {
+          "file": "/kairos_xml/mapc1-c3.xml",
+          "tag": "C1_2",
+          "name": "Bollinger Band"
+        },
+        "입력 항목의 원본 연결을 확인해야 합니다.": {
+          "file": "/kairos_xml/mapc2_1-19.xml",
+          "tag": "C2_9_13",
+          "name": "심리도 추세"
+        },
+        "라디오별 입력칸 활성화 규칙 확인이 필요합니다.": {
+          "file": "/kairos_xml/mapc2_1-19.xml",
+          "tag": "C2_9_16",
+          "name": "심리도 순위"
+        },
+        "문장에 드러나지 않는 라디오 선택지가 있어 확인이 필요합니다.": {
+          "file": "/kairos_xml/mapd-e.xml",
+          "tag": "D2_28",
+          "name": "거래량급증"
+        }
+      },
+      "radio": {
+        "conditions": 178,
+        "withNamedGroups": 177,
+        "withoutCaptions": 35,
+        "withGroupedFields": 160
+      },
+      "multipleTemplates": 145,
+      "dynamicCombos": 1,
+      "otherNodeTypes": {
+        "PARAM": 0,
+        "ITEM": 0,
+        "SUB_ITEM": 0
+      },
+      "nameProjection": {
+        "settings": 279,
+        "review": 631,
+        "inline": 54
+      },
+      "unmatchedNames": 266,
+      "ambiguousNames": 90
+    },
+    {
+      "broker": "NH증권",
+      "files": 7,
+      "catalogConditions": 803,
+      "templates": 699,
+      "types": {
+        "DivideLine": 813,
+        "Static": 4395,
+        "ComboBox": 1461,
+        "Radio": 570,
+        "Edit": 3619,
+        "Calendar": 8,
+        "Check": 30
+      },
+      "rawClasses": {
+        "review": 338,
+        "settings": 339,
+        "inline": 22
+      },
+      "reasons": {
+        "입력 항목의 선택지 또는 중복 정의가 불명확합니다.": 11,
+        "선택지별 문장과 입력칸 연결을 추가 확인해야 합니다.": 146,
+        "체크 항목의 독립 선택 규칙 확인이 필요합니다.": 4,
+        "라디오별 입력칸 활성화 규칙 확인이 필요합니다.": 126,
+        "문장에 드러나지 않는 라디오 선택지가 있어 확인이 필요합니다.": 2,
+        "설정 문장 템플릿이 없습니다.": 8,
+        "수정할 입력 항목이 없는 고정 문장입니다.": 41
+      },
+      "examples": {
+        "입력 항목의 선택지 또는 중복 정의가 불명확합니다.": {
+          "file": "/nh_xml/mapa-b.xml",
+          "tag": "A_1_1",
+          "name": "거래소"
+        },
+        "선택지별 문장과 입력칸 연결을 추가 확인해야 합니다.": {
+          "file": "/nh_xml/mapa-b.xml",
+          "tag": "A_1_7",
+          "name": "신용잔고율"
+        },
+        "체크 항목의 독립 선택 규칙 확인이 필요합니다.": {
+          "file": "/nh_xml/mapa-b.xml",
+          "tag": "A_1_11",
+          "name": "기타종목"
+        },
+        "라디오별 입력칸 활성화 규칙 확인이 필요합니다.": {
+          "file": "/nh_xml/mapa-b.xml",
+          "tag": "B1_1_1",
+          "name": "주당 순자산(BPS) 순위"
+        },
+        "문장에 드러나지 않는 라디오 선택지가 있어 확인이 필요합니다.": {
+          "file": "/nh_xml/mapc1_c2.xml",
+          "tag": "C1_1_7",
+          "name": "이동평균 추세"
+        },
+        "설정 문장 템플릿이 없습니다.": {
+          "file": "/nh_xml/mapc1_c2.xml",
+          "tag": "C1_2",
+          "name": "거래량이동평균"
+        },
+        "수정할 입력 항목이 없는 고정 문장입니다.": {
+          "file": "/nh_xml/mapf-k.xml",
+          "tag": "H1_1_1",
+          "name": "매집을 위한 호가 누르기"
+        }
+      },
+      "radio": {
+        "conditions": 280,
+        "withNamedGroups": 280,
+        "withoutCaptions": 146,
+        "withGroupedFields": 278
+      },
+      "multipleTemplates": 150,
+      "dynamicCombos": 3,
+      "otherNodeTypes": {
+        "PARAM": 0,
+        "ITEM": 0,
+        "SUB_ITEM": 0
+      },
+      "nameProjection": {
+        "review": 460,
+        "inline": 22,
+        "settings": 321
+      },
+      "unmatchedNames": 131,
+      "ambiguousNames": 8
+    }
+  ]
+}
