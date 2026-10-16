@@ -3,6 +3,10 @@ import { normalizeAiResult } from './normalizeAiResult';
 import { generateMent } from './generateMent';
 
 test.each([
+  ['거래대금이 9999백만 이하', '거래대금이 9,999백만 이하'],
+  ['거래대금이 9999백만이하', '거래대금이 9,999백만이하'],
+  ['거래대금 1000 ~ 5000백만', '거래대금 1,000 ~ 5,000백만'],
+  ['거래대금 -10000.50백만 이하', '거래대금 -10,000.50백만 이하'],
   ['종가 기준 5,20,60 단순 이평이 정배열', '종가 기준 5,20,60 단순 이평이 정배열'],
   ['이동평균 1000,2000,5000', '이동평균 1000,2000,5000'],
   ['이동평균 5,20', '이동평균 5,20'],
@@ -44,4 +48,11 @@ test('수동 수정 답변도 정리하되 빈 문자열은 유지한다', () =>
   expect(generateMent({selectedConditions: [condition]})).toContain('1,000,000원');
   condition.comment = '';
   expect(generateMent({selectedConditions: [condition]})).not.toContain('5,000원');
+});
+
+test('원 생략 금액도 AI 숫자 슬롯 및 표시를 일관되게 유지한다',()=>{
+ const {splitTemplate}=require('./conditionTemplate');
+ expect(splitTemplate('거래대금이 9,999백만 이하').values).toEqual(['9999']);
+ const result=normalizeAiResult({matches:[{originalIndex:0,detail:'거래대금이 9,999백만 이하',numericValues:['9999']}]},[{detail:'거래대금이 100백만 이하'}]);
+ expect(result.conditions[0].detail).toBe('거래대금이 9,999백만 이하');
 });

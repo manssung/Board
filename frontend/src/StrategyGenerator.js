@@ -23,6 +23,7 @@ import { useInboxPreanalysis } from './hooks/useInboxPreanalysis';
 import { searchConditions } from './util/searchConditions';
 import InboxInquiryBrowser from './components/InboxInquiryBrowser';
 import './css/WorkspacePolish.css';
+import { usageGuides } from './data/usageGuides';
 
 
 const MAX_ATTACHMENT_BYTES = 2 * 1024 * 1024;
@@ -78,36 +79,9 @@ export default function StrategyGenerator() {
   const [inboxAttachmentNotice, setInboxAttachmentNotice] = useState(false);
   const [inboxSourceInquiry, setInboxSourceInquiry] = useState(null);
 
-  const usageGuide = activeTab === 'manual'
-    ? {
-        title: '사용 방법 · 조건식 편집',
-        description: '조건 카탈로그에서 항목을 직접 구성하고, 상세값과 논리 구조를 검토해 조건식을 완성합니다.',
-        steps: [
-          { screenTitle: '조건 카탈로그', visual: ['가격지표 · 거래량분석', '기술적지표 · 재무분석'], cta: '조건 추가', title: '조건 찾기', description: '좌측 카탈로그에서 필요한 조건을 전략에 추가합니다.' },
-          { screenTitle: '선택된 조건', visual: ['A  종가 · 60일 이동평균 상향', 'B  거래량 · 평균 대비 3배'], cta: '상세값 수정', title: '상세값 조정', description: '하단 설정 영역에서 기간·값·비교 기준을 바로 수정합니다.' },
-          { screenTitle: '조건식', visual: ['A  AND  B', '( A  OR  B )  AND  C'], cta: '그룹 설정', title: '논리 구조 편집', description: '연결 방식과 괄호 그룹을 설정해 의도한 조건식을 만듭니다.' },
-          { screenTitle: '답변 멘트', visual: ['확정 조건식 확인', '고객 안내 문구 확인'], cta: '복사', title: '검토 · 답변', description: '최종 조건식과 안내 문구를 확인한 뒤 답변에 사용합니다.' },
-        ],
-      }
-      : {
-        title: '사용 방법 · AI 추천',
-        description: '기본 화면에서 전체 증권사의 미답변 문의와 자동 분석 현황을 확인하고, 문의를 선택하거나 직접 입력해 답변을 준비합니다.',
-        steps: [
-          { screenTitle: '전체 증권사 · 미답변 현황', visual: ['완료 · 분석 중 · 대기 · 작업불가', '전체 문의를 오래된 순서대로 처리'], cta: '일시정지 / 분석 재개', title: '미답변 현황 확인', description: '처음 열리는 미답변 목록에서 전체 증권사의 현황을 확인합니다. 증권사를 선택하지 않아도 한 건씩 자동 분석합니다. 서버 예약 실행을 설정하면 웹을 닫아도 매일 오전 6시에 미분석 문의를 처리합니다. 무료 AI는 하루 최대 20회 요청을 자동 분석·직접 질문·재시도가 공유합니다. 한도에 도달하면 남은 문의는 갱신 후 처리합니다. 증권사 필터는 목록만 좁히고 현황판은 전체 기준으로 유지됩니다.' },
-          { screenTitle: '문의 선택 또는 직접 입력', visual: ['게시글 선택 → 증권사 · 원글 가져오기', 'AI에게 직접 물어보기 → 직접 문의 작성'], cta: '조건 추천 받기', title: '처리할 문의 준비', description: '문의글을 선택하면 해당 증권사와 원글이 채워지고, 저장된 추천이 있으면 함께 불러옵니다. 직접 문의를 작성하려면 ‘AI에게 직접 물어보기’를 누르고 증권사를 선택한 뒤 내용을 입력합니다. 추천이 필요하면 ‘조건 추천 받기’를 누릅니다.' },
-          { screenTitle: '추천 조건 검토 · 편집', visual: ['추천 이유 · 확인 필요 항목 검토', '상세 수치 · 기간 · AND / OR 조정'], cta: '적용하고 편집하기', title: '추천 검토와 조건식 편집', description: '추천 이유와 확인이 필요한 수치·기간을 문의와 비교합니다. 필요한 조건을 ‘적용’하거나 ‘적용하고 편집하기’를 누른 뒤, 조건식 편집 탭에서 상세값과 연결 방식을 조정합니다.' },
-          { screenTitle: '답변 멘트', visual: ['최종 조건식 · 고객 안내 문구 확인', '답변에 사용할 문구 복사'], cta: '복사', title: '최종 확인과 답변 복사', description: '완성한 조건식과 답변 멘트를 확인하고 ‘복사’를 눌러 답변에 사용합니다. 현황판의 완료는 분석·저장이 끝났다는 뜻이므로, 답변 전 추천 내용은 직접 검토합니다.' },
-        ],
-        statuses: [
-          { label: '완료', description: '추천 결과를 만들고 공용 저장까지 마친 문의' },
-          { label: '분석 중', description: '조건을 준비하거나 현재 분석 중인 문의' },
-          { label: '대기', description: '분석 차례, 요청 한도, 재시도 또는 저장을 기다리는 문의' },
-          { label: '작업불가', description: '추천 조건이 없거나 파일 첨부·미지원 증권사로 자동 분석에서 제외된 문의' },
-        ],
-      };
-  const usageFlow = activeTab === 'manual'
-    ? ['조건 카탈로그', '조건 추가', '상세값 설정', 'AND · OR · 괄호', '답변 복사']
-    : ['미답변 현황', '문의 선택 · 직접 입력', '추천 검토 · 편집', '답변 복사'];
+  const [helpTab, setHelpTab] = useState('ai');
+  const usageGuide = usageGuides[helpTab];
+  const usageFlow = usageGuide.flow;
 
   const handleConditionEditorEdit = useCallback((kind) => {
     if (kind === 'add' || kind === 'duplicate') {
@@ -405,7 +379,7 @@ const runAiGeneration = async () => {
             <button
               type="button"
               className="usage-help-button"
-              onClick={() => setIsHelpOpen(open => !open)}
+              onClick={() => { setHelpTab(activeTab); setIsHelpOpen(open => !open); }}
               aria-expanded={isHelpOpen}
               aria-controls="usage-help-popover"
             >
@@ -418,6 +392,10 @@ const runAiGeneration = async () => {
                   <div className="usage-help-title">
                     <div><strong>{usageGuide.title}</strong><p>{usageGuide.description}</p></div>
                     <button type="button" onClick={() => setIsHelpOpen(false)} aria-label="사용 방법 닫기">×</button>
+                  </div>
+                  <div className="usage-help-tabs" aria-label="도움말 종류" role="group">
+                    <button type="button" aria-pressed={helpTab === 'ai'} onClick={() => setHelpTab('ai')}>AI 추천 도움말</button>
+                    <button type="button" aria-pressed={helpTab === 'manual'} onClick={() => setHelpTab('manual')}>조건식 편집 도움말</button>
                   </div>
                   <div className="usage-help-flow" aria-label="작업 순서">
                     {usageFlow.map((label, index) => (
@@ -438,9 +416,20 @@ const runAiGeneration = async () => {
                         <span className="help-step-number">{String(index + 1).padStart(2, '0')}</span>
                         <h4>{step.title}</h4>
                         <p>{step.description}</p>
+                        <ol className="usage-help-instructions">{step.actions.map(action => <li key={action}>{action}</li>)}</ol>
                       </article>
                     ))}
                   </div>
+                  <section className="usage-help-example" aria-label="따라 해보기">
+                    <h4>{usageGuide.example.title}</h4>
+                    <p>{usageGuide.example.description}</p>
+                    <code>{usageGuide.example.formula}</code>
+                    <p>{usageGuide.example.result}</p>
+                  </section>
+                  <section className="usage-help-faq" aria-label="자주 헷갈리는 부분">
+                    <h4>자주 헷갈리는 부분</h4>
+                    {usageGuide.faq.map(item => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}
+                  </section>
                   {usageGuide.statuses && (
                     <section className="usage-help-status-guide" aria-label="자동 분석 현황 읽는 방법">
                       <h4>현황판 읽는 방법</h4>

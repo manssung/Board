@@ -1,6 +1,6 @@
 // Thousands separators belong to explicit quantities, never to arbitrary indicator numbers.
 const PROTECTED = /\[[^\]\r\n]*\]|\b\d{4}[-/.]\d{1,2}[-/.]\d{1,2}\b|\b\d{1,2}:\d{2}(?::\d{2})?\b|\b\d{2,3}-\d{3,4}-\d{4}\b|(?:종목코드|종목번호)\s*[:：]?\s*\d+/g;
-const UNIT = '(?:(?:백만|천만|백억|천억|십억|백|천|만|억|조)?원|(?:천|만|억)?주|%|퍼센트|배)';
+const UNIT = '(?:(?:백만|천만|백억|천억|십억|백|천|만|억|조)?원|백만|(?:천|만|억)?주|%|퍼센트|배)';
 const SUFFIX = new RegExp('^\\s*(' + UNIT + ')(?=$|\\s|[~,+.)]|이상|이하|초과|미만|부터|까지|대비|인|가|를|이고)');
 const RANGE_SUFFIX = new RegExp('^\\s*~\\s*[+-]?\\d+(?:,\\d+)*(?:\\.\\d+)?\\s*(' + UNIT + ')(?=$|\\s|[~,+.)]|이상|이하|초과|미만|부터|까지)');
 function mapQuantities(value, transform) {

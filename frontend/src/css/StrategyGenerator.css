@@ -1554,3 +1554,19 @@ body {
 @media screen and (max-width: 620px) {
   .usage-help-status-guide dl { grid-template-columns: 1fr; }
 }
+
+/* Help: explicit instructions and readable examples, separate from decorative previews. */
+.usage-help-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.usage-help-tabs button { padding: 9px 13px; border: 1px solid #d6e2f2; border-radius: 8px; background: #fff; color: #405878; cursor: pointer; }
+.usage-help-tabs button[aria-pressed="true"] { background: #edf4ff; border-color: #90b3e9; color: #245eb7; font-weight: 700; }
+.usage-help-instructions { order: 3; margin: 10px 0 0; padding-left: 20px; color: #405570; font-size: 13px; line-height: 1.8; }
+.usage-help-instructions li + li { margin-top: 8px; }
+.usage-help-example, .usage-help-faq { margin-top: 18px; padding: 16px; border: 1px solid #dce6f4; border-radius: 10px; }
+.usage-help-example { background: #f4f8ff; }
+.usage-help-example h4, .usage-help-faq h4 { margin: 0 0 10px; color: #304d73; font-size: 14px; }
+.usage-help-example p, .usage-help-faq p { font-size: 13px; line-height: 1.8; color: #405570; }
+.usage-help-example code { display: block; padding: 12px; border-radius: 6px; background: #fff; white-space: pre-wrap; overflow-wrap: anywhere; color: #245eb7; }
+.usage-help-faq details { padding: 11px 0; border-top: 1px solid #e4ebf5; }
+.usage-help-faq summary { cursor: pointer; color: #354e70; font-size: 13px; font-weight: 600; line-height: 1.6; }
+.usage-help-step .help-screen { min-height: 0; }
+.usage-help-title p { line-height: 1.7; color: #52647c; }
