@@ -42,18 +42,18 @@ describe('condition editor rules', () => {
     expect(secondToggle[0].operator).toBe('and');
   });
 
-  test('moves a condition and clears every existing group', () => {
+  test('moves a condition while preserving its valid group and operators', () => {
     const result = moveConditionAndClearGroups([
       condition('A', 'and', ['group-1']),
       condition('B', 'or', ['group-1']),
     ], 0, 'down');
 
     expect(result.map(item => item.path)).toEqual(['B', 'A']);
-    expect(result.every(item => item.groupIds.length === 0)).toBe(true);
-    expect(result.every(item => item.operator === 'and')).toBe(true);
+    expect(result.every(item => item.groupIds.includes('group-1'))).toBe(true);
+    expect(result.map(item=>item.operator)).toEqual(['or','and']);
   });
 
-  test('removes a condition and clears groups from remaining conditions', () => {
+  test('removes a condition and drops a singleton group without resetting operators', () => {
     const result = removeConditionAndClearGroups([
       condition('A', 'and', ['group-1']),
       condition('B', 'or', ['group-1']),
@@ -61,7 +61,7 @@ describe('condition editor rules', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({ path: 'B', groupIds: [] });
-    expect(result[0].operator).toBe('and');
+    expect(result[0].operator).toBe('or');
   });
 
   test('groups a consecutive AI OR recommendation', () => {
@@ -91,4 +91,17 @@ describe('condition editor rules', () => {
     expect(result[0].comment).toBe('10만주 이상');
     expect(result[1].comment).toBe('1,000억원 이상');
   });
+});
+
+test('unrelated groups and OR operators survive deleting a condition',()=>{
+ const result=removeConditionAndClearGroups([condition('A','or',['g1']),condition('B','and',['g1']),condition('C'),condition('D','or',['g2']),condition('E','and',['g2'])],2);
+ expect(result.map(c=>c.groupIds)).toEqual([['g1'],['g1'],['g2'],['g2']]);expect(result[0].operator).toBe('or');
+});
+test('only the group made non-consecutive by a move is removed',()=>{
+ const result=moveConditionAndClearGroups([condition('A','or',['g1']),condition('B','and',['g1']),condition('C'),condition('D','or',['g2']),condition('E','and',['g2'])],1,'down');
+ expect(result.map(c=>c.path)).toEqual(['A','C','B','D','E']);expect(result.slice(0,3).every(c=>!c.groupIds.length)).toBe(true);expect(result[3].groupIds).toEqual(['g2']);expect(result[4].groupIds).toEqual(['g2']);expect(result[0].operator).toBe('or');
+});
+test('deleting one member preserves remaining groups of two or more',()=>{
+ const result=removeConditionAndClearGroups([condition('A','or',['outer','inner']),condition('B','and',['outer','inner']),condition('C','and',['outer'])],0);
+ expect(result.map(c=>c.groupIds)).toEqual([['outer'],['outer']]);
 });

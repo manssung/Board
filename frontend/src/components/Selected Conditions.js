@@ -39,6 +39,8 @@ const SelectedConditions = ({
   const [editingIndex, setEditingIndex] = useState(null);
   const previousLengthRef = useRef(selectedConditions.length);
   const workspaceRef = useRef(null);
+  const editorKeysRef = useRef([]);
+  const nextEditorKeyRef = useRef(0);
 
   const focusCondition = (index) => {
     setEditingIndex(index);
@@ -63,6 +65,25 @@ const SelectedConditions = ({
 
     previousLengthRef.current = nextLength;
   }, [selectedConditions.length]);
+  const moveSelectedCondition = (index, direction) => {
+    const target = direction === 'up' ? index - 1 : index + 1;
+    if (target < 0 || target >= selectedConditions.length) return;
+    [editorKeysRef.current[index], editorKeysRef.current[target]] = [editorKeysRef.current[target], editorKeysRef.current[index]];
+    setEditingIndex(current => current === index ? target : current === target ? index : current);
+    onMove(index, direction);
+  };
+  const removeSelectedCondition = index => {
+    editorKeysRef.current.splice(index, 1);
+    setEditingIndex(current => current === index ? null : current !== null && current > index ? current - 1 : current);
+    onRemove(index);
+  };
+  // Preserve per-instance editor keys, including duplicate conditions, across moves/deletions.
+  editorKeysRef.current = selectedConditions.map((condition,index) => {
+    const identity = JSON.stringify([condition.broker, condition.path]);
+    const existing = editorKeysRef.current[index];
+    return existing?.identity === identity ? existing : {identity, key:nextEditorKeyRef.current++};
+  });
+  const conditionKeys = editorKeysRef.current.map(entry=>entry.key);
   const groups = useMemo(() => {
     const ranges = new Map();
     selectedConditions.forEach((condition, index) => {
@@ -96,20 +117,21 @@ const SelectedConditions = ({
           const groupId = (cond.groupIds || [])[0];
           const group = groupId ? groups.get(groupId) : null;
           const groupPosition = group ? (index === group.start ? 'start' : index === group.end ? 'end' : 'middle') : '';
-          return <div data-condition-index={index} className={`condition-grouped-entry ${group ? `is-grouped ${groupPosition}` : ''}`} key={index}>
+          return <div data-condition-index={index} className={`condition-grouped-entry ${group ? `is-grouped ${groupPosition}` : ''}`} key={conditionKeys[index]}>
             {group && index === group.start && <span className="condition-group-label">{group.label}</span>}
             <SelectedItem
               cond={cond}
               index={index}
               isFirst={index === 0}
               isLast={index === selectedConditions.length - 1}
-              onRemove={onRemove}
+              onRemove={removeSelectedCondition}
               onCommentChange={onCommentChange}
               onToggleParen={onToggleParen}
-              onMove={onMove}
+              onMove={moveSelectedCondition}
               onDuplicate={onDuplicate}
               isEditing={editingIndex === index}
               onStartEditing={() => setEditingIndex(index)}
+              onStopEditing={() => setEditingIndex(null)}
             />
           </div>;
         })}
@@ -168,8 +190,9 @@ const ConditionFormulaBar = ({ selectedConditions, onToggleOperator, isGrouping,
 );
 
 // --- ✨ 각 아이템을 렌더링하는 별도의 컴포넌트 ---
-const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange, onMove, onDuplicate, isEditing, onStartEditing }) => {
-  const [settingsOpen, setSettingsOpen] = useState(false);
+const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange, onMove, onDuplicate, isEditing, onStartEditing, onStopEditing }) => {
+  const supportsSettings = ['tradeAmount', 'settings'].includes(cond.inputSchema?.kind);
+  const settingsOpen = isEditing && supportsSettings;
   const inputRef = useRef(null);
   const display = getConditionDisplay(cond);
   const pendingSelectionRef = useRef(null);
@@ -225,7 +248,7 @@ const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange,
         </span>
         {!isEditing && <span className="compact-condition-value">{formatConditionDetail(cond.comment !== undefined ? cond.comment : cond.detail || '세부값 없음')}</span>}
       </button>
-      {(['tradeAmount','settings'].includes(cond.inputSchema?.kind)) && <button type="button" className="settings-open-button" onClick={() => setSettingsOpen(current => !current)}>상세 설정</button>}
+      {supportsSettings && <button type="button" className="settings-open-button" aria-expanded={settingsOpen} onClick={onStartEditing}>상세 설정</button>}
       <div className="inline-condition-actions">
         <button
           className="move-button"
@@ -242,9 +265,9 @@ const SelectedItem = ({ cond, index, isFirst, isLast, onRemove, onCommentChange,
         <button className="delete-button" onClick={() => onRemove(index)} title="삭제">&times;</button>
         <button type="button" className="duplicate-button" onClick={() => onDuplicate(index)} title="이 조건을 맨 아래에 복사">복사</button>
       </div>
-      {settingsOpen && <div className="inline-settings-slot"><ConditionSettingsPanel condition={cond} onApply={detail => { onCommentChange(index, detail); setSettingsOpen(false); }} onCancel={() => setSettingsOpen(false)} /></div>}
+      {settingsOpen && <div className="inline-settings-slot"><ConditionSettingsPanel condition={cond} onApply={detail => { onCommentChange(index, detail); onStopEditing(); }} onCancel={onStopEditing} /></div>}
       {isEditing && !settingsOpen && cond.inputSchema?.kind === 'inline' && <KBTemplateSettings compact condition={cond} onApply={detail => onCommentChange(index, detail)} />}
-      {isEditing && !settingsOpen && !(cond.inputSchema?.kind === 'inline') && <input
+      {isEditing && !settingsOpen && !supportsSettings && !(cond.inputSchema?.kind === 'inline') && <input
           ref={inputRef}
           className="inline-condition-value"
           value={formatConditionDetail(cond.comment !== undefined ? cond.comment : cond.detail || "")}

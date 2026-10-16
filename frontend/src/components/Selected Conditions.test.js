@@ -83,6 +83,64 @@ test('이동평균 인자를 직접 수정해도 금액처럼 합치지 않는�
 });
 
 test('개발 환경이 아니어도 지원 조건의 상세설정 버튼을 제공한다',async()=>{
- await act(async()=>root.render(<SelectedConditions selectedConditions={[{broker:'NH증권',path:'이동평균 배열',detail:'종가 기준 5,20,60 단순 이평이 정배열',inputSchema:{kind:'settings'}}]} onCommentChange={()=>{}}/>));
+ await act(async()=>root.render(<SelectedConditions selectedConditions={[{broker:'NH증권',path:'이동평균 배열',detail:'종가 기준 5,20,60 단순 이평이 정배열',inputSchema:settingsSchema}]} onCommentChange={()=>{}}/>));
  expect([...container.querySelectorAll('button')].some(button=>button.textContent==='상세 설정')).toBe(true);
+});
+
+const settingsSchema={kind:'settings',name:'주가 기준',template:'(C1) 기준',fields:[{packet:'C1',type:'select',defaultValue:'종가',options:[{value:'종가',label:'종가'},{value:'시가',label:'시가'}]}]};
+function SettingsHarness(){
+ const [conditions,setConditions]=useState([{broker:'NH증권',path:'주가 기준',detail:'종가 기준',inputSchema:settingsSchema}]);
+ return <SelectedConditions selectedConditions={conditions} onCommentChange={(index,comment)=>setConditions(list=>list.map((condition,i)=>i===index?{...condition,comment}:condition))}/>;
+}
+test('본문과 상세설정 버튼이 같은 편집기를 열고 취소하면 문장 편집창도 남지 않는다',async()=>{
+ await act(async()=>root.render(<SettingsHarness/>));
+ await act(async()=>Simulate.click(container.querySelector('.inline-condition-summary')));
+ expect(container.querySelector('.condition-settings-panel')).not.toBeNull();expect(container.querySelector('.inline-condition-value')).toBeNull();
+ const findButton=text=>[...container.querySelectorAll('button')].find(button=>button.textContent===text);
+ await act(async()=>Simulate.click(findButton('취소')));
+ expect(container.querySelector('.condition-settings-panel')).toBeNull();expect(container.querySelector('.inline-condition-value')).toBeNull();
+ await act(async()=>Simulate.click(container.querySelector('.settings-open-button')));
+ expect(container.querySelector('[aria-label="주가 기준 C1"]').value).toBe('종가');
+});
+test('본문에서 설정 변경 후 적용하면 패널이 닫히고 본문에 변경값을 표시한다',async()=>{
+ await act(async()=>root.render(<SettingsHarness/>));
+ await act(async()=>Simulate.click(container.querySelector('.inline-condition-summary')));
+ await act(async()=>{const select=container.querySelector('[aria-label="주가 기준 C1"]');select.value='시가';Simulate.change(select);});
+ expect(container.querySelector('.condition-settings-panel')).not.toBeNull();
+ await act(async()=>Simulate.click(container.querySelector('.settings-apply')));
+ expect(container.querySelector('.condition-settings-panel')).toBeNull();expect(container.querySelector('.compact-condition-value').textContent).toBe('시가 기준');
+ expect(container.querySelector('.inline-condition-value')).toBeNull();
+});
+
+function ReorderSettingsHarness({duplicate=false}){
+ const [conditions,setConditions]=useState((duplicate?['같은 조건','같은 조건']:['첫 조건','둘째 조건']).map(path=>({broker:'NH증권',path,detail:'종가 기준',inputSchema:settingsSchema})));
+ return <SelectedConditions selectedConditions={conditions} onCommentChange={(index,comment)=>setConditions(list=>list.map((c,i)=>i===index?{...c,comment}:c))} onMove={(index)=>setConditions(list=>[list[1],list[0]])} onRemove={index=>setConditions(list=>list.filter((_,i)=>i!==index))}/>;
+}
+test('순서를 바꿔도 미적용 설정과 적용 대상이 같은 조건을 따라간다',async()=>{
+ await act(async()=>root.render(<ReorderSettingsHarness/>));
+ await act(async()=>Simulate.click(container.querySelectorAll('.inline-condition-summary')[0]));
+ await act(async()=>{const select=container.querySelector('[aria-label="주가 기준 C1"]');select.value='시가';Simulate.change(select);});
+ await act(async()=>Simulate.click(container.querySelector('[title="아래로 이동"]')));
+ expect(container.querySelector('[aria-label="주가 기준 C1"]').value).toBe('시가');
+ expect(container.querySelector('.condition-settings-panel').closest('.selected-item').textContent).toContain('첫 조건');
+ await act(async()=>Simulate.click(container.querySelector('.settings-apply')));
+ const summaries=[...container.querySelectorAll('.inline-condition-summary')];expect(summaries[1].textContent).toContain('시가 기준');expect(summaries[0].textContent).toContain('종가 기준');
+});
+test('편집 중 앞의 조건을 삭제해도 편집 대상과 미적용 설정을 유지한다',async()=>{
+ await act(async()=>root.render(<ReorderSettingsHarness/>));
+ await act(async()=>Simulate.click(container.querySelectorAll('.inline-condition-summary')[1]));
+ await act(async()=>{const select=container.querySelector('[aria-label="주가 기준 C1"]');select.value='시가';Simulate.change(select);});
+ await act(async()=>Simulate.click(container.querySelector('[title="삭제"]')));
+ expect(container.querySelector('[aria-label="주가 기준 C1"]').value).toBe('시가');
+ expect(container.querySelector('.condition-settings-panel').closest('.selected-item').textContent).toContain('둘째 조건');
+});
+
+test('같은 조건을 두 번 추가한 경우에도 이동 중인 편집 초안을 다른 복사본과 섞지 않는다',async()=>{
+ await act(async()=>root.render(<ReorderSettingsHarness duplicate/>));
+ await act(async()=>Simulate.click(container.querySelectorAll('.inline-condition-summary')[0]));
+ await act(async()=>{const select=container.querySelector('[aria-label="주가 기준 C1"]');select.value='시가';Simulate.change(select);});
+ await act(async()=>Simulate.click(container.querySelector('[title="아래로 이동"]')));
+ expect(container.querySelector('[aria-label="주가 기준 C1"]').value).toBe('시가');
+ await act(async()=>Simulate.click(container.querySelector('.settings-apply')));
+ const summaries=[...container.querySelectorAll('.inline-condition-summary')];expect(summaries[1].textContent).toContain('시가 기준');expect(summaries[0].textContent).toContain('종가 기준');
 });

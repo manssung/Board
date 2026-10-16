@@ -51,20 +51,31 @@ export const toggleConditionOperator = (conditions, index) => (
   ))
 );
 
-export const moveConditionAndClearGroups = (conditions, index, direction) => {
+export const moveConditionPreservingGroups = (conditions, index, direction) => {
   const targetIndex = direction === 'up' ? index - 1 : index + 1;
   if (targetIndex < 0 || targetIndex >= conditions.length) return conditions;
 
   const updated = [...conditions];
   [updated[index], updated[targetIndex]] = [updated[targetIndex], updated[index]];
-  return updated.map(condition => ({ ...condition, operator: 'and', groupIds: [] }));
+  return retainValidGroups(updated);
 };
 
-export const removeConditionAndClearGroups = (conditions, index) => (
-  conditions
-    .filter((_, conditionIndex) => conditionIndex !== index)
-    .map(condition => ({ ...condition, operator: 'and', groupIds: [] }))
-);
+// Keep only groups that still contain at least two consecutive conditions.
+const retainValidGroups = conditions => {
+  const members = new Map();
+  conditions.forEach((condition,index)=>(condition.groupIds||[]).forEach(id=>{
+    const indices=members.get(id)||[];indices.push(index);members.set(id,indices);
+  }));
+  const valid = new Set([...members].filter(([,indices])=>indices.length>=2 && indices.at(-1)-indices[0]+1===indices.length).map(([id])=>id));
+  return conditions.map(condition=>({...condition,groupIds:(condition.groupIds||[]).filter(id=>valid.has(id))}));
+};
+export const removeConditionPreservingGroups = (conditions,index) => {
+  if(index<0 || index>=conditions.length)return conditions;
+  return retainValidGroups(conditions.filter((_,conditionIndex)=>conditionIndex!==index));
+};
+// Compatibility for older imports; these operations no longer clear unrelated groups.
+export const moveConditionAndClearGroups = moveConditionPreservingGroups;
+export const removeConditionAndClearGroups = removeConditionPreservingGroups;
 
 export const parseMentForComments = (text, conditions) => {
   const updatedConditions = conditions.map(condition => ({ ...condition }));

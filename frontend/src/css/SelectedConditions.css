@@ -423,3 +423,14 @@
   #right-panel .inline-condition-row .condition-summary-main { flex-basis: calc(100% - 145px); }
   .inline-condition-value { flex-basis: calc(100% - 42px); margin-left: 32px; }
 }
+
+/* Keep descriptions aligned even when a row has no detailed-settings button. */
+@media screen and (min-width: 701px) {
+  #right-panel .inline-condition-row .condition-summary-main {
+    flex: 0 0 clamp(160px, 22vw, 250px);
+  }
+  #right-panel .inline-condition-summary .compact-condition-value {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}

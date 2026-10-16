@@ -4,8 +4,8 @@ import {
   addCondition,
   getConditionIndex,
   getConditionLabel,
-  moveConditionAndClearGroups,
-  removeConditionAndClearGroups,
+  moveConditionPreservingGroups,
+  removeConditionPreservingGroups,
   toggleConditionOperator,
   updateConditionComment,
 } from '../util/conditionEditor';
@@ -141,15 +141,19 @@ export function useConditionEditor({ onEdit, onConditionsEmpty, onRequestConfirm
 
   const handleMoveCondition = useCallback((index, direction) => {
     saveHistory();
-    setSelectedConditions((previous) => moveConditionAndClearGroups(previous, index, direction));
+    const updated = moveConditionPreservingGroups(selectedConditions, index, direction);
+    const remainingGroups = new Set(updated.flatMap(condition=>condition.groupIds||[]));
+    const lostGroup = selectedConditions.some(condition=>(condition.groupIds||[]).some(id=>!remainingGroups.has(id)));
+    setSelectedConditions(updated);
+    if(lostGroup)showToast('이동으로 연속성이 깨진 괄호만 해제했습니다. 되돌리기로 복구할 수 있습니다.', 'info');
     resetSelection();
     onEdit?.('move');
-  }, [onEdit, resetSelection, saveHistory, setSelectedConditions]);
+  }, [onEdit, resetSelection, saveHistory, selectedConditions, setSelectedConditions]);
 
   const handleRemoveCondition = useCallback((index) => {
     const isLastCondition = selectedConditions.length === 1;
     saveHistory();
-    setSelectedConditions((previous) => removeConditionAndClearGroups(previous, index));
+    setSelectedConditions((previous) => removeConditionPreservingGroups(previous, index));
     resetSelection();
     onEdit?.('remove');
     showToast('조건을 삭제했습니다. 상단 되돌리기로 복구할 수 있습니다.', 'info');
