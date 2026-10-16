@@ -74,6 +74,7 @@ export default function StrategyGenerator() {
   const [imageAttachment, setImageAttachment] = useState(null);
   const [attachmentInputKey, setAttachmentInputKey] = useState(0);
   const [confirmDialog, setConfirmDialog] = useState(null);
+  const [hasCopiedAnswer, setHasCopiedAnswer] = useState(false);
   const [isInboxPickerOpen, setIsInboxPickerOpen] = useState(true);
   const { inquiries: inboxInquiries, loading: inboxLoading, error: inboxError, refresh: refreshInbox, lastUpdatedAt: inboxLastUpdatedAt } = useUnansweredInquiries(isInboxPickerOpen && activeTab === 'ai');
   const [inboxAttachmentNotice, setInboxAttachmentNotice] = useState(false);
@@ -138,6 +139,7 @@ export default function StrategyGenerator() {
   const shouldKeepImportedInquiry = isImportingInboxInquiryRef.current;
   isImportingInboxInquiryRef.current = false;
   resetStrategies();
+  setHasCopiedAnswer(false);
   setSearch("");
   if (!shouldKeepImportedInquiry) {
     resetAiWorkflow();
@@ -157,6 +159,7 @@ export default function StrategyGenerator() {
   };
   
   const handleReset = () => { //초기화 버튼
+  setHasCopiedAnswer(false);
   resetStrategies();
   resetAiWorkflow();
   setCustomerQuery('');
@@ -177,6 +180,7 @@ export default function StrategyGenerator() {
   const filteredConditions = searchConditions(allConditions || [], search);
 
 const runAiGeneration = async () => {
+    setHasCopiedAnswer(false);
     // ✨ 중요: 함수 호출 시 3번째 인자로 'selectedBroker'를 전달합니다!
   setInboxSourceInquiry((current) => current || {
     broker: selectedBroker,
@@ -248,6 +252,7 @@ const runAiGeneration = async () => {
       return;
     }
     const applyInquiry = () => {
+    setHasCopiedAnswer(false);
     const cached = getCachedAnalysis(inquiry);
     resetStrategies();
     setSearch('');
@@ -357,6 +362,29 @@ const runAiGeneration = async () => {
     });
   };
 
+  const handleOpenAiTab = () => {
+    if (activeTab === 'manual' && hasCopiedAnswer) {
+      setConfirmDialog({
+        title: '현재 문의의 답변 작업을 완료하셨나요?',
+        description: '예를 선택하면 미답변 문의 목록으로 이동합니다. 아니요를 선택하면 현재 문의와 편집 내용을 유지합니다. 실제 게시판의 답변 완료 상태는 변경하지 않습니다.',
+        confirmLabel: '예, 미답변 목록으로',
+        cancelLabel: '아니요, 작업 유지',
+        onConfirm: () => {
+          setHasCopiedAnswer(false);
+          setIsInboxPickerOpen(true);
+          setActiveTab('ai');
+          refreshInbox();
+        },
+        onCancel: () => {
+          setHasCopiedAnswer(false);
+          setActiveTab('ai');
+        },
+      });
+      return;
+    }
+    setActiveTab('ai');
+  };
+
   const handleAiExample = (query) => {
     handleCustomerQueryChange(query);
   };
@@ -451,7 +479,7 @@ const runAiGeneration = async () => {
             <div id="left-panel" className={`panel ${activeTab === 'ai' ? 'ai-request-panel' : ''}`}>
               <div className="tabs-container">
                 <button className={`tab-button ${activeTab === 'manual' ? 'active' : ''}`} onClick={() => setActiveTab('manual')}>조건식 편집</button>
-                <button className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`} onClick={() => setActiveTab('ai')}>AI 추천</button>
+                <button className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`} onClick={handleOpenAiTab}>AI 추천</button>
               </div>
               
               {!(activeTab === 'ai' && isInboxPickerOpen) && (
@@ -691,6 +719,7 @@ const runAiGeneration = async () => {
               onGroup={handleGroupConditions}
               onClearAllGroups={handleClearAllGroups}
               showLogicControls={false}
+              onCopySuccess={() => setHasCopiedAnswer(true)}
               // onMentUpdate={handleMentUpdate}
             />
           </div>}
@@ -703,7 +732,7 @@ const runAiGeneration = async () => {
             <h3>{confirmDialog.title}</h3>
             <p>{confirmDialog.description}</p>
             <div>
-              <button type="button" onClick={() => setConfirmDialog(null)}>취소</button>
+              <button type="button" onClick={() => { const action = confirmDialog.onCancel; setConfirmDialog(null); action?.(); }}>{confirmDialog.cancelLabel || '취소'}</button>
               <button type="button" onClick={() => { const action = confirmDialog.onConfirm; setConfirmDialog(null); action(); }}>{confirmDialog.confirmLabel}</button>
             </div>
           </section>

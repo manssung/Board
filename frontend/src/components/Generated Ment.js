@@ -89,6 +89,7 @@ export default function GeneratedMent({
   onGroup,
   onClearAllGroups,
   showLogicControls = true,
+  onCopySuccess,
 }) {
   const [isCopied, setIsCopied] = useState(false);
   const [copiedImageId, setCopiedImageId] = useState(null);
@@ -128,12 +129,14 @@ export default function GeneratedMent({
         await navigator.clipboard.writeText(text);
       }
       setIsCopied(true);
+      onCopySuccess?.();
       setTimeout(() => setIsCopied(false), 2000);
     } catch (error) {
       console.error('복사 실패:', error);
       try {
         await navigator.clipboard.writeText(text);
         setIsCopied(true);
+        onCopySuccess?.();
         setTimeout(() => setIsCopied(false), 2000);
       } catch (fallbackError) {
         console.error('텍스트 복사 실패:', fallbackError);
